@@ -16,7 +16,8 @@ namespace AbpShop.EntityFrameworkCore
             var configuration = BuildConfiguration();
 
             var builder = new DbContextOptionsBuilder<AbpShopMigrationsDbContext>()
-                .UseSqlServer(configuration.GetConnectionString("Default"));
+                //.UseSqlServer(configuration.GetConnectionString("Default"));
+                .UseMySql(configuration.GetConnectionString("Default"));
 
             return new AbpShopMigrationsDbContext(builder.Options);
         }
