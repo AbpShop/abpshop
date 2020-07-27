@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Abp" Version="5.10.1" />
+    <PackageReference Include="Flurl.Http" Version="2.4.2" />
     <PackageReference Include="Volo.Abp.Identity.Domain.Shared" Version="3.0.4" />
     <PackageReference Include="Volo.Abp.IdentityServer.Domain.Shared" Version="3.0.4" />
     <PackageReference Include="Volo.Abp.BackgroundJobs.Domain.Shared" Version="3.0.4" />
