@@ -1,5 +1,5 @@
-# ![avatar](https://www.yznt.com/skin/images/logo.png)ABPSHOP微信小程序多商户电子商城
-
+# ![avatar](https://www.yznt.com/skin/images/logo.png)
+# ABPSHOP微信小程序多商户电子商城
 #### 介绍
 AbpShop 是基于.Net core ABP框架基础开发的可建立无数个用户，系统不限制小程序和公众号数量，支持商业运营的电商系统，小程序商城带生活圈、商户、积分、优惠券、预约等功能，更是一套方便二次开发的商城框架（后台封装了独有快速的代码生成功能，无需代码操作，一键生成小程序、系统参数配置、数据字典、组合数据等）
 
