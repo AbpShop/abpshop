@@ -51,6 +51,19 @@
 							<view class='name'>提现</view>
 							<view class='input'><input :placeholder='"最低提现金额"+minPrice' placeholder-class='placeholder' name="money" type='digit'></input></view>
 						</view>
+						<view class='item acea-row row-top row-between'>
+							<view class='name'>收款码</view>
+							<view class="input acea-row">
+								<view class="picEwm" v-if="qrcodeUrlW">
+									<image :src="qrcodeUrlW"></image>
+									<text class='iconfont icon-guanbi1 font-color' @click='DelPicW'></text>
+								</view>
+								<view class='pictrue acea-row row-center-wrapper row-column' @click='uploadpic("W")' v-else>
+								  <text class='iconfont icon-icon25201'></text>
+								  <view>上传图片</view>
+								</view>
+							</view>
+						</view>
 						<view class='tip'>
 							当前可提现金额: <text class="price">￥{{userInfo.commissionCount}},</text>冻结佣金：￥{{userInfo.broken_commission}}
 						</view>
@@ -69,6 +82,19 @@
 						<view class='item acea-row row-between-wrapper'>
 							<view class='name'>提现</view>
 							<view class='input'><input :placeholder='"最低提现金额"+minPrice' placeholder-class='placeholder' name="money" type='digit'></input></view>
+						</view>
+						<view class='item acea-row row-top row-between'>
+							<view class='name'>收款码</view>
+							<view class="input acea-row">
+								<view class="picEwm" v-if="qrcodeUrlZ">
+									<image :src="qrcodeUrlZ"></image>
+									<text class='iconfont icon-guanbi1 font-color' @click='DelPicZ'></text>
+								</view>
+								<view class='pictrue acea-row row-center-wrapper row-column' @click='uploadpic("Z")' v-else>
+								  <text class='iconfont icon-icon25201'></text>
+								  <view>上传图片</view>
+								</view>
+							</view>
 						</view>
 						<view class='tip'>
 							当前可提现金额: <text class="price">￥{{userInfo.commissionCount}},</text>冻结佣金：￥{{userInfo.broken_commission}}
@@ -130,7 +156,9 @@
 				userInfo: [],
 				isClone: false,
 				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false //是否隐藏授权
+				isShowAuth: false, //是否隐藏授权
+				qrcodeUrlW:"",
+				qrcodeUrlZ:""
 			};
 		},
 		computed: mapGetters(['isLogin']),
@@ -149,6 +177,36 @@
 			}
 		},
 		methods: {
+			// uploadpicW(){
+			// 	this.uploadpic(this.qrcodeUrlW);
+			// },
+			// uploadpicZ(){
+			// 	this.uploadpic(this.qrcodeUrlZ);
+			// },
+			/**
+			 * 上传文件
+			 * 
+			*/
+			uploadpic: function (type) {
+			  let that = this;
+			  that.$util.uploadImageOne('upload/image', function (res) {
+				  if(type==='W'){
+					  that.qrcodeUrlW = res.data.url;
+				  }else{
+					  that.qrcodeUrlZ = res.data.url;
+				  }
+			  });
+			},
+			/**
+			 * 删除图片
+			 * 
+			*/
+			DelPicW: function () {
+			  this.qrcodeUrlW = "";
+			},
+			DelPicZ: function () {
+			  this.qrcodeUrlZ = "";
+			},
 			onLoadFun: function() {
 				this.getUserInfo();
 				this.getUserExtractBank();
@@ -182,6 +240,7 @@
 				this.index = e.detail.value;
 			},
 			subCash: function(e) {
+				console.log(e.detail.value);
 				let that = this,
 					value = e.detail.value;
 				if (that.currentTab == 0) { //银行卡
@@ -202,12 +261,14 @@
 						title: '请填写微信号'
 					});
 					value.weixin = value.name;
+					value.qrcode_url = that.qrcodeUrlW;
 				} else if (that.currentTab == 2) { //支付宝
 					value.extract_type = 'alipay';
 					if (value.name.length == 0) return this.$util.Tips({
 						title: '请填写账号'
 					});
 					value.alipay_code = value.name;
+					value.qrcode_url = that.qrcodeUrlZ;
 				}
 				if (value.money.length == 0) return this.$util.Tips({
 					title: '请填写提现金额'
@@ -286,9 +347,10 @@
 
 	.cash-withdrawal .wrapper .list .item {
 		border-bottom: 1rpx solid #eee;
-		height: 107rpx;
+		min-height: 28rpx;
 		font-size: 30rpx;
 		color: #333;
+		padding: 39rpx 0;
 	}
 
 	.cash-withdrawal .wrapper .list .item .name {
@@ -301,6 +363,39 @@
 
 	.cash-withdrawal .wrapper .list .item .input .placeholder {
 		color: #bbb;
+	}
+	
+	.cash-withdrawal .wrapper .list .item .picEwm,.cash-withdrawal .wrapper .list .item .pictrue{
+		width:140rpx;
+		height:140rpx;
+		border-radius:3rpx;
+		position: relative;
+		margin-right: 23rpx;
+	}
+	
+	.cash-withdrawal .wrapper .list .item .picEwm image{
+		width:100%;
+		height:100%;
+		border-radius:3rpx;
+	}
+	
+	.cash-withdrawal .wrapper .list .item .picEwm .icon-guanbi1{
+		position:absolute;
+		right: -14rpx;
+		top: -16rpx;
+		font-size:40rpx;
+	}
+	
+	.cash-withdrawal .wrapper .list .item .pictrue{
+		border:1px solid rgba(221,221,221,1);
+		font-size:22rpx;
+		color: #BBBBBB;
+	}
+	
+	.cash-withdrawal .wrapper .list .item .pictrue .icon-icon25201{
+		font-size: 47rpx;
+		color: #DDDDDD;
+		margin-bottom: 3px;
 	}
 
 	.cash-withdrawal .wrapper .list .tip {

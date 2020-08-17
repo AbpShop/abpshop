@@ -79,12 +79,14 @@
 				"navigationBarTitleText": "资讯详情"
 			}
 		},
+		//#ifdef H5
 		{
 			"path": "pages/auth/index",
 			"style": {
-				"navigationBarTitleText": "abpshopop"
+				"navigationBarTitleText": "CRMEB"
 			}
 		},
+		//#endif
 		{
 			"path": "pages/goods_search/index",
 			"style": {
@@ -492,7 +494,7 @@
 	  ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "abpshopop",
+		"navigationBarTitleText": "crmeb",
 		"navigationBarBackgroundColor": "#fff",
 		"backgroundColor": "#F8F8F8",
 		"titleNView": false

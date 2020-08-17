@@ -26,7 +26,8 @@
 	import sendVerifyCode from "@/mixins/SendVerifyCode";
 	import {
 		registerVerify,
-		bindingPhone
+		bindingUserPhone,
+		verifyCode
 	} from '@/api/api.js';
 	import {
 		toLogin
@@ -49,13 +50,19 @@
 				phone:'',
 				captcha:'',
 				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false //是否隐藏授权
+				isShowAuth: false, //是否隐藏授权
+				key: '',
+				authKey:''
 			};
 		},
 		computed: mapGetters(['isLogin']),
-		onLoad() {
+		onLoad(options) {
 			if (this.isLogin) {
-
+				verifyCode().then(res=>{
+					this.$set(this, 'key', res.data.key)
+				});
+				this.authKey = options.key || '';
+				this.url = options.url || '';
 			} else {
 				// #ifdef H5 || APP-PLUS
 				toLogin();
@@ -83,7 +90,7 @@
 				if (!that.captcha) return that.$util.Tips({
 					title: '请填写验证码'
 				});
-				bindingPhone({
+				bindingUserPhone({
 					phone: that.phone,
 					captcha: that.captcha
 				}).then(res => {
@@ -94,7 +101,7 @@
 							confirmText: '绑定',
 							success(res) {
 								if (res.confirm) {
-									bindingPhone({
+									bindingUserPhone({
 										phone: that.phone,
 										captcha: that.captcha,
 										step: 1
@@ -147,16 +154,18 @@
 				if (!(/^1(3|4|5|7|8|9|6)\d{9}$/i.test(that.phone))) return that.$util.Tips({
 					title: '请输入正确的手机号码！'
 				});
-				await registerVerify(that.phone).then(res => {
-					that.$util.Tips({
-						title: res.msg
+				await verifyCode().then(res => {
+					registerVerify(that.phone, 'reset', res.data.key, that.captcha).then(res => {
+						that.$util.Tips({
+							title: res.msg
+						});
+						that.sendCode();
+					}).catch(err => {
+						return that.$util.Tips({
+							title: err
+						});
 					});
-					that.sendCode();
-				}).catch(err => {
-					return that.$util.Tips({
-						title: err
-					});
-				});
+				})
 			}
 		}
 	}

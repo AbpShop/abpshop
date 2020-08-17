@@ -164,10 +164,9 @@
 					});
 					switchH5Login().then(res => {
 						uni.hideLoading();
-						let newTime = Math.round(new Date() / 1000);
 						that.$store.commit("LOGIN", {
 							'token': res.data.token,
-							'time': dayjs(res.data.expires_time) - newTime
+							'time': this.$Cache.strTotime(res.data.expires_time) - this.$Cache.time()
 						});
 						that.getUserInfo();
 
@@ -206,9 +205,9 @@
 					            getLogout()
 					              .then(res => {
 					                that.$store.commit("LOGOUT");
-									uni.switchTab({
-									    url: '/pages/index/index'
-									});
+									uni.reLaunch({
+										url: '/pages/index/index'
+									})
 					              })
 					              .catch(err => {
 					                console.log(err);

@@ -9,13 +9,18 @@
       <div class="pictrue"><img :src="item.avatar" /></div>
       <div class="text line1">{{ item.nickname }}</div>
     </div>
+	 <home></home>
   </div>
 </template>
 <script>
 import { serviceList } from "@/api/user";
+import home from '@/components/home';
 
 export default {
   name: "CustomerList",
+  components:{
+	  home
+  },
   data() {
     return {
       list: [],

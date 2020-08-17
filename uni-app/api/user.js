@@ -337,7 +337,7 @@ export function serviceList() {
  * 客服详情
  */
 export function getChatRecord(to_uid, data) {
-  return request.get("user/service/record/" + to_uid, data);
+  return request.get("user/service/record" , data);
 }
 
 /**
@@ -347,4 +347,26 @@ export function getChatRecord(to_uid, data) {
 export function spread(puid)
 {
 	return request.post("user/spread",{puid:puid});
+}
+
+/**
+ * 会员详情
+ */
+export function getlevelInfo() {
+  return request.get("user/level/info");
+}
+
+/**
+ * 会员经验列表
+ */
+export function getlevelExpList(data) {
+  return request.get("user/level/expList",data);
+}
+
+/**
+ * 修改用户信息
+ * @param {Object} data
+ */
+export function updateUserInfo(data){
+	return request.post('v2/user/user_update',data);
 }

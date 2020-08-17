@@ -19,8 +19,7 @@ function baseRequest(url, method, data, {noAuth = false, noVerify = false})
   }
   
   if (store.state.app.token) header[TOKENNAME] = 'Bearer ' + store.state.app.token;
-  console.log(url);
-  console.log(data);
+
   return new Promise((reslove, reject) => {
     uni.request({
       url: Url + '/api/' + url,
@@ -28,7 +27,6 @@ function baseRequest(url, method, data, {noAuth = false, noVerify = false})
       header: header,
       data: data || {},
       success: (res) => {
-		console.log(res);
         if (noVerify)
           reslove(res.data, res);
         else if (res.data.status == 200)

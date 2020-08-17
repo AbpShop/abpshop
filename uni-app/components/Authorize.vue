@@ -6,11 +6,11 @@
 		   <view class='tip'>请授权头像等信息，以便为您提供更好的服务</view>
 		   <view class='bottom flex'>
 		      <view class='item' @click='close'>随便逛逛</view>
-			  <!-- #ifdef APP-PLUS -->
+			  <!-- #ifdef MP -->
 			  <button class='item grant' @click="setUserInfo">去授权</button>
 			  <!-- #endif -->
 			  <!-- #ifdef MP -->
-			  <button class='item grant'  type="primary" open-type="getUserInfo" lang="zh_CN" @getuserinfo="setUserInfo">去授权</button>
+			  <button class='item grant'  type="primary" open-type="getPhoneNumber" lang="zh_CN" @getphonenumber="setUserInfo">去授权</button>
 			  <!-- #endif -->
 		   </view>
 		</view>
@@ -21,41 +21,70 @@
 <script>
 	const app = getApp();
 	import Cache from '../utils/cache';
-	import { getLogo } from '../api/public';
-	import { LOGO_URL } from '../config/cache';
+	import { getLogo, silenceAuth, getUserPhone } from '../api/public';
+	import { LOGO_URL,EXPIRES_TIME,USER_INFO,STATE_R_KEY } from '../config/cache';
 	import { mapGetters } from 'vuex';
 	import Routine from '../libs/routine';
+	import store from '../store';
 	
 	export default {
 		name:'Authorize',
 		props:{
 			isAuto:{
-				type:Boolean,
+				type: Boolean,
 				default:true
 			},
 			isGoIndex:{
-				type:Boolean,
+				type: Boolean,
 				default:true
 			},
 			isShowAuth:{
-				type:Boolean,
+				type: Boolean,
 				default:false
 			}
 		},
 		data(){
 			return {
-				logoUrl:''
+				logoUrl:'',
+				authKey: ''
 			}
 		},
 		computed:mapGetters(['isLogin','userInfo']),
 		watch:{
 			isLogin(n){
+				console.log(n);
 				n === true && this.$emit('onLoadFun',this.userInfo);
 			}
 		},
-		created() {
+		mounted() {
 			this.getLogoUrl();
-			this.setAuthStatus();
+			let that = this;
+			if (!this.isLogin && !Cache.has(STATE_R_KEY)) {
+				wx.login({
+					success(res){
+						console.log(res);
+						Cache.set(STATE_R_KEY, res.code ,10800);
+						let spread = app.globalData.spid ? app.globalData.spid : '';
+						silenceAuth({code:res.code,spread:spread,spid:app.globalData.code }).then( res => {
+							if (res.data.key !== undefined && res.data.key) {
+								that.authKey = res.data.key;
+							} else {
+								app.globalData.code = 0;
+								let time = res.data.expires_time - Cache.time();
+								// store.commit('UPDATE_USERINFO', res.data.userInfo);
+								store.commit('LOGIN', {token:res.data.token, time:time});
+								// store.commit('SETUID', res.data.userInfo.uid);
+								// Cache.set(EXPIRES_TIME,res.data.expires_time,time);
+								// Cache.set(USER_INFO,res.data.userInfo,time);
+							}
+						}).catch(res=>{
+							console.log(res);
+						});
+					}
+				})
+			} else {
+				this.setAuthStatus();
+			}
 		},
 		methods:{
 			setAuthStatus(){
@@ -69,7 +98,7 @@
 						this.$emit('authColse',true);
 				})
 			},
-			getUserInfo(code){
+			getUserInfo (code) {
 				Routine.getUserInfo().then(res=>{
 					let userInfo = res.userInfo
 					userInfo.code = code;
@@ -91,10 +120,25 @@
 					uni.hideLoading();
 				})
 			},
-			setUserInfo(){
+			getUserPhoneNumber (encryptedData,iv,code) {
+				getUserPhone({encryptedData,iv,code}).then(res => {
+					let time = res.data.expires_time - this.$Cache.time();
+					this.$store.commit('LOGIN', {
+						token : res.data.token,
+						 time : time,
+					});
+					this.$emit('authColse',false);
+					this.$emit('onLoadFun',res.data.userInfo);
+					uni.hideLoading();
+				}).catch(res => {
+					console.log(res);
+					uni.hideLoading();
+				})
+			},
+			setUserInfo(e){
 				uni.showLoading({title:'正在登陆中'});
-				Routine.getCode().then(code=>{
-					this.getUserInfo(code);
+				Routine.getCode().then(code => {
+					this.getUserPhoneNumber(e.detail.encryptedData,e.detail.iv,code);
 				}).catch(res=>{
 					uni.hideLoading();
 				})
@@ -105,7 +149,7 @@
 					this.logoUrl = Cache.get(LOGO_URL);
 					return;
 				}
-				getLogo().then(res=>{
+				getLogo().then( res => {
 					that.logoUrl = res.data.logo_url
 					Cache.set(LOGO_URL,that.logoUrl);
 				})

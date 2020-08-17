@@ -44,8 +44,8 @@
 						</view>
 						<view class='label acea-row row-middle'>
 							<!-- <view class='stock'>库存：{{storeInfo.stock}}{{storeInfo.unit_name}}</view> -->
-							<view class='stock'>累计销售：{{storeInfo.total?storeInfo.total:0}}件</view>
-							<view>限量: {{ storeInfo.quota ? storeInfo.quota : 0 }} 件</view>
+							<view class='stock'>累计销售：{{storeInfo.total?storeInfo.total:0}}{{storeInfo.unit_name || ''}}</view>
+							<view>限量: {{ storeInfo.quota_show ? storeInfo.quota_show : 0 }}{{storeInfo.unit_name || ''}}</view>
 						</view>
 					</view>
 					<view class='attribute acea-row row-between-wrapper' @tap='selecAttr' v-if='attribute.productAttr.length'>
@@ -180,7 +180,9 @@
 	import {
 		toLogin
 	} from '@/libs/login.js';
-	import { silenceBindingSpread } from "@/utils";
+	import {
+		silenceBindingSpread
+	} from "@/utils";
 	export default {
 		computed: mapGetters(['isLogin']),
 		data() {
@@ -212,7 +214,6 @@
 				isShowAuth: false,
 				iShidden: false,
 				limitNum: 1, //限制本属性产品的个数；
-				personNum: 0, //限制用户购买的个数；
 				iSplus: false,
 				replyCount: 0, //总评论数量
 				reply: [], //评论列表
@@ -243,7 +244,7 @@
 				posterImage: '', //海报路径
 				posterbackgd: '/static/images/posterbackgd.png',
 				actionSheetHidden: false,
-				cart_num:''
+				cart_num: ''
 			}
 		},
 		components: {
@@ -259,7 +260,7 @@
 		},
 		computed: mapGetters(['isLogin']),
 		onLoad(options) {
-			
+
 			let that = this
 			let statusBarHeight = ''
 			//设置商品列表高度
@@ -276,29 +277,29 @@
 			let menuButtonInfo = uni.getMenuButtonBoundingClientRect()
 			this.meunHeight = menuButtonInfo.height
 			this.backH = (that.navH / 2) + (this.meunHeight / 2)
-			
+
 			//扫码携带参数处理
 			if (options.scene) {
 				let value = this.$util.getUrlParams(decodeURIComponent(options.scene));
-				console.log(value,'options')
-				if (value.id){
+				console.log(value, 'options')
+				if (value.id) {
 					this.id = value.id;
-				}else{
+				} else {
 					return this.$util.Tips({
 						title: '缺少参数无法查看商品'
 					}, {
 						tab: 3,
 						url: 1
 					});
-				} 
+				}
 				//记录推广人uid
 				if (value.pid) app.globalData.spid = value.pid;
 				if (value.time) this.datatime = value.time
 			}
 			// #endif
-			
-			if(options.id){
-				this.id= options.id
+
+			if (options.id) {
+				this.id = options.id
 				this.datatime = Number(options.time)
 				this.status = options.status
 			}
@@ -318,9 +319,9 @@
 			/**
 			 * 购物车手动填写
 			 * 
-			*/
-			iptCartNum: function (e) {
-				this.$set(this.attribute.productSelect,'cart_num',e);
+			 */
+			iptCartNum: function(e) {
+				this.$set(this.attribute.productSelect, 'cart_num', e);
 				this.$set(this, "cart_num", e);
 			},
 			// 后退
@@ -328,7 +329,7 @@
 				uni.navigateBack()
 			},
 			onLoadFun: function(data) {
-				if(this.isAuto){
+				if (this.isAuto) {
 					this.isAuto = false;
 					this.isShowAuth = false;
 					this.getSeckillDetail();
@@ -342,7 +343,7 @@
 					this.imgUrls = res.data.storeInfo.images;
 					this.attribute.productAttr = res.data.productAttr;
 					this.productValue = res.data.productValue;
-					this.personNum = res.data.storeInfo.num;
+					this.attribute.productSelect.num = res.data.storeInfo.num;
 					this.replyCount = res.data.replyCount;
 					this.reply = res.data.reply ? [res.data.reply] : [];
 					this.replyChance = res.data.replyChance
@@ -366,9 +367,9 @@
 					// wxh.time(that.data.time, that);
 				}).catch(err => {
 					that.$util.Tips({
-						title:err
-					},{
-						tab:3
+						title: err
+					}, {
+						tab: 3
 					})
 				});
 			},
@@ -408,7 +409,7 @@
 					this.$set(productAttr[i], "index", value[i]);
 				}
 				//sort();排序函数:数字-英文-汉字；
-				let productSelect = this.productValue[value.sort().join(",")];
+				let productSelect = this.productValue[value.join(",")];
 				if (productSelect && productAttr.length) {
 					self.$set(
 						self.attribute.productSelect,
@@ -419,12 +420,12 @@
 					self.$set(self.attribute.productSelect, "price", productSelect.price);
 					self.$set(self.attribute.productSelect, "stock", productSelect.stock);
 					self.$set(self.attribute.productSelect, "unique", productSelect.unique);
-                    self.$set(self.attribute.productSelect, "quota", productSelect.quota);
+					self.$set(self.attribute.productSelect, "quota", productSelect.quota);
 					self.$set(self.attribute.productSelect, "quota_show", productSelect.quota_show);
 					self.$set(self.attribute.productSelect, "product_stock", productSelect.product_stock);
 					self.$set(self.attribute.productSelect, "cart_num", 1);
-					self.$set(self, "attrValue", value.sort().join(","));
-					self.attrValue = value.sort().join(",")
+					self.$set(self, "attrValue", value.join(","));
+					self.attrValue = value.join(",")
 				} else if (!productSelect && productAttr.length) {
 					self.$set(
 						self.attribute.productSelect,
@@ -480,9 +481,9 @@
 				//获取当前变动属性
 				let productSelect = this.productValue[this.attrValue];
 				if (this.cart_num) {
-				      productSelect.cart_num = this.cart_num;
-					  this.attribute.productSelect.cart_num = this.cart_num;
-				    }
+					productSelect.cart_num = this.cart_num;
+					this.attribute.productSelect.cart_num = this.cart_num;
+				}
 				//如果没有属性,赋值给商品默认库存
 				if (productSelect === undefined && !this.attribute.productAttr.length)
 					productSelect = this.attribute.productSelect;
@@ -490,26 +491,37 @@
 				if (productSelect === undefined) return;
 				let stock = productSelect.stock || 0;
 				let quotaShow = productSelect.quota_show || 0;
+				let quota = productSelect.quota || 0;
 				let productStock = productSelect.product_stock || 0;
 				let num = this.attribute.productSelect;
+				let nums = this.storeInfo.num || 0;
 				//设置默认数据
-				    if (productSelect.cart_num == undefined) productSelect.cart_num = 1;
+				if (productSelect.cart_num == undefined) productSelect.cart_num = 1;
 				if (changeValue) {
-					num.cart_num ++;
-					if(quotaShow >= productStock){
-						 if (num.cart_num > productStock) {
-						 	this.$set(this.attribute.productSelect, "cart_num", productStock);
-						 	this.$set(this, "cart_num", productStock);
-						 }
-					}else{
-						if (num.cart_num > quotaShow) {
-							this.$set(this.attribute.productSelect, "cart_num", quotaShow);
-							this.$set(this, "cart_num", quotaShow);
-						}
+					num.cart_num++;
+					let arrMin = [];
+					arrMin.push(nums);
+					arrMin.push(quota);
+					arrMin.push(productStock);
+					let minN = Math.min.apply(null, arrMin);
+					if (num.cart_num >= minN) {
+						this.$set(this.attribute.productSelect, "cart_num", minN ? minN : 1);
+						this.$set(this, "cart_num", minN ? minN : 1);
 					}
+					// if(quotaShow >= productStock){
+					// 	 if (num.cart_num > productStock) {
+					// 	 	this.$set(this.attribute.productSelect, "cart_num", productStock);
+					// 	 	this.$set(this, "cart_num", productStock);
+					// 	 }
+					// }else{
+					// 	if (num.cart_num > quotaShow) {
+					// 		this.$set(this.attribute.productSelect, "cart_num", quotaShow);
+					// 		this.$set(this, "cart_num", quotaShow);
+					// 	}
+					// }
 					this.$set(this, "cart_num", num.cart_num);
 					this.$set(this.attribute.productSelect, "cart_num", num.cart_num);
-					
+
 				} else {
 					num.cart_num--;
 					if (num.cart_num < 1) {
@@ -528,7 +540,7 @@
 			 * 
 			 */
 			ChangeAttr: function(res) {
-				this.$set(this,'cart_num',1);
+				this.$set(this, 'cart_num', 1);
 				let productSelect = this.productValue[res];
 				if (productSelect) {
 					this.$set(this.attribute.productSelect, "image", productSelect.image);
@@ -657,7 +669,7 @@
 				}).then(res => {
 					this.isOpen = false
 					uni.navigateTo({
-						url: '/pages/users/order_confirm/index?cartId=' + res.data.cartId
+						url: '/pages/users/order_confirm/index?new=1&cartId=' + res.data.cartId
 					});
 				}).catch(err => {
 					return this.$util.Tips({
@@ -726,7 +738,9 @@
 			 */
 			downloadFilePromotionCode: function(successFn) {
 				let that = this;
-				seckillCode(that.id,{stop_time:that.datatime}).then(res => {
+				seckillCode(that.id, {
+					stop_time: that.datatime
+				}).then(res => {
 					uni.downloadFile({
 						url: that.setDomain(res.data.code),
 						success: function(res) {
@@ -1145,11 +1159,12 @@
 	.bg-color-hui {
 		background: #bbbbbb !important;
 	}
+
 	.canvas {
 		width: 750px;
 		height: 1190px;
 	}
-	
+
 	.poster-pop {
 		width: 450rpx;
 		height: 714rpx;
@@ -1160,13 +1175,13 @@
 		top: 50%;
 		margin-top: -357rpx;
 	}
-	
+
 	.poster-pop image {
 		width: 100%;
 		height: 100%;
 		display: block;
 	}
-	
+
 	.poster-pop .close {
 		width: 46rpx;
 		height: 75rpx;
@@ -1175,7 +1190,7 @@
 		top: -73rpx;
 		display: block;
 	}
-	
+
 	.poster-pop .save-poster {
 		background-color: #df2d0a;
 		font-size: ：22rpx;
@@ -1185,14 +1200,14 @@
 		line-height: 76rpx;
 		width: 100%;
 	}
-	
+
 	.poster-pop .keep {
 		color: #fff;
 		text-align: center;
 		font-size: 25rpx;
 		margin-top: 10rpx;
 	}
-	
+
 	.mask {
 		position: fixed;
 		top: 0;

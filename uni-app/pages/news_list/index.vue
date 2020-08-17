@@ -210,7 +210,7 @@
 		margin-bottom: -15rpx;
 	}
 	// #endif
-	// #ifdef APP-PLUS || H5
+	// #ifdef MP || H5
 	.newsList .swiper .uni-swiper-dot {
 			width: 12rpx !important;
 			height: 12rpx !important;

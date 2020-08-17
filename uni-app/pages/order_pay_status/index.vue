@@ -2,8 +2,8 @@
 	<view>
 		<view class='payment-status'>
 			<!--失败时： 用icon-iconfontguanbi fail替换icon-duihao2 bg-color-->
-			<view class='iconfont icon-duihao2 bg-color' v-if="order_pay_info.paid || order_pay_info.pay_type == 'offline'"></view>
-			<view class='iconfont icon-iconfontguanbi bg-color' v-else></view>
+			<view class='iconfont icons icon-duihao2 bg-color' v-if="order_pay_info.paid || order_pay_info.pay_type == 'offline'"></view>
+			<view class='iconfont icons icon-iconfontguanbi bg-color' v-else></view>
 			<!-- 失败时：订单支付失败 -->
 			<view class='status' v-if="order_pay_info.pay_type != 'offline'">{{order_pay_info.paid ? '订单支付成功':'订单支付失败'}}</view>
 			<view class='status' v-else>订单创建成功</view>
@@ -40,9 +40,32 @@
 			<view @tap="goOrderDetails" v-if="order_pay_info.paid==0 && status==2">
 				<button class='returnBnt bg-color' hover-class='none'>重新支付</button>
 			</view>
-			<button @click="goPink(order_pay_info.pink_id)" class='returnBnt cart-color' formType="submit" hover-class='none' v-if="order_pay_info.pink_id && order_pay_info.paid!=0 && status!=2 && status!=1">邀请好友参团</button>
+			<button @click="goPink(order_pay_info.pink_id)" class='returnBnt cart-color' formType="submit" hover-class='none'
+			 v-if="order_pay_info.pink_id && order_pay_info.paid!=0 && status!=2 && status!=1">邀请好友参团</button>
 			<button @click="goIndex" class='returnBnt cart-color' formType="submit" hover-class='none' v-else>返回首页</button>
+			<view class="coupons" v-if='couponList.length'>
+				<view class="title acea-row row-center-wrapper">
+					<view class="line"></view>
+					<view class="name">赠送优惠券</view>
+					<view class="line"></view>
+				</view>
+				<view class="list">
+					<view class="item acea-row row-between-wrapper" v-for="(item,index) in couponList" :key='index' v-if="couponsHidden?index<2:''">
+						<view class="price acea-row row-center-wrapper">
+							<view>
+								￥<text>{{item.coupon_price}}</text>
+							</view>
+						</view>
+						<view class="text">
+							<view class="name line1">{{item.coupon_title}}</view>
+							<view class="priceMin">满{{item.use_min_price}}元可用</view>
+							<view class="time">有效期:{{ item.add_time ? item.add_time + "-" : ""}}{{ item.end_time }}</view>
+						</view>
+					</view>
+					<view class="open acea-row row-center-wrapper" @click="openTap">{{couponsHidden?'展开更多':'合上更少'}}<text class="iconfont" :class='couponsHidden==true?"icon-xiangxia":"icon-xiangshang"'></text></view>
+				</view>
 			</view>
+		</view>
 		<!-- #ifdef MP -->
 		<authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize>
 		<!-- #endif -->
@@ -51,7 +74,8 @@
 
 <script>
 	import {
-		getOrderDetail
+		getOrderDetail,
+		orderCoupon
 	} from '@/api/order.js';
 	import {
 		openOrderSubscribe
@@ -79,9 +103,11 @@
 					_status: {}
 				},
 				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false ,//是否隐藏授权
-				status:0,
-				msg:''
+				isShowAuth: false, //是否隐藏授权
+				status: 0,
+				msg: '',
+				couponsHidden: true,
+				couponList: []
 			};
 		},
 		computed: mapGetters(['isLogin']),
@@ -108,6 +134,9 @@
 			}
 		},
 		methods: {
+			openTap() {
+				this.$set(this,'couponsHidden',!this.couponsHidden);
+			},
 			onLoadFun: function() {
 				this.getOrderPayInfo();
 			},
@@ -127,9 +156,19 @@
 					uni.setNavigationBarTitle({
 						title: res.data.paid ? '支付成功' : '支付失败'
 					});
+					that.getOrderCoupon();
 				}).catch(err => {
 					uni.hideLoading();
 				});
+			},
+			getOrderCoupon() {
+				let that = this;
+				console.log('88888888888');
+				console.log(that.orderId);
+				orderCoupon(that.orderId).then(res => {
+					console.log(res.data);
+					that.couponList = res.data;
+				})
 			},
 			/**
 			 * 去首页关闭当前所有页面
@@ -140,9 +179,9 @@
 				});
 			},
 			// 去参团页面；
-            goPink:function(id){
+			goPink: function(id) {
 				uni.navigateTo({
-					url: '/pages/activity/goods_combination_status/index?id='+id
+					url: '/pages/activity/goods_combination_status/index?id=' + id
 				});
 			},
 			/**
@@ -175,7 +214,78 @@
 	}
 </script>
 
-<style>
+<style lang="scss">
+	.coupons {
+		.title {
+			margin: 30rpx 0 25rpx 0;
+
+			.line {
+				width: 70rpx;
+				height: 1px;
+				background: #DCDCDC;
+			}
+
+			.name {
+				font-size: 24rpx;
+				color: #999;
+				margin: 0 10rpx;
+			}
+		}
+
+		.list {
+			padding: 0 20rpx;
+
+			.item {
+				margin-bottom: 20rpx;
+				box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, 0.06);
+
+				.price {
+					width: 236rpx;
+					height: 160rpx;
+					font-size: 26rpx;
+					color: #fff;
+					font-weight: 800;
+
+					text {
+						font-size: 64rpx;
+					}
+				}
+
+				.text {
+					width: 385rpx;
+
+					.name {
+						font-size: #282828;
+						font-size: 30rpx;
+					}
+
+					.priceMin {
+						font-size: 24rpx;
+						color: #999;
+						margin-top: 10rpx;
+					}
+
+					.time {
+						font-size: 24rpx;
+						color: #999;
+						margin-top: 15rpx;
+					}
+				}
+			}
+
+			.open {
+				font-size: 24rpx;
+				color: #999;
+				margin-top: 30rpx;
+
+				.iconfont {
+					font-size: 25rpx;
+					margin: 5rpx 0 0 10rpx;
+				}
+			}
+		}
+	}
+
 	.payment-status {
 		background-color: #fff;
 		margin: 195rpx 30rpx 0 30rpx;
@@ -183,7 +293,7 @@
 		padding: 1rpx 0 28rpx 0;
 	}
 
-	.payment-status .iconfont {
+	.payment-status .icons {
 		font-size: 70rpx;
 		width: 140rpx;
 		height: 140rpx;

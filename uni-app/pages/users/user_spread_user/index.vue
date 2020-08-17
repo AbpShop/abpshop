@@ -18,7 +18,7 @@
 					</view>
 				</view>
 			</view>
-			<!-- #ifdef APP-PLUS || H5 -->
+			<!-- #ifdef H5 -->
 			<navigator url="/pages/users/user_cash/index" hover-class="none" class='bnt bg-color'>立即提现</navigator>
 			<!-- #endif -->
 			<!-- #ifdef MP -->
@@ -54,6 +54,7 @@
 		<!-- #ifdef MP -->
 		<authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize>
 		<!-- #endif -->
+		<home></home>
 	</view>
 </template>
 
@@ -69,11 +70,13 @@
 	// #ifdef MP
 	import authorize from '@/components/Authorize';
 	// #endif
+	import home from '@/components/home';
 	export default {
 		components: {
 			// #ifdef MP
-			authorize
+			authorize,
 			// #endif
+			home
 		},
 		data() {
 			return {

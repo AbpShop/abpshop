@@ -1,6 +1,6 @@
 <template>
 	<view style="touch-action: none;">
-		<view class="home" style="position:fixed;" :style="{ top: top + 'px', bottom: bottom }" id="right-nav" @touchmove.stop.prevent="setTouchMove">
+		<view class="home" style="position:fixed;" :style="{ top: top + 'px'}" id="right-nav" @touchmove.stop.prevent="setTouchMove">
 			<view class="homeCon bg-color-red" :class="homeActive === true ? 'on' : ''" v-if="homeActive">
 				<navigator hover-class='none' url='/pages/index/index' open-type='switchTab' class='iconfont icon-shouye-xianxing'></navigator>
 				<navigator hover-class='none' url='/pages/order_addcart/order_addcart' open-type='switchTab' class='iconfont icon-caigou-xianxing'></navigator>
@@ -28,8 +28,7 @@
 		props: {},
 		data: function() {
 			return {
-				top: "",
-				bottom: ""
+				top: "545"
 			};
 		},
 		computed: mapGetters(["homeActive"]),
@@ -50,7 +49,6 @@
 			}
 		},
 		created() {
-			this.bottom = "50px";
 		}
 	};
 </script>

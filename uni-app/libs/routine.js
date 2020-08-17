@@ -65,9 +65,9 @@ class Routine
 	async getCode(){
 		let provider = await this.getProvider();
 		return new Promise((resolve,reject)=>{
-			if(Cache.has(STATE_R_KEY)){
-				return resolve(Cache.get(STATE_R_KEY));
-			}
+			// if(Cache.has(STATE_R_KEY)){
+			// 	return resolve(Cache.get(STATE_R_KEY));
+			// }
 			uni.login({
 				provider:provider,
 				success(res) {
@@ -124,12 +124,12 @@ class Routine
 	{
 		return new Promise((resolve, reject)=>{
 			login(data).then(res=>{
-				let time = res.data.expires_time - Cache.time();
+				// let time = res.data.expires_time - Cache.time();
 				store.commit('UPDATE_USERINFO', res.data.userInfo);
-				store.commit('LOGIN', {token:res.data.token, time:time});
+				// store.commit('LOGIN', {token:res.data.token, time:time});
 				store.commit('SETUID', res.data.userInfo.uid);
-				Cache.set(EXPIRES_TIME,res.data.expires_time,time);
-				Cache.set(USER_INFO,res.data.userInfo,time);
+				// Cache.set(EXPIRES_TIME,res.data.expires_time,time);
+				Cache.set(USER_INFO,res.data.userInfo);
 				return resolve(res);
 			}).catch(res=>{
 				return reject(res);

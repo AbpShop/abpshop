@@ -56,6 +56,14 @@ export function getUserCoupons(types){
 }
 
 /**
+ * 首页新人优惠券
+ * 
+*/
+export function getNewCoupon(){
+  return request.get('v2/new_coupon')
+}
+
+/**
  * 文章分类列表
  * 
 */
@@ -106,11 +114,19 @@ export function loginMobile(data){
 }
 
 /**
+ * 获取短信KEY
+ * @param object phone
+*/
+export function verifyCode(){
+  return request.get('verify_code', {},{noAuth:true})
+}
+
+/**
  * 验证码发送
  * @param object phone
 */
-export function registerVerify(phone, reset){
-  return request.post('register/verify', { phone: phone, type: reset === undefined ? 'reset' : reset },{noAuth:true})
+export function registerVerify(phone, reset, key, code){
+  return request.post('register/verify', { phone: phone, type: reset === undefined ? 'reset' : reset, key: key, code: code },{noAuth:true})
 }
 
 /**
@@ -164,7 +180,17 @@ export function switchH5Login() {
  * 
 */
 export function bindingPhone(data){
-  return request.post('binding',data);
+  return request.post('binding',data, { noAuth : true });
+}
+
+
+
+/**
+ * 绑定手机号
+ * 
+*/
+export function bindingUserPhone(data){
+  return request.post('user/binding',data);
 }
 
 /**
@@ -203,4 +229,19 @@ export function getCity() {
  */
 export function getLiveList(page,limit) {
   return request.get('wechat/live', { page, limit}, { noAuth: true });
+}
+
+/**
+ * 获取首页DIY；
+ */
+export function getDiy() {
+  return request.get('v2/diy/get_diy', { },{ noAuth: true });
+}
+
+/**
+ * 获取公众号关注
+ * @returns {*}
+ */
+export function follow() {
+  return request.get("wechat/follow", {}, { noAuth: true });
 }

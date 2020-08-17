@@ -11,10 +11,10 @@ import {
 } from '../../config/cache';
 
 const state = {
-	token: Cache.get(LOGIN_STATUS) || null,
+	token: Cache.get(LOGIN_STATUS) || false,
 	backgroundColor: "#fff",
-	userInfo: null,
-	uid: Cache.get(UID) || null,
+	userInfo: {},
+	uid: Cache.get(UID) || 0,
 	homeActive: false,
 };
 

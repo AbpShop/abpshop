@@ -28,11 +28,12 @@
 											<view class='text line1'>{{child.nickname}}</view>
 										</view>
 										<view class='money' v-if="child.type == 'brokerage'">返佣：<text class='font-color'>￥{{child.number}}</text></view>
-										<view class='money'else>暂未返佣：<text class='font-color'>￥{{child.number}}</text></view>
+										<view class='money' v-else>暂未返佣：<text class='font-color'>￥{{child.number}}</text></view>
 									</view>
 									<view class='bottom'>
 										<view><text class='name'>订单编号：</text>{{child.order_id}}</view>
-										<view><text class='name'>下单时间：</text>{{child.time}}</view>
+										<view v-if="child.type == 'brokerage'"><text class='name'>返佣时间：</text>{{child.time}}</view>
+										<view v-else><text class='name' >下单时间：</text>{{child.time}}</view>
 									</view>
 								</view>
 							</block>
@@ -47,6 +48,7 @@
 		<!-- #ifdef MP -->
 		<authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize>
 		<!-- #endif -->
+		<home></home>
 	</view>
 </template>
 
@@ -64,12 +66,14 @@
 	import authorize from '@/components/Authorize';
 	// #endif
 	import emptyPage from '@/components/emptyPage.vue'
+	import home from '@/components/home';
 	export default {
 		components: {
 			// #ifdef MP
 			authorize,
 			// #endif
-			emptyPage
+			emptyPage,
+			home
 		},
 		data() {
 			return {

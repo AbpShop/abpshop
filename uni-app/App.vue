@@ -2,7 +2,7 @@
 <script>
 	import { checkLogin } from "./libs/login";
 	import { HTTP_REQUEST_URL } from './config/app';
-
+	
 	export default {
 		globalData: {
 			spid: 0,
@@ -14,7 +14,7 @@
 		onLaunch: function(option) {
 			let that = this;
 			// #ifdef MP
-			 if (HTTP_REQUEST_URL==''){
+			 if (HTTP_REQUEST_URL == ''){
 			      console.error("请配置根目录下的config.js文件中的 'HTTP_REQUEST_URL'\n\n请修改开发者工具中【详情】->【AppID】改为自己的Appid\n\n请前往后台【小程序】->【小程序配置】填写自己的 appId and AppSecret");
 			      return false;
 			    }
@@ -22,8 +22,8 @@
 			      switch (option.scene) {
 			        //扫描小程序码
 			        case 1047:
-								let val = that.$util.getUrlParams(decodeURIComponent(option.query.scene));
-			          that.globalData.code = val.pid;
+					  let val = that.$util.getUrlParams(decodeURIComponent(option.query.scene));
+			          that.globalData.code = val.pid === undefined ? val : val.pid;
 			          break;
 			        //长按图片识别小程序码
 			        case 1048:

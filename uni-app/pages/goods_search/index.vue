@@ -11,7 +11,7 @@
 			<view class='title'>热门搜索</view>
 			<view class='list acea-row'>
 				<block v-for="(item,index) in hotSearchList" :key="index">
-					<view class='item' @tap='setHotSearchValue(item)'>{{item}}</view>
+					<view class='item' @tap='setHotSearchValue(item.val)'>{{item.val}}</view>
 				</block>
 			</view>
 			<view class='line'></view>
@@ -60,8 +60,9 @@
 			};
 		},
 		onShow: function() {
-			this.getRoutineHotSearch();
+			// this.getRoutineHotSearch();
 			this.getHostProduct();
+			this.hotSearchList = this.$store.state.hotWords.hotWord;
 		},
 		onReachBottom: function() {
 			if(this.bastList.length>0){

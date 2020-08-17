@@ -3,8 +3,10 @@ import App from './App'
 import store from './store'
 import Cache from './utils/cache'
 import util from 'utils/util'
+import configs from './config/app.js'
 
 Vue.prototype.$util = util;
+Vue.prototype.$config = configs;
 Vue.prototype.$Cache = Cache;
 Vue.prototype.$eventHub = new Vue();
 Vue.config.productionTip = false
@@ -18,8 +20,8 @@ let cookieName = "VCONSOLE",
 	query = parseQuery(),
 	urlSpread = query["spread"],
 	vconsole = query[cookieName.toLowerCase()],
-	md5abpshopop = "b14d1e9baeced9bb7525ab19ee35f2d2", abpshopshop MD5 加密开启vconsole模式
-	md5Unabpshopop = "3dca2162c4e101b7656793a1af20295c"; //UN_CREMB MD5 加密关闭vconsole模式
+	md5Crmeb = "b14d1e9baeced9bb7525ab19ee35f2d2", //CRMEB MD5 加密开启vconsole模式
+	md5UnCrmeb = "3dca2162c4e101b7656793a1af20295c"; //UN_CREMB MD5 加密关闭vconsole模式
 
 if (urlSpread !== undefined) {
 	var spread = Cache.get(SPREAD);
@@ -32,18 +34,19 @@ if (urlSpread !== undefined) {
 }
 
 if (vconsole !== undefined) {
-  if (vconsole === md5Unabpshopop && Cache.has(cookieName))
+  if (vconsole === md5UnCrmeb && Cache.has(cookieName))
 	  Cache.clear(cookieName);
 } else vconsole = Cache.get(cookieName);
 
 import VConsole from './components/vconsole.min.js'
 
-if (vconsole !== undefined && vconsole === md5abpshopop) {
-	Cache.set(cookieName, md5abpshopop, 3600);
+if (vconsole !== undefined && vconsole === md5Crmeb) {
+	Cache.set(cookieName, md5Crmeb, 3600);
 	let vConsole = new VConsole();
 }
 
-Auth.isWeixin() && Auth.oAuth();
+// let snsapiBase = 'snsapi_base';
+// Auth.isWeixin() && Auth.oAuth(snsapiBase);
 
 // #endif
 

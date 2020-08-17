@@ -1,11 +1,28 @@
 <template>
-	<view class="new-users">
+	<view class="new-users copy-data">
 		<view class="head">
 			<view class="user-card">
 				<view class="bg"></view>
 				<view class="user-info">
-					<image class="avatar" :src='userInfo.avatar' v-if="userInfo.avatar" @click="goEdit()"></image>
-					<image v-else class="avatar" src="/static/images/f.png" mode="" @click="goEdit()"></image>
+					<!-- 注释这个是加的bnt -->
+					<!-- #ifdef H5 -->
+					<button class="bntImg" v-if="userInfo.is_complete == 0 && isWeixin"  @click="getWechatuserinfo">
+						<image class="avatar" src='/static/images/f.png'></image>
+						<view class="avatarName">获取头像</view>
+					</button>
+					<!-- #endif -->
+					<!-- #ifdef MP -->
+					<button class="bntImg" v-if="userInfo.is_complete == 0" open-type='getUserInfo' @getuserinfo="getRoutineUserInfo">
+						<image class="avatar" src='/static/images/f.png'></image>
+						<view class="avatarName">获取头像</view>
+					</button>
+					<!-- #endif -->
+					<view>
+						<image class="avatar" :src='userInfo.avatar' v-if="userInfo.avatar" @click="goEdit()"></image>
+						<image v-else class="avatar" src="/static/images/f.png" mode="" @click="goEdit()"></image>
+					</view>
+					
+
 					<view class="info">
 						<!-- #ifdef MP -->
 						<view class="name" v-if="!userInfo.uid" @tap="openAuto">
@@ -29,7 +46,7 @@
 					</view>
 				</view>
 				<view class="num-wrapper">
-					<view class="num-item" @click="goMenuPage('/pages/users/user_money/index')">
+					<view class="num-item" v-if="userInfo.balance_func_status" @click="goMenuPage('/pages/users/user_money/index')">
 						<text class="num">{{userInfo.now_money || 0}}</text>
 						<view class="txt">余额</view>
 					</view>
@@ -90,7 +107,7 @@
 				</navigator>
 			</block>
 			<!-- #ifdef H5 -->
-			<navigator class="item" url="/pages/customer_list/index" hover-class="none">
+			<navigator class="item" url="/pages/customer_list/chat" hover-class="none">
 				<view class="left">
 					<image src="/static/images/user_menu08.png"></image>
 					<text>联系客服</text>
@@ -118,7 +135,8 @@
 	import {
 		getMenuList,
 		getUserInfo,
-		setVisit
+		setVisit,
+		updateUserInfo
 	} from '@/api/user.js';
 	import {
 		toLogin
@@ -128,6 +146,9 @@
 	} from "vuex";
 	// #ifdef MP
 	import authorize from '@/components/Authorize';
+	// #endif
+	// #ifdef H5
+	import Auth from '@/libs/wechat';
 	// #endif
 	const app = getApp();
 	export default {
@@ -166,42 +187,6 @@
 					},
 				],
 				imgUrls: [],
-				userMenu: [{
-						icon: '/static/images/user_menu01.png',
-						title: '会员中心',
-						url: '/pages/users/user_vip/index'
-					},
-					{
-						icon: '/static/images/user_menu02.png',
-						title: '我的推广',
-						url: '/pages/users/user_spread_user/index'
-					},
-					{
-						icon: '/static/images/user_menu03.png',
-						title: '优惠券',
-						url: '/pages/users/user_coupon/index'
-					},
-					{
-						icon: '/static/images/user_menu04.png',
-						title: '砍价记录',
-						url: '/pages/activity/bargain/index'
-					},
-					{
-						icon: '/static/images/user_menu05.png',
-						title: '我的余额',
-						url: '/pages/users/user_money/index'
-					},
-					{
-						icon: '/static/images/user_menu06.png',
-						title: '我的收藏',
-						url: '/pages/users/user_goods_collection/index'
-					},
-					{
-						icon: '/static/images/user_menu07.png',
-						title: '地址管理',
-						url: '/pages/users/user_address_list/index'
-					},
-				],
 				autoplay: true,
 				circular: true,
 				interval: 3000,
@@ -210,7 +195,10 @@
 				isShowAuth: false, //是否隐藏授权
 				orderStatusNum: {},
 				userInfo: {},
-				MyMenus: []
+				MyMenus: [],
+				// #ifdef H5
+				isWeixin: Auth.isWeixin()
+				//#endif
 			}
 		},
 		onLoad() {
@@ -228,15 +216,29 @@
 				this.getUserInfo();
 				this.getMyMenus();
 				this.setVisit();
-			}
+			};
 		},
 		methods: {
+			getWechatuserinfo() {
+				//#ifdef H5
+				Auth.isWeixin() && Auth.oAuth('snsapi_userinfo');
+				//#endif
+			},
+			getRoutineUserInfo(e) {
+				updateUserInfo({userInfo:e.detail.userInfo}).then(res=>{
+					this.getUserInfo();
+					return this.$util.Tips('更新用户信息成功');
+				}).catch(res=>{
+					
+				})
+				console.log(e);
+			},
 			// 记录会员访问
-			setVisit(){
+			setVisit() {
 				setVisit({
-					url:'/pages/user/index'
-				}).then(res=>{})
-			},	
+					url: '/pages/user/index'
+				}).then(res => {})
+			},
 			// 打开授权
 			openAuto() {
 				this.isAuto = true;
@@ -271,6 +273,7 @@
 			getUserInfo: function() {
 				let that = this;
 				getUserInfo().then(res => {
+					console.log(res.data);
 					that.userInfo = res.data
 					that.$store.commit("SETUID", res.data.uid);
 					that.orderMenu.forEach((item, index) => {
@@ -319,14 +322,14 @@
 				})
 			},
 			// goMenuPage
-			goMenuPage(url){
-				if(this.isLogin){
+			goMenuPage(url) {
+				if (this.isLogin) {
 					uni.navigateTo({
 						url
 					})
-				}else{
+				} else {
 					// #ifdef MP
-						this.openAuto()
+					this.openAuto()
 					// #endif
 				}
 			}
@@ -364,6 +367,29 @@
 					z-index: 20;
 					position: relative;
 					display: flex;
+
+					.bntImg {
+						width: 120rpx;
+						height: 120rpx;
+						border-radius: 50%;
+						text-align: center;
+						line-height: 120rpx;
+						background-color: unset;
+						position: relative;
+						
+						.avatarName{
+							font-size: 16rpx;
+							color: #fff;
+							text-align: center;
+							background-color: rgba(0,0,0,0.6);
+							height:37rpx;
+							line-height: 37rpx;
+							position: absolute;
+							bottom: 0;
+							left: 0;
+							width: 100%;
+						}
+					}
 
 					.avatar {
 						width: 120rpx;
@@ -487,6 +513,7 @@
 				.order-bd {
 					display: flex;
 					padding: 0 24rpx;
+
 					.order-item {
 						display: flex;
 						flex-direction: column;
@@ -566,7 +593,8 @@
 					display: none;
 				}
 			}
-			button{
+
+			button {
 				font-size: 28rpx;
 			}
 		}
@@ -576,17 +604,24 @@
 		}
 
 		.order-status-num {
-			
-			min-width:12rpx;
+
+			min-width: 12rpx;
 			background-color: #fff;
 			color: #ee5a52;
 			border-radius: 15px;
 			position: absolute;
-			right:-14rpx;
+			right: -14rpx;
 			top: -15rpx;
 			font-size: 20rpx;
 			padding: 0 8rpx;
 			border: 1px solid #ee5a52;
+		}
+
+		.support {
+			width: 219rpx;
+			height: 74rpx;
+			margin: 54rpx auto;
+			display: block;
 		}
 	}
 </style>

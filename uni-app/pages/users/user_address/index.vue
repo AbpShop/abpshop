@@ -45,6 +45,7 @@
 		<!-- #ifdef MP -->
 		<authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize>
 		<!-- #endif -->
+		<home></home>
 	</view>
 </template>
 
@@ -66,11 +67,13 @@
 	// #ifdef MP
 	import authorize from '@/components/Authorize';
 	// #endif
+	import home from '@/components/home';
 	export default {
 		components: {
 			// #ifdef MP
 			authorize,
 			// #endif
+			home
 		},
 		data() {
 			return {
@@ -91,7 +94,8 @@
 				multiIndex: [0, 0, 0],
 				cityId: 0,
 				defaultRegion: ['广东省', '广州市', '番禺区'],
-				defaultRegionCode: '440113'
+				defaultRegionCode: '440113',
+				news:'',
 			};
 		},
 		computed: mapGetters(['isLogin']),
@@ -101,6 +105,7 @@
 				this.pinkId = options.pinkId || 0;
 				this.couponId = options.couponId || 0;
 				this.id = options.id || 0;
+				this.news = this.new || '';
 				uni.setNavigationBarTitle({
 					title: options.id ? '修改地址' : '添加地址'
 				})
@@ -271,17 +276,12 @@
 											uni.navigateTo({
 												url: '/pages/users/order_confirm/index?cartId=' + cartId + '&addressId=' + (that.id ? that.id :
 													res.data
-													.id) + '&pinkId=' + pinkId + '&couponId=' + couponId
+													.id) + '&pinkId=' + pinkId + '&couponId=' + couponId + '&new='+this.news
 											});
 										} else {
-											// #ifdef MP || APP-PLUS
 											uni.navigateBack({
 												delta: 1
 											});
-											// #endif
-											// #ifdef H5
-											history.back();
-											// #endif
 										}
 									}, 1000);
 									return that.$util.Tips({
@@ -324,7 +324,6 @@
 			getAddress() {
 				let that = this;
 				that.$wechat.openAddress().then(userInfo => {
-					window.open();
 					editAddress({
 							id: this.id,
 							real_name: userInfo.userName,
@@ -336,26 +335,38 @@
 							},
 							detail: userInfo.detailInfo,
 							is_default: 1,
-							post_code: userInfo.postalCode
+							post_code: userInfo.postalCode,
+							type: 1,
 						})
 						.then(() => {
+							setTimeout(function() {
+								if (that.cartId) {
+									let cartId = that.cartId;
+									let pinkId = that.pinkId;
+									let couponId = that.couponId;
+									that.cartId = '';
+									that.pinkId = '';
+									that.couponId = '';
+									uni.navigateTo({
+										url: '/pages/users/order_confirm/index?cartId=' + cartId + '&addressId=' + (that.id ? that.id :
+											res.data
+											.id) + '&pinkId=' + pinkId + '&couponId=' + couponId + '&new=' + this.news
+									});
+								} else {
+									uni.navigateTo({
+										url:'/pages/users/user_address_list/index'
+									})
+									// history.back();
+								}
+							}, 1000);
+							// close();
 							that.$util.Tips({
 								title: "添加成功",
 								icon: 'success'
-							}, function() {
-								window.close();
-								// #ifdef MP || APP-PLUS
-								uni.navigateBack({
-									delta: 1
-								});
-								// #endif
-								// #ifdef H5
-								history.back();
-								// #endif
 							});
 						})
 						.catch(err => {
-							window.close();
+							// close();
 							return that.$util.Tips({
 								title: err || "添加失败"
 							});
@@ -420,7 +431,7 @@
 							that.pinkId = '';
 							that.couponId = '';
 							uni.navigateTo({
-								url: '/pages/users/order_confirm/index?cartId=' + cartId + '&addressId=' + (that.id ? that.id : res.data.id) +'&pinkId=' + pinkId + '&couponId=' + couponId
+								url: '/pages/users/order_confirm/index?new='+this.news+'&cartId=' + cartId + '&addressId=' + (that.id ? that.id : res.data.id) +'&pinkId=' + pinkId + '&couponId=' + couponId
 							});
 						} else {
 							// #ifdef H5

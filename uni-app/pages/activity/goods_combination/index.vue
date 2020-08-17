@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<view class='group-list'>
-			<view class='iconfont icon-xiangzuo' @tap='goBack' :style="'top:'+ (navH/2) +'rpx'"></view>
+			<view class='iconfont icon-xiangzuo' @tap='goBack' :style="'top:'+ (navH/2) +'rpx'" v-if="returnShow"></view>
 			<view class='header'></view>
 			<view class='list'>
 				<block v-for="(item,index) in combinationList" :key='index'>
@@ -27,6 +27,7 @@
 				</block>
 			</view>
 		</view>
+		<home></home>
 	</div>
 </template>
 
@@ -37,8 +38,12 @@
 	import {
 		openPinkSubscribe
 	} from '../../../utils/SubscribeMessage.js';
+	import home from '@/components/home/index.vue'
 	let app = getApp();
 	export default {
+		components: {
+			home
+		},
 		data() {
 			return {
 				navH: '',
@@ -47,9 +52,12 @@
 				page: 1,
 				loading: false,
 				loadend: false,
+				returnShow: true
 			}
 		},
 		onLoad() {
+			var pages = getCurrentPages();
+			this.returnShow = pages.length===1?false:true;
 			uni.setNavigationBarTitle({
 				title:"拼团列表"
 			})

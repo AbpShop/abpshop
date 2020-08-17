@@ -94,7 +94,6 @@
 				<view class='item'>
 					<view>支付方式</view>
 					<view class='list'>
-						<!-- #ifdef H5 -->
 						<view class='payItem acea-row row-middle' :class='active==index ?"on":""' @tap='payItem(index)' v-for="(item,index) in cartArr"
 						 :key='index' v-if="item.payStatus==1">
 							<view class='name acea-row row-center-wrapper'>
@@ -102,15 +101,14 @@
 							</view>
 							<view class='tip'>{{item.title}}</view>
 						</view>
-						<!-- #endif -->
 						<!-- #ifdef MP || APP-PLUS -->
-						<view class='payItem acea-row row-middle' :class='active==index ?"on":""' @tap='payItem(index)' v-for="(item,index) in cartArr"
+						<!-- <view class='payItem acea-row row-middle' :class='active==index ?"on":""' @tap='payItem(index)' v-for="(item,index) in cartArr"
 						 :key='index' v-if="item.payStatus==1">
 							<view class='name acea-row row-center-wrapper'>
 								<view class='iconfont animated' :class='(item.icon) + " " + (animated==true&&active==index ?"bounceIn":"")'></view>{{item.name}}
 							</view>
 							<view class='tip'>{{item.title}}</view>
-						</view>
+						</view> -->
 						<!-- #endif -->
 					</view>
 				</view>
@@ -143,7 +141,7 @@
 		</view>
 		<couponListWindow :coupon='coupon' @ChangCouponsClone="ChangCouponsClone" :openType='openType' :cartId='cartId'
 		 @ChangCoupons="ChangCoupons"></couponListWindow>
-		<addressWindow ref="addressWindow" @changeTextareaStatus="changeTextareaStatus" :address='address' :pagesUrl="pagesUrl"
+		<addressWindow ref="addressWindow" @changeTextareaStatus="changeTextareaStatus" :news='news' :address='address' :pagesUrl="pagesUrl"
 		 @OnChangeAddress="OnChangeAddress" @changeClose="changeClose"></addressWindow>
 		<!-- #ifdef MP -->
 		<authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize>
@@ -271,7 +269,8 @@
 				offlinePostage: "",
 				isAuto: false, //没有授权的不会自动授权
 				isShowAuth: false, //是否隐藏授权
-				from: ''
+				from: '',
+				news:1
 			};
 		},
 		computed: mapGetters(['isLogin']),
@@ -289,13 +288,11 @@
 				url: 1
 			});
 			this.couponId = options.couponId || 0;
-			console.log('options');
-			console.log(options);
-			console.log(options.pinkId);
 			this.pinkId = options.pinkid ? parseInt(options.pinkid) : 0;
 			this.addressId = options.addressId || 0;
 			this.cartId = options.cartId;
 			this.is_address = options.is_address ? true : false;
+			this.news = options.new ? 1 :0;
 			if (this.isLogin) {
 				this.getaddressInfo();
 				this.getConfirm();
@@ -497,7 +494,7 @@
 			 */
 			getConfirm: function() {
 				let that = this;
-				orderConfirm(that.cartId).then(res => {
+				orderConfirm(that.cartId,that.news).then(res => {
 					console.log(res,'res')
 					that.$set(that, 'userInfo', res.data.userInfo);
 					that.$set(that, 'integral', res.data.userInfo.integral);
@@ -522,6 +519,7 @@
 					// that.$set(that, 'usableCoupon', res.data.usableCoupon);
 					that.$set(that, 'store_self_mention', res.data.store_self_mention);
 					that.cartArr[1].title = '可用余额:' + res.data.userInfo.now_money;
+					that.cartArr[0].payStatus = res.data.pay_weixin_open || 0
 					that.cartArr[1].payStatus = res.data.yue_pay_status || 0
 					if (res.data.offline_pay_status == 2){
 						that.cartArr[2].payStatus = 0
@@ -569,7 +567,8 @@
 			getCouponList: function() {
 				let that = this;
 				let data = {
-					cartId: this.cartId
+					cartId: this.cartId,
+					'new': this.news
 				}
 				getCouponsOrderPrice(this.totalPrice, data).then(res => {
 					that.$set(that.coupon, 'list', res.data);
@@ -619,7 +618,7 @@
 				let that = this;
 				that.textareaStatus = false;
 				that.address.address = true;
-				that.pagesUrl = '/pages/users/user_address_list/index?cartId=' + this.cartId + '&pinkId=' + this.pinkId +
+				that.pagesUrl = '/pages/users/user_address_list/index?news='+ this.news +'&cartId=' + this.cartId + '&pinkId=' + this.pinkId +
 					'&couponId=' +
 					this.couponId;
 			},
@@ -632,6 +631,7 @@
 			payment: function(data) {
 				let that = this;
 				orderCreate(that.orderKey, data).then(res => {
+					console.log(res.data.status,'res.data.status')
 					let status = res.data.status,
 						orderId = res.data.result.orderId,
 						jsConfig = res.data.result.jsConfig,
@@ -715,7 +715,6 @@
 							})
 							// #endif
 							// #ifdef H5
-							console.log('公众号支付')
 							this.$wechat.pay(res.data.result.jsConfig).then(res => {
 								return that.$util.Tips({
 									title: '支付成功',
@@ -724,8 +723,8 @@
 									tab: 5,
 									url: goPages
 								});
-							}).cache(res => {
-								if (res.errMsg == 'requestPayment:cancel') return that.$util.Tips({
+							}).catch(res => {
+								if (res.errMsg == 'chooseWXPay:cancel') return that.$util.Tips({
 									title: '取消支付'
 								}, {
 									tab: 5,
@@ -803,7 +802,8 @@
 					mark: that.mark,
 					store_id: that.system_store.id || 0,
 					'from': that.from,
-					shipping_type: that.$util.$h.Add(that.shippingType, 1)
+					shipping_type: that.$util.$h.Add(that.shippingType, 1),
+					'new':that.news
 				};
 				console.log(data);
 				if (data.payType == 'yue' && parseFloat(that.userInfo.now_money) < parseFloat(that.totalPrice)) return that.$util.Tips({

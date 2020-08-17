@@ -30,22 +30,22 @@
 			<image src="/static/images/line.jpg" />
 		</view>
 		<view class="pos-order-goods">
-			<navigator :url="`/pages/goods_details/index?id=${item.cart_info.productInfo.product_id}`" hover-class="none" class="goods acea-row row-between-wrapper" v-for="(item, index) in orderInfo._info" :key="index">
+			<navigator :url="`/pages/goods_details/index?id=${item.productInfo.id}`" hover-class="none" class="goods acea-row row-between-wrapper" v-for="(item, index) in orderInfo.cartInfo" :key="index">
 				<view class="picTxt acea-row row-between-wrapper">
 					<view class="pictrue">
-						<image :src="item.cart_info.productInfo.image" />
+						<image :src="item.productInfo.image" />
 					</view>
 					<view class="text acea-row row-between row-column">
 						<view class="info line2">
-							{{ item.cart_info.productInfo.store_name }}
+							{{ item.productInfo.store_name }}
 						</view>
-						<view class="attr">{{ item.cart_info.productInfo.suk }}</view>
+						<view class="attr">{{ item.productInfo.suk }}</view>
 					</view>
 				</view>
 				<view class="money">
-					<view class="x-money">￥{{ item.cart_info.productInfo.price }}</view>
-					<view class="num">x{{ item.cart_info.cart_num }}</view>
-					<view class="y-money">￥{{ item.cart_info.productInfo.ot_price }}</view>
+					<view class="x-money">￥{{ item.productInfo.price }}</view>
+					<view class="num">x{{ item.cart_num }}</view>
+					<view class="y-money">￥{{ item.productInfo.ot_price }}</view>
 				</view>
 			</navigator>
 		</view>

@@ -277,7 +277,7 @@ class MpHtmlParser {
 				break;
 			case 'a':
 			case 'ad':
-			// #ifdef APP-PLUS
+			// #ifdef MP
 			case 'iframe':
 			case 'embed':
 			// #endif

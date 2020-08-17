@@ -32,7 +32,7 @@
 								<text class='num font-color'>{{item.price}}</text>
 								<text class="y_money">￥{{item.ot_price}}</text>
 							</view>
-							<view class="limit">限量 <text class="limitPrice">{{item.quota}}件</text></view>
+							<view class="limit">限量 <text class="limitPrice">{{item.quota_show}}{{item.unit_name || ''}}</text></view>
 							<view class="progress">
 								<view class='bg-reds' :style="'width:'+item.percent+'%;'"></view>
 								<view class='piece'>已抢{{item.percent}}%</view>
@@ -77,7 +77,7 @@
 				countDownMinute: "00",
 				countDownSecond: "00",
 				page: 1,
-				limit: 4,
+				limit: 8,
 				loading: false,
 				loadend: false,
 				pageloading: false,

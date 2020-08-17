@@ -9,34 +9,24 @@ import { LOGIN_STATUS, USER_INFO, EXPIRES_TIME, STATE_R_KEY} from './../config/c
 
 function prePage(){
 	let pages = getCurrentPages();
-	let prePage = pages[pages.length - 2];
-	// #ifdef H5
-	return prePage;
-	// #endif
-	return prePage.$vm;
+	let prePage = pages[pages.length - 1];
+	return prePage.route;
 }
 
 export function toLogin(push, pathLogin) {
 	store.commit("LOGOUT");
 	let path = prePage();
-	if(path){
-		path = path.router;
-		if(path == undefined){
-			path = location.pathname;
-		}
-	}  
-		// #ifdef H5
-	else{
-		path = location.pathname;
-	} 
-		// #endif
+	
+	// #ifdef H5
+	path = location.href;
+	// #endif
 		
 	if(!pathLogin)
 		pathLogin = '/page/users/login/index'
 	Cache.set('login_back_url',path);
-	// #ifdef H5 || APP-PLUS
+	// #ifdef H5 
 	if (isWeixin()) {
-		auth.oAuth();
+		auth.oAuth('snsapi_base');
 	} else {
 		if (path !== pathLogin) {
 		 push ? uni.navigateTo({

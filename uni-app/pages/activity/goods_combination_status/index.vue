@@ -55,10 +55,10 @@
 				<span class="iconfont" :class="iShidden ? 'icon-xiangshang' : 'icon-xiangxia'"></span>
 			</div>
 			<!-- #ifdef H5 -->
-			 <div v-if="userBool === 1 && isOk == 0 && pinkBool === 0">
-				 <div class="teamBnt bg-color-red" v-if="$wechat.isWeixin()" @click="H5ShareBox = true">邀请好友参团</div>
-				 <div class="teamBnt bg-color-red" v-else @click="goPoster">邀请好友参团</div>
-			 </div>
+			<div v-if="userBool === 1 && isOk == 0 && pinkBool === 0">
+				<div class="teamBnt bg-color-red" v-if="$wechat.isWeixin()" @click="H5ShareBox = true">邀请好友参团</div>
+				<div class="teamBnt bg-color-red" v-else @click="goPoster">邀请好友参团</div>
+			</div>
 			<!-- <div class="teamBnt bg-color-red" v-if="userBool === 1 && isOk == 0 && pinkBool === 0" @click="goPoster">
 				邀请好友参团
 			</div> -->
@@ -99,15 +99,15 @@
 				</div>
 			</div>
 		</div>
-        <product-window :attr='attr' :limitNum='1' :iSbnt='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr" @ChangeCartNum="ChangeCartNum"  @iptCartNum="iptCartNum"
-		 @attrVal="attrVal" @goCat="goPay"></product-window>
-		 <!-- 发送给朋友图片 -->
-		 <view class="share-box" v-if="H5ShareBox">
-		 	<image src="/static/images/share-info.png" @click="H5ShareBox = false"></image>
-		 </view>
-		 <!-- #ifdef MP -->
-		 <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize>
-		 <!-- #endif -->
+		<product-window :attr='attr' :limitNum='1' :iSbnt='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr" @ChangeCartNum="ChangeCartNum"
+		 @iptCartNum="iptCartNum" @attrVal="attrVal" @goCat="goPay"></product-window>
+		<!-- 发送给朋友图片 -->
+		<view class="share-box" v-if="H5ShareBox">
+			<image src="/static/images/share-info.png" @click="H5ShareBox = false"></image>
+		</view>
+		<!-- #ifdef MP -->
+		<authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize>
+		<!-- #endif -->
 		<!-- <Product-window v-on:changeFun="changeFun" :attr="attr" :limitNum='1' :iSbnt='1'></Product-window> -->
 		<home></home>
 	</div>
@@ -128,7 +128,7 @@
 	import {
 		postCartAdd
 	} from "@/api/store";
-   // #ifdef MP
+	// #ifdef MP
 	import authorize from '@/components/Authorize';
 	// #endif
 	import home from '@/components/home';
@@ -169,13 +169,14 @@
 						unique: "",
 						cart_num: 1,
 						quota_show: 0,
-						product_stock: 0
+						product_stock: 0,
+						num: 0
 					},
 					attrValue: "",
 					productAttr: []
 				},
-				cart_num:'',
-				userInfo:{},
+				cart_num: '',
+				userInfo: {},
 				H5ShareBox: false, //公众号分享图片
 				isAuto: false, //没有授权的不会自动授权
 				isShowAuth: false //是否隐藏授权
@@ -193,7 +194,7 @@
 				that.isAuto = true;
 				that.$set(that, 'isShowAuth', true);
 				// #endif
-			}else{
+			} else {
 				// #ifdef H5
 				this.getCombinationPink();
 				// #endif
@@ -231,9 +232,9 @@
 			/**
 			 * 购物车手动填写
 			 * 
-			*/
-			iptCartNum: function (e) {
-				this.$set(this.attr.productSelect,'cart_num',e);
+			 */
+			iptCartNum: function(e) {
+				this.$set(this.attr.productSelect, 'cart_num', e);
 				this.$set(this, "cart_num", e);
 			},
 			attrVal(val) {
@@ -256,7 +257,7 @@
 			// },
 			//选择属性；
 			ChangeAttr: function(res) {
-				this.$set(this,'cart_num',1);
+				this.$set(this, 'cart_num', 1);
 				let productSelect = this.productValue[res];
 				if (productSelect) {
 					this.$set(this.attr.productSelect, "image", productSelect.image);
@@ -300,36 +301,47 @@
 				//changeValue:是否 加|减
 				//获取当前变动属性
 				let productSelect = this.productValue[this.attrValue];
-	           if (this.cart_num) {
-			      productSelect.cart_num = this.cart_num;
-				  this.attr.productSelect.cart_num = this.cart_num;
-			    }
+				if (this.cart_num) {
+					productSelect.cart_num = this.cart_num;
+					this.attr.productSelect.cart_num = this.cart_num;
+				}
 				//如果没有属性,赋值给商品默认库存
 				if (productSelect === undefined && !this.attr.productAttr.length)
 					productSelect = this.attr.productSelect;
 				if (productSelect === undefined) return;
 				let stock = productSelect.stock || 0;
 				let quotaShow = productSelect.quota_show || 0;
+				let quota = productSelect.quota || 0;
 				let productStock = productSelect.product_stock || 0;
 				let num = this.attr.productSelect;
+				let nums = this.storeCombination.num || 0;
 				//设置默认数据
 				if (productSelect.cart_num == undefined) productSelect.cart_num = 1;
 				if (res) {
-					num.cart_num ++;
-					if(quotaShow >= productStock){
-						 if (num.cart_num > productStock) {
-						 	this.$set(this.attr.productSelect, "cart_num", productStock);
-						 	this.$set(this, "cart_num", productStock);
-						 }
-					}else{
-						if (num.cart_num > quotaShow) {
-							this.$set(this.attr.productSelect, "cart_num", quotaShow);
-							this.$set(this, "cart_num", quotaShow);
-						}
+					num.cart_num++;
+					let arrMin = [];
+					arrMin.push(nums);
+					arrMin.push(quota);
+					arrMin.push(productStock);
+					let minN = Math.min.apply(null, arrMin);
+					if (num.cart_num >= minN) {
+						this.$set(this.attr.productSelect, "cart_num", minN ? minN : 1);
+						this.$set(this, "cart_num", minN ? minN : 1);
 					}
+					// if(quotaShow >= productStock){
+					// 	 if (num.cart_num > productStock) {
+					// 	 	this.$set(this.attr.productSelect, "cart_num", productStock);
+					// 	 	this.$set(this, "cart_num", productStock);
+					// 	 }
+					// }else{
+					// 	if (num.cart_num > quotaShow) {
+					// 		this.$set(this.attr.productSelect, "cart_num", quotaShow);
+					// 		this.$set(this, "cart_num", quotaShow);
+					// 	}
+					// }
 					this.$set(this, "cart_num", num.cart_num);
 					this.$set(this.attr.productSelect, "cart_num", num.cart_num);
-					
+
 				} else {
 					num.cart_num--;
 					if (num.cart_num < 1) {
@@ -367,7 +379,7 @@
 					this.$set(productAttr[i], "index", value[i]);
 				}
 				//sort();排序函数:数字-英文-汉字；
-				let productSelect = this.productValue[value.sort().join(",")];
+				let productSelect = this.productValue[value.join(",")];
 				if (productSelect && productAttr.length) {
 					this.$set(
 						this.attr.productSelect,
@@ -389,8 +401,8 @@
 						"quota_show",
 						productSelect.quota_show
 					);
-					this.$set(this, "attrValue", value.sort().join(","));
-					this.attrValue = value.sort().join(",");
+					this.$set(this, "attrValue", value.join(","));
+					this.attrValue = value.join(",");
 					this.$set(this, "attrTxt", "已选择");
 				} else if (!productSelect && productAttr.length) {
 					this.$set(
@@ -474,12 +486,12 @@
 				postCartAdd(data)
 					.then(res => {
 						uni.navigateTo({
-							url:'/pages/users/order_confirm/index?cartId=' +res.data.cartId +'&pinkid='+that.pinkId
+							url: '/pages/users/order_confirm/index?new=1&cartId=' + res.data.cartId + '&pinkid=' + that.pinkId
 						})
 					})
 					.catch(res => {
 						that.$util.Tips({
-							title:res
+							title: res
 						})
 					});
 			},
@@ -489,19 +501,19 @@
 				// 	path: "/activity/poster/" + that.pinkId + "/1"
 				// });
 				uni.navigateTo({
-					url:'/pages/activity/poster-poster/index?type=2&id='+that.pinkId
+					url: '/pages/activity/poster-poster/index?type=2&id=' + that.pinkId
 				})
 			},
 			goOrder: function() {
 				var that = this;
 				uni.navigateTo({
-					url:"/pages/order_details/index?order_id=" + that.currentPinkOrder
+					url: "/pages/order_details/index?order_id=" + that.currentPinkOrder
 				})
 			},
 			//拼团列表
 			goList: function() {
 				uni.navigateTo({
-					url:'/pages/activity/goods_combination/index'
+					url: '/pages/activity/goods_combination/index'
 				})
 			},
 			//拼团详情
@@ -509,7 +521,7 @@
 				this.pinkId = id
 				// this.getCombinationPink();
 				uni.navigateTo({
-					url:'/pages/activity/goods_combination_details/index?id='+id
+					url: '/pages/activity/goods_combination_details/index?id=' + id
 				})
 				// this.$router.push({
 				// 	path: "/activity/group_detail/" + id
@@ -526,6 +538,7 @@
 					);
 					res.data.pinkT.stop_time = parseInt(res.data.pinkT.stop_time)
 					that.$set(that, "storeCombination", res.data.store_combination);
+					that.$set(that.attr.productSelect, "num", res.data.store_combination.num);
 					that.$set(that, "pinkT", res.data.pinkT);
 					that.$set(that, "pinkAll", res.data.pinkAll);
 					that.$set(that, "count", res.data.count);
@@ -545,44 +558,42 @@
 			},
 			//#ifdef H5
 			setOpenShare() {
-			      let that = this;
-			      let configTimeline = {
-			        title:
-			          "您的好友" +
-			          that.userInfo.nickname +
-			          "邀请您参团" +
-			          that.storeCombination.title,
-			        desc: that.storeCombination.title,
-			        link:
-			          window.location.protocol +
-			          "//" +
-			          window.location.host +
-			          "/pages/activity/goods_combination_status/index?id=" +
-			          that.pinkId,
-			        imgUrl: that.storeCombination.image
-			      };
-			      if (this.$wechat.isWeixin()) {
-			        this.$wechat.wechatEvevt([
-						"updateAppMessageShareData", 
-						"updateTimelineShareData",
-						"onMenuShareAppMessage",
-						"onMenuShareTimeline"
-					  ],
-			          configTimeline
-			        )
-			          .then(res => {
-			            console.log(res);
-			          })
-			          .catch(res => {
-			            if (res.is_ready) {
-			              res.wx.updateAppMessageShareData(configTimeline);
-			              res.wx.updateTimelineShareData(configTimeline);
-						  res.wx.onMenuShareAppMessage(configTimeline);
-						  res.wx.onMenuShareTimeline(configTimeline);
-			            }
-			          });
-			      }
-			    },
+				let that = this;
+				let configTimeline = {
+					title: "您的好友" +
+						that.userInfo.nickname +
+						"邀请您参团" +
+						that.storeCombination.title,
+					desc: that.storeCombination.title,
+					link: window.location.protocol +
+						"//" +
+						window.location.host +
+						"/pages/activity/goods_combination_status/index?id=" +
+						that.pinkId,
+					imgUrl: that.storeCombination.image
+				};
+				if (this.$wechat.isWeixin()) {
+					this.$wechat.wechatEvevt([
+								"updateAppMessageShareData",
+								"updateTimelineShareData",
+								"onMenuShareAppMessage",
+								"onMenuShareTimeline"
+							],
+							configTimeline
+						)
+						.then(res => {
+							console.log(res);
+						})
+						.catch(res => {
+							if (res.is_ready) {
+								res.wx.updateAppMessageShareData(configTimeline);
+								res.wx.updateTimelineShareData(configTimeline);
+								res.wx.onMenuShareAppMessage(configTimeline);
+								res.wx.onMenuShareTimeline(configTimeline);
+							}
+						});
+				}
+			},
 			//#endif
 			//拼团取消
 			getCombinationRemove: function() {
@@ -593,14 +604,14 @@
 					})
 					.then(res => {
 						that.$util.Tips({
-							title:res.msg
-						},{
+							title: res.msg
+						}, {
 							tab: 3,
 						})
 					})
 					.catch(res => {
 						that.$util.Tips({
-							title:res
+							title: res
 						})
 					});
 			},
@@ -859,6 +870,7 @@
 		font-weight: bold;
 		font-size: 28rpx;
 	}
+
 	.share-box {
 		z-index: 1000;
 		position: fixed;
@@ -866,7 +878,7 @@
 		top: 0;
 		width: 100%;
 		height: 100%;
-	
+
 		image {
 			width: 100%;
 			height: 100%;

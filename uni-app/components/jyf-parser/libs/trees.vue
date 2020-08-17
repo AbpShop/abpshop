@@ -50,7 +50,7 @@
 			<!--<ad v-else-if="n.name=='ad'" :class="n.attrs.class" :style="n.attrs.style" :appid="n.attrs.appid"
 			 :apid="n.attrs.apid" :type="n.attrs.type" data-from="ad" @error="error" />-->
 			<!--#endif-->
-			<!--#ifdef APP-PLUS-->
+			<!--#ifdef MP-->
 			<!--<ad v-else-if="n.name=='ad'" :class="n.attrs.class" :style="n.attrs.style" :adpid="n.attrs.adpid"
 			 data-from="ad" @error="error" />-->
 			<!--#endif-->
@@ -90,7 +90,7 @@
 					</view>
 				</view>
 			</view>
-			<!--#ifdef APP-PLUS-->
+			<!--#ifdef MP-->
 			<iframe v-else-if="n.name=='iframe'" :style="n.attrs.style" :allowfullscreen="n.attrs.allowfullscreen" :frameborder="n.attrs.frameborder"
 			 :width="n.attrs.width" :height="n.attrs.height" :src="n.attrs.src" />
 			<embed v-else-if="n.name=='embed'" :style="n.attrs.style" :width="n.attrs.width" :height="n.attrs.height" :src="n.attrs.src" />
@@ -130,7 +130,7 @@
 				// #ifdef MP-WEIXIN || MP-QQ || APP-PLUS
 				imgLoad: false,
 				// #endif
-				// #ifndef APP-PLUS
+				// #ifndef MP
 				loadVideo: true
 				// #endif
 			}
@@ -140,7 +140,7 @@
 			// #ifdef MP-WEIXIN || MP-QQ || H5 || APP-PLUS
 			lazyLoad: Boolean,
 			// #endif
-			// #ifdef APP-PLUS
+			// #ifdef MP
 			loadVideo: Boolean
 			// #endif
 		},
@@ -220,10 +220,10 @@
 									id: attrs.href.substring(1)
 								})
 						} else if (attrs.href.indexOf('http') == 0 || attrs.href.indexOf('//') == 0) {
-							// #ifdef APP-PLUS
+							// #ifdef MP
 							plus.runtime.openWeb(attrs.href);
 							// #endif
-							// #ifndef APP-PLUS
+							// #ifndef MP
 							uni.setClipboardData({
 								data: attrs.href,
 								success: () =>

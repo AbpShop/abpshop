@@ -6,8 +6,8 @@ import {
  import {
  	pathToBase64
  } from '@/plugin/image-tools/index.js';
- // #ifdef APP-PLUS
- import permision from "permission.js"
+ // #ifdef MP
+ import permision from "./permission.js"
  // #endif
  export default {
  	/**
@@ -20,8 +20,8 @@ import {
  	 * tab=1 一定时间后跳转至 table上
  	 * tab=2 一定时间后跳转至非 table上
  	 * tab=3 一定时间后返回上页面
- 	 * tab=4 关闭所有页面跳转至非table上
- 	 * tab=5 关闭当前页面跳转至table上
+ 	 * tab=4 关闭所有页面，打开到应用内的某个页面
+ 	 * tab=5 关闭当前页面，跳转到应用内的某个页面
  	 */
  	Tips: function(opt, to_url) {
  		if (typeof opt == 'string') {
@@ -73,7 +73,7 @@ import {
  						}, endtime);
  						break;
  					case 4:
- 						//关闭当前所有页面跳转至非table页面
+ 						//关闭所有页面，打开到应用内的某个页面
  						setTimeout(function() {
  							uni.reLaunch({
  								url: url,
@@ -81,7 +81,7 @@ import {
  						}, endtime);
  						break;
  					case 5:
- 						//关闭当前页面跳转至非table页面
+ 						//关闭当前页面，跳转到应用内的某个页面
  						setTimeout(function() {
  							uni.redirectTo({
  								url: url,
@@ -163,11 +163,12 @@ import {
  	 * @param array arr2 海报素材
  	 * @param string store_name 素材文字
  	 * @param string price 价格
+	 * @param string ot_price 原始价格
  	 * @param function successFn 回调函数
  	 * 
  	 * 
  	 */
- 	PosterCanvas: function(arr2, store_name, price, successFn) {
+ 	PosterCanvas: function(arr2, store_name, price,ot_price, successFn) {
  		let that = this;
  		uni.showLoading({
  			title: '海报生成中',
@@ -175,28 +176,31 @@ import {
  		});
  		const ctx = uni.createCanvasContext('myCanvas');
  		ctx.clearRect(0, 0, 0, 0);
+		
+		
  		/**
  		 * 只能获取合法域名下的图片信息,本地调试无法获取
  		 * 
  		 */
+		ctx.fillStyle = '#fff';
+		ctx.fillRect(0, 0, 750, 1150);
  		uni.getImageInfo({
  			src: arr2[0],
  			success: function(res) {
-				console.log(res,'getImageInfo')
  				const WIDTH = res.width;
  				const HEIGHT = res.height;
- 				ctx.drawImage(arr2[0], 0, 0, WIDTH, HEIGHT);
+ 				// ctx.drawImage(arr2[0], 0, 0, WIDTH, 1050);
  				ctx.drawImage(arr2[1], 0, 0, WIDTH, WIDTH);
  				ctx.save();
- 				let r = 90;
+ 				let r = 130;
  				let d = r * 2;
- 				let cx = 40;
- 				let cy = 990;
+ 				let cx = 460;
+ 				let cy = 790;
  				ctx.arc(cx + r, cy + r, r, 0, 2 * Math.PI);
  				// ctx.clip();
  				ctx.drawImage(arr2[2], cx, cy,d,d);
  				ctx.restore();
- 				const CONTENT_ROW_LENGTH = 40;
+ 				const CONTENT_ROW_LENGTH = 20;
  				let [contentLeng, contentArray, contentRows] = that.textByteLength(store_name, CONTENT_ROW_LENGTH);
  				if (contentRows > 2) {
  					contentRows = 2;
@@ -204,16 +208,56 @@ import {
  					textArray[textArray.length - 1] += '……';
  					contentArray = textArray;
  				}
- 				ctx.setTextAlign('center');
- 				ctx.setFontSize(32);
- 				let contentHh = 32 * 1.3;
+ 				ctx.setTextAlign('left');
+ 				ctx.setFontSize(36);
+				ctx.setFillStyle('#000');
+ 				let contentHh = 36 * 1.3;
  				for (let m = 0; m < contentArray.length; m++) {
- 					ctx.fillText(contentArray[m], WIDTH / 2, 820 + contentHh * m);
+ 					ctx.fillText(contentArray[m], 50, 1000 + contentHh * m,750);
  				}
- 				ctx.setTextAlign('center')
- 				ctx.setFontSize(48);
- 				ctx.setFillStyle('red');
- 				ctx.fillText('￥' + price, WIDTH / 2, 880 + contentHh);
+ 				ctx.setTextAlign('left')
+ 				ctx.setFontSize(72);
+ 				ctx.setFillStyle('#DA4F2A');
+ 				ctx.fillText('￥' + price, 40, 820 + contentHh);
+				
+				ctx.setTextAlign('left')
+				ctx.setFontSize(36);
+				ctx.setFillStyle('#999');
+				ctx.fillText('￥' + ot_price, 50, 880 + contentHh);
+				
+				var underline = function(ctx, text, x, y, size, color, thickness ,offset){ 
+					var width = ctx.measureText(text).width; 
+					
+					 switch(ctx.textAlign){ 
+					 case "center": 
+					 x -= (width/2); break; 
+					 case "right": 
+					 x -= width; break; 
+					 } 
+					
+					 y += size+offset; 
+					
+					 ctx.beginPath(); 
+					 ctx.strokeStyle = color; 
+					 ctx.lineWidth = thickness; 
+					 ctx.moveTo(x,y); 
+					 ctx.lineTo(x+width,y); 
+					 ctx.stroke(); 
+				} 
+				underline(ctx,'￥'+ot_price, 55,880,36,'#999',2,0)
+				
+				
+				
+				
+				
+				ctx.setTextAlign('left')
+				ctx.setFontSize(28);
+				ctx.setFillStyle('#999');
+				ctx.fillText('长按或扫描查看', 490, 1030 + contentHh);
+				
+				
+
+					
  				ctx.draw(true, function() {
  					uni.canvasToTempFilePath({
  						canvasId: 'myCanvas',
@@ -444,14 +488,15 @@ import {
  	// 获取地理位置;
  	$L: {
  		async getLocation() {
- 			// #ifdef APP-PLUS
- 			let status = await this.checkPermission();
+			let status = 0;
+ 			// #ifdef MP
+ 			status = await this.checkPermission();
  			if (status !== 1) {
  				return;
  			}
  			// #endif
  			// #ifdef MP-WEIXIN || MP-TOUTIAO || MP-QQ
- 			let status = await this.getSetting();
+ 			status = await this.getSetting();
  			if (status === 2) {
  				this.openSetting();
  				return;

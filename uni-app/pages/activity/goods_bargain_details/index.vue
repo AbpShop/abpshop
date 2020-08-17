@@ -6,7 +6,7 @@
 			<view class="header" :class="bargainUid != userInfo.uid ? 'on' : ''">
 				<view class='people' >
 					<!-- :style="'top:'+navH/2+'rpx'" -->
-					{{bargainCount.lookCount}}人查看 丨 {{bargainCount.shareCount}}人分享 丨 {{bargainCount.userCount}}人参与
+					{{bargainCount.lookCount || 0}}人查看 丨 {{bargainCount.shareCount || 0}}人分享 丨 {{bargainCount.userCount || 0}}人参与
 				</view>
 				<!-- <view class='time font-color' v-if="bargainUid == userInfo.uid">
 					倒计时
@@ -25,7 +25,7 @@
 						<image :src='bargainUserInfo.avatar'></image>
 					</view>
 					<view class='text'>
-						{{bargainUserInfo.nickname}}
+						{{bargainUserInfo.nickname || ''}}
 						<text>邀请您帮忙砍价</text>
 					</view>
 				</view>
@@ -177,7 +177,7 @@
 			</view>
 			<view class='bargainTip' :class='active==true?"on":""'>
 				<view class='pictrue'>
-					<!-- <image src="../../../static/images/bargainBg.jpg"></image> -->
+					<image src="../../../static/images/bargainBg.jpg"></image>
 				</view>
 				<view v-if="bargainUid == userInfo.uid">
 					<view class='cutOff'>
@@ -296,7 +296,8 @@
 				H5ShareBox: false, //公众号分享图片
 				systemH:0,
 				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false //是否隐藏授权
+				isShowAuth: false, //是否隐藏授权
+				pages:'',
 			}
 
 		},
@@ -415,12 +416,10 @@
 				};
 				postCartAdd(data).then(res => {
 					uni.navigateTo({
-						url: '/pages/users/order_confirm/index?cartId=' + res.data.cartId
+						url: '/pages/users/order_confirm/index?new=1&cartId=' + res.data.cartId
 					});
 				}).catch(err => {
-					return app.Tips({
-						title: err
-					})
+					return that.$util.Tips({title:err})
 				});
 			},
 			getBargainDetails: function() { //获取砍价产品详情
@@ -435,12 +434,9 @@
 					that.productStock = res.data.bargain.attr.product_stock;
 					that.quota = res.data.bargain.attr.quota;
 					that.datatime = res.data.bargain.stop_time
-					app.globalData.openPages = '/pages/activity/goods_bargain_details/index?id=' + that.id + '&bargain=' +
+					that.pages = '/pages/activity/goods_bargain_details/index?id=' + that.id + '&bargain=' +
 					that.bargainUid + '&scene=' + that.userInfo.uid;
-					// that.bargainUid = that.userInfo.uid;
-					// WxParse.wxParse('description', 'html', that.data.bargainInfo.description || '', that, 0);
-					// WxParse.wxParse('rule', 'html', that.data.bargainInfo.rule || '', that, 0);
-					// wxh.time2(that.bargainInfo.stop_time, that);
+					console.log(that.pages);
 					uni.setNavigationBarTitle({
 						title:res.data.bargain.title.substring(0,13)+'...'
 					})
@@ -512,10 +508,7 @@
 					var bargainUserHelpListNew = [];
 					var bargainUserHelpList = that.bargainUserHelpList;
 					var len = res.data.length;
-					console.log('res');
-					console.log(res.data);
-					console.log(bargainUserHelpList);
-					console.log(bargainUserHelpList.concat(res.data));
+				
 					bargainUserHelpListNew = bargainUserHelpList.concat(res.data);
 					
 					that.$set(that, 'bargainUserHelpList', res.data);
@@ -555,14 +548,16 @@
 			onLoadFun: function(e) {
 				this.getBargainDetails();
 				this.addShareBargain();
-				app.globalData.openPages = '/pages/activity/goods_bargain_details/index?id=' + this.id + '&bargain=' + this.bargainUid +
-					'&spid=' + e.uid;
+				// this.pages = '/pages/activity/goods_bargain_details/index?id=' + this.id + '&bargain=' + this.bargainUid +
+				// 	'&spid=' + e.uid;
 				this.$set(this, 'bargainPartake', e.uid);
 			},
 			addShareBargain: function() { //添加分享次数 获取人数
 				var that = this;
 				postBargainShare(this.id).then(res => {
 					that.$set(that, 'bargainCount', res.data);
+					this.pages = '/pages/activity/goods_bargain_details/index?id=' + this.id + '&bargain=' + this.bargainUid +
+						'&spid=' + this.userInfo.uid;
 				});
 			},
 			//#ifdef H5
@@ -654,14 +649,15 @@
 		 * 用户点击右上角分享
 		 */
 		onShareAppMessage: function() {
-			let that = this;
+			let that = this,share = {
+				title: '您的好友' + that.userInfo.nickname + '邀请您帮他砍' + that.bargainInfo.title + ' 快去帮忙吧！',
+				path: '/pages/activity/goods_bargain_details/index?id=' + this.id + '&bargain=' + this.bargainUid +
+						'&spid=' + this.userInfo.uid,
+				imageUrl: that.bargainInfo.image,
+			};
 			that.close();
 			that.addShareBargain();
-			return {
-				title: '您的好友' + that.userInfo.nickname + '邀请您帮他砍' + that.bargainInfo.title + ' 快去帮忙吧！',
-				path: app.globalData.openPages,
-				imageUrl: that.bargainInfo.image,
-			}
+			return share;
 		},
 		//#endif
 	}

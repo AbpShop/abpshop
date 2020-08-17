@@ -1,4 +1,5 @@
 import request from "@/utils/request.js";
+import wechat from "@/libs/wechat.js";
 
 /**
  * 获取微信sdk配置
@@ -7,7 +8,7 @@ import request from "@/utils/request.js";
 export function getWechatConfig() {
   return request.get(
     "wechat/config",
-    { url: document.location.href },
+    { url: wechat.signLink() },
     { noAuth: true }
   );
 }
@@ -40,6 +41,20 @@ export function getLogo()
 export function login(data) {
   return request.post("wechat/mp_auth", data, { noAuth : true });
 }
+
+/**
+ * 静默授权
+ * @param {Object} data
+ */
+export function silenceAuth(data) {
+	//#ifdef MP
+  return request.get("v2/wechat/silence_auth", data, { noAuth : true });
+  //#endif
+  //#ifdef H5
+  return request.get("v2/wechat/wx_silence_auth", data, { noAuth : true });
+  //#endif
+}
+
 /**
  * 分享
  * @returns {*}
@@ -68,3 +83,26 @@ export function imageBase64(image, code) {
   );
 }
 
+/**
+ * 自动复制口令功能
+ * @returns {*}
+ */
+export function copyWords() {
+  return request.get("copy_words", {}, { noAuth: true });
+}
+
+/**
+ * 获取商城是否强制绑定手机号
+ */
+export function getShopConfig() {
+	return request.get('v2/bind_status' ,{} ,{noAuth : true});
+}
+
+/**
+ * 小程序绑定手机号
+ * @param {Object} data
+ */
+export function getUserPhone(data){
+	console.log(data);
+	return request.post('v2/auth_bindind_phone',data,{noAuth : true});
+}

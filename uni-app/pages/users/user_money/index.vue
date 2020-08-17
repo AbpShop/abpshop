@@ -9,7 +9,7 @@
 								<view>总资产(元)</view>
 								<view class='money'>{{userInfo.now_money || 0}}</view>
 							</view>
-							<!-- #ifdef APP-PLUS || H5 -->
+							<!-- #ifdef MP || H5 -->
 							<navigator url="/pages/users/user_payment/index" hover-class="none" class='recharge font-color'>充值</navigator>
 							<!-- #endif -->
 							<!-- #ifdef MP -->
@@ -17,7 +17,7 @@
 							<!-- #endif -->
 						</view>
 						<view class='cumulative acea-row row-top'>
-							<!-- #ifdef APP-PLUS || H5 -->
+							<!-- #ifdef MP || H5 -->
 							<view class='item'>
 								<view>累计充值(元)</view>
 								<view class='money'>{{userInfo.recharge || 0}}</view>
@@ -123,6 +123,7 @@
 		<!-- #ifdef MP -->
 		<authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize>
 		<!-- #endif -->
+		<home></home>
 	</view>
 </template>
 
@@ -147,12 +148,14 @@
 	// #ifdef MP
 	import authorize from '@/components/Authorize';
 	// #endif
+	import home from '@/components/home';
 	export default {
 		components: {
 			recommend,
 			// #ifdef MP
-			authorize
+			authorize,
 			// #endif
+			home
 		},
 		data() {
 			return {

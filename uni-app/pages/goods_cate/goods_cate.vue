@@ -1,5 +1,5 @@
 <template>
-	<view class='productSort'>
+	<view class='productSort copy-data'>
 		<view class='header acea-row row-center-wrapper'>
 			<view class='acea-row row-between-wrapper input'>
 				<text class='iconfont icon-sousuo'></text>

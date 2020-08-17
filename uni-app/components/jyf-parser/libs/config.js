@@ -22,7 +22,7 @@ module.exports = {
 		// #ifdef MP-WEIXIN
 		+ (canIUse ? ',rp' : '')
 		// #endif
-		// #ifndef APP-PLUS
+		// #ifndef MP
 		+ ',embed,iframe'
 		// #endif
 	),
@@ -48,7 +48,7 @@ module.exports = {
 		// #ifdef MP-WEIXIN
 		+ (canIUse ? ',bdi,bdo,caption,pre,rt,ruby' : '')
 		// #endif
-		// #ifdef APP-PLUS
+		// #ifdef MP
 		+ ',embed,iframe'
 		// #endif
 	),

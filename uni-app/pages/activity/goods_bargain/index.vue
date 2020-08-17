@@ -1,7 +1,7 @@
 <template>
 	<view>
 		<view class='bargain-list'>
-			<view class='iconfont icon-xiangzuo' @tap='goBack' :style="'top:'+ (navH/2) +'rpx'"></view>
+			<view class='iconfont icon-xiangzuo' @tap='goBack' :style="'top:'+ (navH/2) +'rpx'" v-if="returnShow"></view>
 			<view class='header'></view>
 			<view class='list'>
 				<block v-for="(item,index) in bargainList" :key="index">
@@ -63,15 +63,17 @@
 				userInfo: {},
 				navH: '',
 				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false //是否隐藏授权
+				isShowAuth: false, //是否隐藏授权
+				returnShow:true
 			};
 		},
 		computed: mapGetters(['isLogin']),
 		onLoad: function(options) {
+			var pages = getCurrentPages();
+			this.returnShow = pages.length===1?false:true;
 			uni.setNavigationBarTitle({
 				title:"砍价列表"
 			})
-
 			this.navH = app.globalData.navHeight;
 			if (this.isLogin) {
 				this.getUserInfo();

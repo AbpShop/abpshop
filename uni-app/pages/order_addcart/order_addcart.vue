@@ -1,6 +1,6 @@
 <template>
 	<view>
-		<view class='shoppingCart'>
+		<view class='shoppingCart copy-data'>
 			<view class='labelNav acea-row row-around row-middle'>
 				<view class='item'><text class='iconfont icon-xuanzhong'></text>100%正品保证</view>
 				<view class='item'><text class='iconfont icon-xuanzhong'></text>所有商品精挑细选</view>
@@ -17,10 +17,10 @@
 						<block v-for="(item,index) in cartList.valid" :key="index">
 							<view class='item acea-row row-between-wrapper'>
 								<!-- #ifndef MP -->
-								<checkbox :value="(item.id).toString()" :checked="item.checked" />
+								<checkbox :value="(item.id).toString()" :checked="item.checked" :disabled="item.attrStatus?false:true" />
 								<!-- #endif -->
 								<!-- #ifdef MP -->
-								<checkbox :value="item.id" :checked="item.checked" />
+								<checkbox :value="item.id" :checked="item.checked" :disabled="item.attrStatus?false:true" />
 								<!-- #endif -->
 								<navigator :url='"/pages/goods_details/index?id="+item.product_id' hover-class='none' class='picTxt acea-row row-between-wrapper'>
 									<view class='pictrue'>
@@ -28,11 +28,15 @@
 										<image v-else :src='item.productInfo.image'></image>
 									</view>
 									<view class='text'>
-										<view class='line1'>{{item.productInfo.store_name}}</view>
+										<view class='line1' :class="item.attrStatus?'':'reColor'">{{item.productInfo.store_name}}</view>
 										<view class='infor line1' v-if="item.productInfo.attrInfo">属性：{{item.productInfo.attrInfo.suk}}</view>
-										<view class='money'>￥{{item.truePrice}}</view>
+										<view class='money' v-if="item.attrStatus">￥{{item.truePrice}}</view>
+										<view class="reElection acea-row row-between-wrapper" v-else>
+											<view class="title">请重新选择商品规格</view>
+											<view class="reBnt cart-color acea-row row-center-wrapper" @click.stop="reElection(item)">重选</view>
+										</view>
 									</view>
-									<view class='carnum acea-row row-center-wrapper'>
+									<view class='carnum acea-row row-center-wrapper' v-if="item.attrStatus">
 										<view class="reduce" :class="item.numSub ? 'on' : ''" @click.stop='subCart(index)'>-</view>
 										<view class='num'>{{item.cart_num}}</view>
 										<!-- <view class="num">
@@ -70,6 +74,12 @@
 						</block>
 					</view>
 				</view>
+				<view class='loadingicon acea-row row-center-wrapper' v-if="cartList.valid.length&&!loadend">
+					<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
+				</view>
+				<view class='loadingicon acea-row row-center-wrapper' v-if="cartList.invalid.length&&loadend">
+					<text class='loading iconfont icon-jiazai' :hidden='loadingInvalid==false'></text>{{loadTitleInvalid}}
+				</view>
 			</view>
 			<view class='noCart' v-if="cartList.valid.length == 0 && cartList.invalid.length == 0">
 				<view class='pictrue'>
@@ -77,7 +87,7 @@
 				</view>
 				<recommend :hostProduct='hostProduct'></recommend>
 			</view>
-			<view style='height:120rpx;'></view>
+			<view style='height:120rpx;color: #F5F5F5;'>{{selectCountPrice}}</view>
 			<view class='footer acea-row row-between-wrapper' v-if="cartList.valid.length > 0">
 				<view>
 					<checkbox-group @change="checkboxAllChange">
@@ -100,9 +110,12 @@
 				</view>
 			</view>
 		</view>
+		<productWindow :attr="attr" :isShow='1' :iSplus='1' :iScart='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr"
+		 @ChangeCartNum="ChangeCartNum" @attrVal="attrVal" @iptCartNum="iptCartNum" @goCat="reGoCat" id='product-window'></productWindow>
 		<!-- #ifdef MP -->
 		<authorize :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize>
 		<!-- #endif -->
+
 	</view>
 </template>
 
@@ -111,11 +124,13 @@
 		getCartList,
 		getCartCounts,
 		changeCartNum,
-		cartDel
+		cartDel,
+		getResetCart
 	} from '@/api/order.js';
 	import {
 		getProductHot,
-		collectAll
+		collectAll,
+		getProductDetail
 	} from '@/api/store.js';
 	import {
 		toLogin
@@ -124,12 +139,14 @@
 		mapGetters
 	} from "vuex";
 	import recommend from '@/components/recommend';
+	import productWindow from '@/components/productWindow';
 	// #ifdef MP
 	import authorize from '@/components/Authorize';
 	// #endif
 	export default {
 		components: {
 			recommend,
+			productWindow,
 			// #ifdef MP
 			authorize
 			// #endif
@@ -149,9 +166,30 @@
 				selectCountPrice: 0.00,
 				isAuto: false, //没有授权的不会自动授权
 				isShowAuth: false, //是否隐藏授权
-				hotScroll:false,
-				hotPage:1,
-				hotLimit:10
+				hotScroll: false,
+				hotPage: 1,
+				hotLimit: 10,
+				loading: false,
+				loadend: false,
+				loadTitle: '加载更多', //提示语
+				page: 1,
+				limit: 20,
+				loadingInvalid: false,
+				loadendInvalid: false,
+				loadTitleInvalid: '加载更多', //提示语
+				pageInvalid: 1,
+				limitInvalid: 20,
+				attr: {
+					cartAttr: false,
+					productAttr: [],
+					productSelect: {}
+				},
+				productValue: [], //系统属性
+				storeInfo: {},
+				attrValue: '', //已选属性
+				attrTxt: '请选择', //属性页面提示
+				cartId: 0,
+				product_id: 0
 			};
 		},
 		computed: mapGetters(['isLogin']),
@@ -169,8 +207,18 @@
 		},
 		onShow: function() {
 			if (this.isLogin == true) {
+				this.hotPage = 1;
+				this.hostProduct = [],
+				this.hotScroll = false,
 				this.getHostProduct();
+				this.loadend = false;
+				this.page = 1;
+				this.cartList.valid = [];
 				this.getCartList();
+				this.loadendInvalid = false;
+				this.pageInvalid = 1;
+				this.cartList.invalid = [];
+				this.getInvalidList();
 				this.getCartNum();
 				this.goodsHidden = true;
 				this.footerswitch = true;
@@ -187,33 +235,219 @@
 				this.selectCountPrice = 0.00;
 				this.cartCount = 0;
 				this.isShowAuth = false;
-			}
+			};
 		},
 		methods: {
-			
-			     /**
-			     * 手动输入数量失焦事件
-			     */
-			  //   inputBlur(index,val) {
-			  //     if (val <= 1) {
-			  //       // let index = e.currentTarget.dataset.index;
-			  //       let item = this.cartList.valid[index];
-			  //       item.cart_num = 1;
-			  //       if (item.cart_num) this.setCartNum(item.id, item.cart_num);
-					// this.cartList.valid[index] = item;
-					// this.$set(this.cartList,'valid',this.cartList.valid);
-					// this.switchSelect();
-			  //     }
-			  //   },
 			// 授权关闭
 			authColse: function(e) {
 				this.isShowAuth = e;
+			},
+			// 修改购物车
+			reGoCat: function() {
+				console.log('pppp');
+				let that = this,
+					productSelect = that.productValue[this.attrValue];
+				//如果有属性,没有选择,提示用户选择
+				if (
+					that.attr.productAttr.length &&
+					productSelect === undefined
+				)
+					return that.$util.Tips({
+						title: "产品库存不足，请选择其它"
+					});
+					
+				let q = {
+					id: that.cartId,
+					product_id: that.product_id,
+					num: that.attr.productSelect.cart_num,
+					unique: that.attr.productSelect !== undefined ?
+						that.attr.productSelect.unique : ""
+				};
+				getResetCart(q)
+					.then(function(res) {
+						that.attr.cartAttr = false;
+						that.$util.Tips({
+							title: "添加购物车成功",
+							success: () => {
+								console.log('马敏娟');
+								that.loadend = false;
+								that.page = 1;
+								that.cartList.valid = [];
+								that.getCartList();
+								that.getCartNum();
+							}
+						});
+					})
+					.catch(res => {
+						return that.$util.Tips({
+							title: res.msg
+						});
+					});
+			},
+			onMyEvent: function() {
+				this.$set(this.attr, 'cartAttr', false);
+			},
+			reElection: function(item) {
+				this.getGoodsDetails(item)
+			},
+			/**
+			 * 获取产品详情
+			 * 
+			 */
+			getGoodsDetails: function(item) {
+				uni.showLoading({
+					title: '加载中',
+					mask: true
+				});
+				let that = this;
+				that.cartId = item.id;
+				that.product_id = item.product_id;
+				getProductDetail(item.product_id).then(res => {
+					uni.hideLoading();
+					that.attr.cartAttr = true;
+					let storeInfo = res.data.storeInfo;
+					that.$set(that, 'storeInfo', storeInfo);
+					that.$set(that.attr, 'productAttr', res.data.productAttr);
+					that.$set(that, 'productValue', res.data.productValue);
+					that.DefaultSelect();
+				}).catch(err => {
+					uni.hideLoading();
+				})
+			},
+			/**
+			 * 属性变动赋值
+			 * 
+			 */
+			ChangeAttr: function(res) {
+				let productSelect = this.productValue[res];
+				if (productSelect && productSelect.stock > 0) {
+					this.$set(this.attr.productSelect, "image", productSelect.image);
+					this.$set(this.attr.productSelect, "price", productSelect.price);
+					this.$set(this.attr.productSelect, "stock", productSelect.stock);
+					this.$set(this.attr.productSelect, "unique", productSelect.unique);
+					this.$set(this.attr.productSelect, "cart_num", 1);
+					this.$set(this, "attrValue", res);
+					this.$set(this, "attrTxt", "已选择");
+				} else {
+					this.$set(this.attr.productSelect, "image", this.storeInfo.image);
+					this.$set(this.attr.productSelect, "price", this.storeInfo.price);
+					this.$set(this.attr.productSelect, "stock", 0);
+					this.$set(this.attr.productSelect, "unique", "");
+					this.$set(this.attr.productSelect, "cart_num", 0);
+					this.$set(this, "attrValue", "");
+					this.$set(this, "attrTxt", "请选择");
+				}
+			},
+			/**
+			 * 默认选中属性
+			 * 
+			 */
+			DefaultSelect: function() {
+				let productAttr = this.attr.productAttr;
+				let value = [];
+				for (var key in this.productValue) {
+					if (this.productValue[key].stock > 0) {
+						value = this.attr.productAttr.length ? key.split(",") : [];
+						break;
+					}
+				}
+				for (let i = 0; i < productAttr.length; i++) {
+					this.$set(productAttr[i], "index", value[i]);
+				}
+				//sort();排序函数:数字-英文-汉字；
+				let productSelect = this.productValue[value.sort().join(",")];
+				if (productSelect && productAttr.length) {
+					this.$set(
+						this.attr.productSelect,
+						"store_name",
+						this.storeInfo.store_name
+					);
+					this.$set(this.attr.productSelect, "image", productSelect.image);
+					this.$set(this.attr.productSelect, "price", productSelect.price);
+					this.$set(this.attr.productSelect, "stock", productSelect.stock);
+					this.$set(this.attr.productSelect, "unique", productSelect.unique);
+					this.$set(this.attr.productSelect, "cart_num", 1);
+					this.$set(this, "attrValue", value.sort().join(","));
+					this.$set(this, "attrTxt", "已选择");
+				} else if (!productSelect && productAttr.length) {
+					this.$set(
+						this.attr.productSelect,
+						"store_name",
+						this.storeInfo.store_name
+					);
+					this.$set(this.attr.productSelect, "image", this.storeInfo.image);
+					this.$set(this.attr.productSelect, "price", this.storeInfo.price);
+					this.$set(this.attr.productSelect, "stock", 0);
+					this.$set(this.attr.productSelect, "unique", "");
+					this.$set(this.attr.productSelect, "cart_num", 0);
+					this.$set(this, "attrValue", "");
+					this.$set(this, "attrTxt", "请选择");
+				} else if (!productSelect && !productAttr.length) {
+					this.$set(
+						this.attr.productSelect,
+						"store_name",
+						this.storeInfo.store_name
+					);
+					this.$set(this.attr.productSelect, "image", this.storeInfo.image);
+					this.$set(this.attr.productSelect, "price", this.storeInfo.price);
+					this.$set(this.attr.productSelect, "stock", this.storeInfo.stock);
+					this.$set(
+						this.attr.productSelect,
+						"unique",
+						this.storeInfo.unique || ""
+					);
+					this.$set(this.attr.productSelect, "cart_num", 1);
+					this.$set(this, "attrValue", "");
+					this.$set(this, "attrTxt", "请选择");
+				}
+			},
+			attrVal(val) {
+				this.$set(this.attr.productAttr[val.indexw], 'index', this.attr.productAttr[val.indexw].attr_values[val.indexn]);
+			},
+			/**
+			 * 购物车数量加和数量减
+			 * 
+			 */
+			ChangeCartNum: function(changeValue) {
+				//changeValue:是否 加|减
+				//获取当前变动属性
+				let productSelect = this.productValue[this.attrValue];
+				//如果没有属性,赋值给商品默认库存
+				if (productSelect === undefined && !this.attr.productAttr.length)
+					productSelect = this.attr.productSelect;
+				//无属性值即库存为0；不存在加减；
+				if (productSelect === undefined) return;
+				let stock = productSelect.stock || 0;
+				let num = this.attr.productSelect;
+				if (changeValue) {
+					num.cart_num++;
+					if (num.cart_num > stock) {
+						this.$set(this.attr.productSelect, "cart_num", stock ? stock : 1);
+						this.$set(this, "cart_num", stock ? stock : 1);
+					}
+				} else {
+					num.cart_num--;
+					if (num.cart_num < 1) {
+						this.$set(this.attr.productSelect, "cart_num", 1);
+						this.$set(this, "cart_num", 1);
+					}
+				}
+			},
+			/**
+			 * 购物车手动填写
+			 * 
+			 */
+			iptCartNum: function(e) {
+				this.$set(this.attr.productSelect, 'cart_num', e);
 			},
 			subDel: function(event) {
 				let that = this,
 					selectValue = that.selectValue;
 				if (selectValue.length > 0)
 					cartDel(selectValue).then(res => {
+						that.loadend = false;
+						that.page = 1;
+						that.cartList.valid = [];
 						that.getCartList();
 						that.getCartNum();
 					});
@@ -271,10 +505,14 @@
 				}
 			},
 			checkboxAllChange: function(event) {
+				console.log('8989898989898989');
+				console.log(event.detail.value);
 				let value = event.detail.value;
 				if (value.length > 0) {
+					console.log(1)
 					this.setAllSelectValue(1)
 				} else {
+					console.log(0)
 					this.setAllSelectValue(0)
 				}
 			},
@@ -283,13 +521,21 @@
 				let selectValue = [];
 				let valid = that.cartList.valid;
 				if (valid.length > 0) {
+					console.log(valid);
 					for (let index in valid) {
 						if (status == 1) {
-							valid[index].checked = true;
-							selectValue.push(valid[index].id);
+							if(valid[index].attrStatus){
+								valid[index].checked = true;
+								selectValue.push(valid[index].id);
+							}else{
+								valid[index].checked = false;
+							}
 						} else valid[index].checked = false;
 					}
+					console.log('88888888888888');
+					console.log(valid);
 					that.$set(that.cartList, 'valid', valid);
+					console.log(that.cartList.valid);
 					that.selectValue = selectValue;
 					that.switchSelect();
 				}
@@ -299,11 +545,19 @@
 				let value = event.detail.value;
 				let valid = that.cartList.valid;
 				for (let index in valid) {
-					if (that.inArray(valid[index].id, value)) valid[index].checked = true;
-					else valid[index].checked = false;
+					if (that.inArray(valid[index].id, value)){
+						if(valid[index].attrStatus){
+							valid[index].checked = true;
+						}else{
+							valid[index].checked = false;
+						}
+					} else {
+						valid[index].checked = false;
+					} 
 				}
 				that.$set(that.cartList, 'valid', valid);
-				that.isAllSelect = value.length == that.cartList.valid.length;
+				let newArr = that.cartList.valid.filter(item => item.attrStatus);
+				that.isAllSelect = value.length == newArr.length;
 				that.selectValue = value;
 				that.switchSelect();
 			},
@@ -333,25 +587,24 @@
 				}
 			},
 			/**
-			  * 购物车手动填写
-			  * 
+			 * 购物车手动填写
+			 * 
 			 */
-			 iptCartNum: function (index) {
-					let item = this.cartList.valid[index];
-					if(item.cart_num){
-						this.setCartNum(item.id, item.cart_num);
-					}
-					this.switchSelect();
-			 },
-			 blurInput:function (index) {
-				 console.log(66);
-				 let item = this.cartList.valid[index];
-				 if(!item.cart_num){
-					 item.cart_num = 1;
-					 console.log( item.cart_num)
-					 this.$set(this.cartList,'valid',this.cartList.valid)
-				 }
-			 },
+			iptCartNum: function(index) {
+				let item = this.cartList.valid[index];
+				if (item.cart_num) {
+					this.setCartNum(item.id, item.cart_num);
+				}
+				this.switchSelect();
+			},
+			blurInput: function(index) {
+				let item = this.cartList.valid[index];
+				if (!item.cart_num) {
+					item.cart_num = 1;
+					console.log(item.cart_num)
+					this.$set(this.cartList, 'valid', this.cartList.valid)
+				}
+			},
 			subCart: function(index) {
 				let that = this;
 				let status = false;
@@ -381,7 +634,7 @@
 					item.cart_num = item.productInfo.attrInfo.stock;
 					item.numAdd = true;
 					item.numSub = false;
-				}else {
+				} else {
 					item.numAdd = false;
 					item.numSub = false;
 				}
@@ -404,9 +657,18 @@
 			},
 			getCartList: function() {
 				let that = this;
-				getCartList().then(res => {
+				if (this.loadend) return false;
+				if (this.loading) return false;
+				let data = {
+					page: that.page,
+					limit: that.limit,
+					status: 1
+				}
+				getCartList(data).then(res => {
 					let cartList = res.data;
-					let valid = cartList.valid;
+					let valid = cartList.valid,
+						loadend = valid.length < that.limit;
+					let validList = that.$util.SplitArray(valid, that.cartList.valid);
 					let numSub = [{
 						numSub: true
 					}, {
@@ -418,41 +680,79 @@
 							numAdd: false
 						}],
 						selectValue = [];
-					if (valid.length > 0) {
-						for (let index in valid) {
-							if (valid[index].cart_num == 1) {
-								valid[index].numSub = true;
+					if (validList.length > 0) {
+						for (let index in validList) {
+							if (validList[index].cart_num == 1) {
+								validList[index].numSub = true;
 							} else {
-								valid[index].numSub = false;
+								validList[index].numSub = false;
 							}
-							let productInfo = valid[index].productInfo;
-							if (productInfo.hasOwnProperty('attrInfo') && valid[index].cart_num == valid[index].productInfo.attrInfo.stock) {
-								valid[index].numAdd = true;
-							} else if (valid[index].cart_num == valid[index].productInfo.stock) {
-								valid[index].numAdd = true;
+							let productInfo = validList[index].productInfo;
+							if (productInfo.hasOwnProperty('attrInfo') && validList[index].cart_num == validList[index].productInfo.attrInfo
+								.stock) {
+								validList[index].numAdd = true;
+							} else if (validList[index].cart_num == validList[index].productInfo.stock) {
+								validList[index].numAdd = true;
 							} else {
-								valid[index].numAdd = false;
+								validList[index].numAdd = false;
 							}
-							valid[index].checked = true;
-							selectValue.push(valid[index].id);
+							if(validList[index].attrStatus){
+								validList[index].checked = true;
+								selectValue.push(validList[index].id);
+							}else{
+								validList[index].checked = false;
+							}
 						}
 					}
-					that.$set(that, 'cartList', cartList);
-					that.goodsHidden = cartList.valid.length <= 0 ? false : true;
+					that.$set(that.cartList, 'valid', validList);
+					that.loadend = loadend;
+					that.loadTitle = loadend ? '我也是有底线的' : '加载更多';
+					that.page = that.page + 1;
+					that.loading = false;
+					// that.goodsHidden = cartList.valid.length <= 0 ? false : true;
 					that.selectValue = selectValue;
-					that.isAllSelect = valid.length == selectValue.length && valid.length;
+					let newArr = validList.filter(item => item.attrStatus);
+					that.isAllSelect = newArr.length == selectValue.length && newArr.length;
 					that.switchSelect();
-				});
+				}).catch(function() {
+					that.loading = false;
+					that.loadTitle = '加载更多';
+				})
+			},
+			getInvalidList: function() {
+				let that = this;
+				if (this.loadendInvalid) return false;
+				if (this.loadingInvalid) return false;
+				let data = {
+					page: that.pageInvalid,
+					limit: that.limitInvalid,
+					status: 0
+				}
+				getCartList(data).then(res => {
+					let cartList = res.data,
+						invalid = cartList.invalid,
+						loadendInvalid = invalid.length < that.limit;
+					let invalidList = that.$util.SplitArray(invalid, that.cartList.invalid);
+					that.$set(that.cartList, 'invalid', invalidList);
+					that.loadendInvalid = loadendInvalid;
+					that.loadTitleInvalid = loadendInvalid ? '我也是有底线的' : '加载更多';
+					that.pageInvalid = that.pageInvalid + 1;
+					that.loadingInvalid = false;
+				}).catch(res => {
+					that.loadingInvalid = false;
+					that.loadTitleInvalid = '加载更多';
+				})
+
 			},
 			getHostProduct: function() {
 				let that = this;
-				if(that.hotScroll) return
+				if (that.hotScroll) return
 				getProductHot(
 					that.hotPage,
 					that.hotLimit,
 				).then(res => {
 					that.hotPage++
-					that.hotScroll = res.data.length<that.hotLimit
+					that.hotScroll = res.data.length < that.hotLimit
 					that.hostProduct = that.hostProduct.concat(res.data)
 				});
 			},
@@ -481,7 +781,15 @@
 			}
 		},
 		onReachBottom() {
-			this.getHostProduct();
+			let that = this;
+			if (that.loadend) {
+				that.getInvalidList();
+			} else {
+				that.getCartList();
+			}
+			if (that.cartList.valid.length == 0 && that.cartList.invalid.length == 0) {
+				that.getHostProduct();
+			}
 		}
 	}
 </script>
@@ -518,6 +826,10 @@
 		left: 0;
 		z-index: 5;
 		top: 76rpx;
+	}
+
+	.shoppingCart .nav .num {
+		margin-left: 12rpx;
 	}
 
 	.shoppingCart .nav .administrate {
@@ -576,6 +888,25 @@
 		width: 444rpx;
 		font-size: 28rpx;
 		color: #282828;
+	}
+
+	.shoppingCart .list .item .picTxt .text .reColor {
+		color: #999;
+	}
+
+	.shoppingCart .list .item .picTxt .text .reElection {
+		margin-top: 20rpx;
+	}
+
+	.shoppingCart .list .item .picTxt .text .reElection .title {
+		font-size: 24rpx;
+	}
+
+	.shoppingCart .list .item .picTxt .text .reElection .reBnt {
+		width: 120rpx;
+		height: 46rpx;
+		border-radius: 23rpx;
+		font-size: 26rpx;
 	}
 
 	.shoppingCart .list .item .picTxt .text .infor {
@@ -690,7 +1021,11 @@
 		color: #999;
 		height: 140rpx;
 	}
-    .shoppingCart .invalidGoods .goodsList .item .text .name{width:100%;}
+
+	.shoppingCart .invalidGoods .goodsList .item .text .name {
+		width: 100%;
+	}
+
 	.shoppingCart .invalidGoods .goodsList .item .text .infor {
 		font-size: 24rpx;
 	}
@@ -701,7 +1036,7 @@
 	}
 
 	.shoppingCart .footer {
-		z-index:9;
+		z-index: 9;
 		width: 100%;
 		height: 96rpx;
 		background-color: #fafafa;

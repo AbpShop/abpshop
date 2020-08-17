@@ -130,11 +130,11 @@ export function getSearchKeyword(){
 }
 
 /**
- * 商户列表
+ * 门店列表
  * @returns {*}
  */
 export function storeListApi(data) {
-  return request.get("store_list", data, {noAuth:true});
+  return request.get("store_list", data);
 }
 
 

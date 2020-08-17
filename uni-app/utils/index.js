@@ -10,14 +10,11 @@ export function silenceBindingSpread()
 	
 	
 	//#ifdef H5
-	let puid = Cache.get('spread');
+	let puid = Cache.get('spread'),code = 0;
 	//#endif
 	
 	//#ifdef MP
-	let puid = getApp().globalData.spid;
-	if(!puid){
-		puid = getApp().globalData.code;
-	}
+	let puid = getApp().globalData.spid,code = getApp().globalData.code;
 	//#endif
 	
 	puid = parseInt(puid);
@@ -25,7 +22,7 @@ export function silenceBindingSpread()
 		puid = 0;
 	}
 	if(puid){
-		spread(puid).then(res=>{
+		spread({puid,code}).then(res=>{
 			console.log(res);
 			//#ifdef H5
 			 Cache.clear('spread');
@@ -76,7 +73,6 @@ export function parseQuery() {
 
 // #ifdef H5
 	const VUE_APP_WS_URL = process.env.VUE_APP_WS_URL || `ws://${location.hostname}:20003`;
-	// const VUE_APP_WS_URL = process.env.VUE_APP_WS_URL || `ws://admin.abpshopop.net:21001`
 	export {VUE_APP_WS_URL}
 // #endif
 

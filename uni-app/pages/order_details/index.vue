@@ -44,6 +44,9 @@
 				<view class="writeOff" v-if="orderInfo.shipping_type == 2 && orderInfo.paid">
 					<view class="title">核销信息</view>
 					<view class="grayBg">
+						<view class="written" v-if="orderInfo.status == 2">
+							<image src="../../static/images/written.png"></image>
+						</view>
 						<view class="pictrue">
 							<image :src="orderInfo.code"></image>
 						</view>
@@ -161,7 +164,7 @@
 				</view>
 				<view class='wrapper' v-else-if='orderInfo.delivery_type=="send"'>
 					<view class='item acea-row row-between'>
-						<view>配送方式：：</view>
+						<view>配送方式：</view>
 						<view class='conter'>送货</view>
 					</view>
 					<view class='item acea-row row-between'>
@@ -450,6 +453,20 @@
 		border-radius: 20rpx 20rpx 0 0;
 		margin: 50rpx auto 0 auto;
 		padding-top: 55rpx;
+		position: relative;
+	}
+
+	.order-details .writeOff .grayBg .written {
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 60rpx;
+		height: 60rpx;
+	}
+
+	.order-details .writeOff .grayBg .written image {
+		width: 100%;
+		height: 100%;
 	}
 
 	.order-details .writeOff .grayBg .pictrue {
@@ -689,7 +706,7 @@
 			goGoodCall() {
 				let self = this
 				uni.navigateTo({
-					url: `/pages/customer_list/index?orderId=${self.order_id}`
+					url: `/pages/customer_list/chat?orderId=${self.order_id}`
 				})
 			},
 			openSubcribe: function(e) {
@@ -885,7 +902,7 @@
 				let that = this;
 				orderAgain(that.orderInfo.order_id).then(res => {
 					return uni.navigateTo({
-						url: '/pages/users/order_confirm/index?cartId=' + res.data.cateId
+						url: '/pages/users/order_confirm/index?new=1&cartId=' + res.data.cateId
 					});
 				});
 			},

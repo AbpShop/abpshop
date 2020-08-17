@@ -99,6 +99,7 @@
 			};
 		},
 		onLoad: function(options) {
+			this.where.cid = options.cid || 0;
 			this.$set(this.where, 'sid', options.sid || 0);
 			this.title = options.title || '';
 			this.$set(this.where, 'keyword', options.searchValue || '');

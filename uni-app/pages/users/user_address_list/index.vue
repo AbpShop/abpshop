@@ -38,7 +38,7 @@
 			</view>
 			<view style='height:120rpx;'></view>
 			<view class='footer acea-row row-between-wrapper'>
-				<!-- #ifdef APP-PLUS -->
+				<!-- #ifdef MP -->
 				<view class='addressBnt bg-color on' @click='addAddress'><text class='iconfont icon-tianjiadizhi'></text>添加新地址</view>
 				<!-- #endif -->
 				<!-- #ifdef MP-->
@@ -54,6 +54,7 @@
 		<!-- #ifdef MP -->
 		<authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize>
 		<!-- #endif -->
+		<home></home>
 	</view>
 </template>
 
@@ -74,11 +75,13 @@
 	// #ifdef MP
 	import authorize from '@/components/Authorize';
 	// #endif
+	import home from '@/components/home';
 	export default {
 		components: {
 			// #ifdef MP
-			authorize
+			authorize,
 			// #endif
+			home
 		},
 		data() {
 			return {
@@ -92,7 +95,8 @@
 				page: 1,
 				limit: 20,
 				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false //是否隐藏授权
+				isShowAuth: false ,//是否隐藏授权
+				news:''
 			};
 		},
 		computed: mapGetters(['isLogin']),
@@ -101,6 +105,7 @@
 				this.cartId = options.cartId || '';
 				this.pinkId = options.pinkId || 0;
 				this.couponId = options.couponId || 0;
+				this.news = options.new || 0;
 				this.getAddressList(true);
 			} else {
 				// #ifdef H5 || APP-PLUS
@@ -195,7 +200,7 @@
 			getAddress() {
 				let that = this;
 				that.$wechat.openAddress().then(userInfo => {
-					open();
+					// open();
 					editAddress({
 							real_name: userInfo.userName,
 							phone: userInfo.telNumber,
@@ -214,12 +219,12 @@
 								title: "添加成功",
 								icon: 'success'
 							}, function() {
-								close();
+								// close();
 								that.getAddressList(true);
 							});
 						})
 						.catch(err => {
-							close();
+							// close();
 							return that.$util.Tips({
 								title: err || "添加失败"
 							});
@@ -297,7 +302,7 @@
 				this.couponId = '';
 				uni.navigateTo({
 					url: '/pages/users/user_address/index?id=' + id + '&cartId=' + cartId + '&pinkId=' + pinkId + '&couponId=' +
-						couponId
+						couponId+'&new='+this.news
 				})
 			},
 			/**
@@ -334,7 +339,7 @@
 				this.pinkId = '';
 				this.couponId = '';
 				uni.navigateTo({
-					url: '/pages/users/user_address/index?cartId=' + cartId + '&pinkId=' + pinkId + '&couponId=' + couponId
+					url: '/pages/users/user_address/index?cartId=' + cartId + '&pinkId=' + pinkId + '&couponId=' + couponId+'&new='+this.news
 				})
 			},
 			goOrder: function(id) {
@@ -349,7 +354,7 @@
 					this.pinkId = '';
 					this.couponId = '';
 					uni.redirectTo({
-						url: '/pages/users/order_confirm/index?is_address=1&cartId=' + cartId + '&addressId=' + id + '&pinkId=' +
+						url: '/pages/users/order_confirm/index?is_address=1&new='+ this.news +'&cartId=' + cartId + '&addressId=' + id + '&pinkId=' +
 							pinkId + '&couponId=' + couponId
 					})
 				}

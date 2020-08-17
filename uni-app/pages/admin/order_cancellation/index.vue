@@ -6,11 +6,11 @@
 				<view class="input">
 					<input type="number" placeholder="0" v-model="verify_code" />
 				</view>
-				<view class="bnt" @tap="codeChange">立即核销</view>
+				<view class="bnt" @click="codeChange">立即核销</view>
 			</view>
-			<!-- #ifdef MP -->
-			<view class="scan" @tap="scanCode">
-				<image src="./scan.gif"></image>
+			<!-- #ifdef MP || MP-WEIXIN -->
+			<view class="scan" @click="scanCode">
+				<image src="../static/scan.gif"></image>
 			</view>
 			<!-- #endif -->
 		</view>
@@ -21,14 +21,15 @@
 				</view>
 				<view class="num acea-row row-center-wrapper">
 					<text>{{ orderInfo.order_id }}</text>
-					<view class="views" @tap='goOrderDetails(orderInfo.order_id)'>查看<text class='iconfont icon-jiantou views-jian'></text></view>
+					<view class="views" @click='goOrderDetails(orderInfo.order_id)'>查看<text class='iconfont icon-jiantou views-jian'></text></view>
 				</view>
 				<view class="tip">确定要核销此订单吗？</view>
-				<view class="sure" bindtap="confirm">确定核销</view>
-				<view class="sure cancel" bindtap="cancel">取消</view>
+				<view class="sure" @click="confirm">确定核销</view>
+				<view class="sure cancel" @click="cancel">取消</view>
 			</view>
 			<view class="mask"></view>
 		</view>
+		<home></home>
 	</view>
 </template>
 
@@ -36,12 +37,16 @@
 	import {
 		orderVerific
 	} from "@/api/admin";
+	import home from '@/components/home';
 	export default {
+		components:{
+			home
+		},
 		data() {
 			return {
 				iShidden: false,
 				verify_code: '',
-				iShidden: false,
+				iShidden: false
 			}
 		},
 		methods: {
@@ -80,10 +85,10 @@
 						});
 				}, 800);
 			},
-			// 扫码核销
-			// #ifdef MP
+			// 扫码核
 			scanCode() {
 				var self = this;
+				// #ifdef MP
 				wx.scanCode({
 					scanType: ["qrCode", "barCode"],
 					success(res) {
@@ -94,15 +99,27 @@
 						console.log(res);
 					},
 				})
+				// #endif
+				//#ifdef H5
+				if(this.$wechat.isWeixin()){
+					this.$wechat.wechatEvevt('scanQRCode',{
+						needResult: 1,
+						scanType: ["qrCode", "barCode"]
+					}).then(res=>{
+						this.verify_code = res.result
+						this.codeChange();
+					});
+				}
+				//#endif
 
 			},
-			// #endif
+		
 			/**
 			 * 确定销码
 			 */
 			confirm: function() {
 				let self = this
-				orderVerific(this.data.verify_code, 1)
+				orderVerific(this.verify_code, 1)
 					.then(res => {
 						this.setData({
 							verify_code: '',

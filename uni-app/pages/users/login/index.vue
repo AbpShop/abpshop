@@ -13,7 +13,7 @@
 					{{ item }}
 				</div>
 			</div>
-			<div class="list" :hidden="current !== 0">
+			<div class="list" :hidden="current !== 1">
 				<form @submit.prevent="submit">
 					<div class="item">
 						<div class="acea-row row-middle">
@@ -28,11 +28,11 @@
 						</div>
 					</div>
 				</form>
-				<navigator class="forgetPwd" hover-class="none" url="/pages/users/retrievePassword/index">
+				<!-- <navigator class="forgetPwd" hover-class="none" url="/pages/users/retrievePassword/index">
 					<span class="iconfont icon-wenti"></span>忘记密码
-				</navigator>
+				</navigator> -->
 			</div>
-			<div class="list" :hidden="current !== 1">
+			<div class="list" :hidden="current !== 0">
 				<div class="item">
 					<div class="acea-row row-middle">
 						<image src="/static/images/phone_1.png"></image>
@@ -56,14 +56,16 @@
 					</div>
 				</div>
 			</div>
-			<div class="logon" @click="loginMobile" :hidden="current !== 1">登录</div>
-			<div class="logon" @click="submit" :hidden="current === 1">登录</div>
+			<div class="logon" @click="loginMobile" :hidden="current !== 0">登录</div>
+			<div class="logon" @click="submit" :hidden="current === 0">登录</div>
 			<div class="tip">
-				没有账号?
-				<span @click="formItem = 2" class="font-color-red">立即注册</span>
+				<div :hidden="current !== 1">
+					没有账号?
+					<span @click="current = 0" class="font-color-red">快速登录</span>
+				</div>
 			</div>
 		</div>
-		<div class="whiteBg" v-else>
+		<!-- <div class="whiteBg" v-else>
 			<div class="title">注册账号</div>
 			<div class="list">
 				<div class="item">
@@ -100,7 +102,7 @@
 				已有账号?
 				<span @click="formItem = 1" class="font-color-red">立即登录</span>
 			</div>
-		</div>
+		</div> -->
 		<div class="bottom"></div>
 	</div>
 </template>
@@ -138,8 +140,8 @@
 		mixins: [sendVerifyCode],
 		data: function() {
 			return {
-				navList: ["账号登录", "快速登录"],
-				current: 1,
+				navList: ["快速登录", "账号登录"],
+				current: 0,
 				account: "",
 				password: "",
 				captcha: "",
@@ -213,10 +215,9 @@
 					})
 					.then(res => {
 						let data = res.data;
-						let newTime = Math.round(new Date() / 1000);
 						that.$store.commit("LOGIN", {
 							'token': data.token,
-							'time': dayjs(data.expires_time) - newTime
+							'time': data.expires_time - this.$Cache.time()
 						});
 						const backUrl = that.$Cache.get(BACK_URL) || "/pages/index/index";
 						that.$Cache.clear(BACK_URL);
@@ -259,7 +260,7 @@
 				if (!that.password) return that.$util.Tips({
 					title: '请填写密码'
 				});
-				if (!/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,16}$/i.test(that.password)) return that.$util.Tips({
+				if (/^([0-9]|[a-z]|[A-Z]){0,6}$/i.test(that.password)) return that.$util.Tips({
 					title: '您输入的密码过于简单'
 				});
 				register({
@@ -330,10 +331,9 @@
 					.then(({
 						data
 					}) => {
-						let newTime = Math.round(new Date() / 1000);
 						that.$store.commit("LOGIN", {
 							'token': data.token,
-							'time': dayjs(data.expires_time) - newTime
+							'time': data.expires_time - this.$Cache.time()
 						});
 						const backUrl = that.$Cache.get(BACK_URL) || "/pages/index/index";
 						that.$Cache.clear(BACK_URL);

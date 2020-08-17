@@ -125,12 +125,11 @@
 			};
 		},
 		watch: {
-			"$route.params.types": function(newVal) {
-				let that = this;
-				if (newVal != undefined) {
-					that.where.status = newVal;
-					that.init();
+			"$route": function (n){
+				if (n.params.types) {
+					this.where.status = n.params.types;
 				}
+				this.init();
 			},
 			types: function() {
 				this.getIndex();
@@ -261,7 +260,19 @@
 				uni.navigateTo({
 					url:`/pages/admin/orderDetail/index?id=${item.order_id}`
 				})
-			}
+			},
+			offlinePay: function(item) {
+			      console.log(item);
+			      setOfflinePay({ order_id: item.order_id }).then(
+			        res => {
+			          this.$util.Tips({title:res.msg,icon:"success"});
+			          this.init();
+			        },
+			        error => {
+			          this.$util.Tips(error.msg);
+			        }
+			      );
+			    }
 		},
 		onReachBottom() {
 			this.getIndex()

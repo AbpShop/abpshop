@@ -51,7 +51,7 @@
 				</div>
 				<div class="chat" ref="chat" >
 					<template v-for="item in history">
-						<div class="item acea-row row-top" v-if="item.uid === toUid" :key="item.id">
+						<div class="item acea-row row-top" v-if="item.uid !== uid" :key="item.id">
 							<div class="pictrue"><img :src="item.avatar" /></div>
 							<div class="text">
 								<div class="name">{{ item.nickname }}</div>
@@ -59,13 +59,13 @@
 									<!--商品链接-->
 									<div v-if="item.msn_type === 6 && item.orderInfo.id">
 										<router-link class="broadcast-details_num" :to="{
-			                path: '/customer/orderdetail/' + item.orderInfo.order_id
+			                path: '/pages/admin/orderDetail/index?id=' + item.orderInfo.order_id
 			              }">
 											<span>订单号：{{ item.orderInfo.order_id }}</span>
 										</router-link>
 										<div class="conter acea-row row-middle">
 											<div class="broadcast-details_order noPad" v-for="(val, inx) in item.orderInfo.cartInfo" :key="val.id">
-												<router-link class="broadcast-details_box noPad" :to="{ path: '/detail/' + val.product_id }" v-if="inx == 0">
+												<router-link class="broadcast-details_box noPad" :to="{ path: '/pages/goods_details/index?id=' + val.product_id }" v-if="inx == 0">
 													<div class="broadcast_details_img">
 														<img :src="val.productInfo.image" />
 														<div class="broadcast_details_model">
@@ -90,7 +90,7 @@
 									<!--商品链接-->
 									<div class="conter acea-row row-middle" v-if="item.msn_type === 5">
 										<div class=" noPad">
-											<router-link class="acea-row row-column-around noPad" v-if="item.productInfo.id" :to="{ path: '/detail/' + item.productInfo.id }">
+											<router-link class="acea-row row-column-around noPad" v-if="item.productInfo.id" :to="{ path: '/pages/goods_details/index?id=' + item.productInfo.id }">
 												<div class="broadcast_details_img_no">
 													<img :src="item.productInfo.image" />
 												</div>
@@ -129,7 +129,7 @@
 								<div class="acea-row ">
 									<!--商品链接-->
 									<router-link v-if="item.msn_type === 6 && item.orderInfo.id" :to="{
-			              path: '/customer/orderdetail/' + item.orderInfo.order_id
+			              path: '/pages/admin/orderDetail/index?id=' + item.orderInfo.order_id
 			            }">
 										<div class="broadcast-details_num">
 											<span>订单号：{{ item.orderInfo.order_id }}</span>
@@ -161,7 +161,7 @@
 									<!--商品链接-->
 									<div class="conter acea-row row-middle" v-if="item.msn_type === 5">
 										<div class=" noPad">
-											<router-link class="acea-row row-column-around noPad" v-if="item.productInfo.id" :to="{ path: '/detail/' + item.productInfo.id }">
+											<router-link class="acea-row row-column-around noPad" v-if="item.productInfo.id" :to="{ path: '/pages/goods_details/index?id=' + item.productInfo.id }">
 												<div class="broadcast_details_img_no">
 													<img :src="item.productInfo.image" />
 												</div>
@@ -251,6 +251,7 @@
 		<div class="recording" v-if="recording">
 			<img src="/static/images/recording.png" />
 		</div>
+		<home></home>
 	</div>
 </template>
 <script>
@@ -271,6 +272,10 @@
 		TOKENNAME,
 		HTTP_REQUEST_URL
 	} from '@/config/app.js';
+	import home from '@/components/home';
+	import {
+		mapGetters
+	} from "vuex";
 
 	const chunk = function(arr, num) {
 		num = num * 1 || 1;
@@ -291,7 +296,8 @@
 		components: {
 			// swiper,
 			// swiperSlide,
-			easyUpload
+			easyUpload,
+			home
 		},
 		props: {
 			couponList: {
@@ -299,6 +305,7 @@
 				default: () => []
 			}
 		},
+		computed: mapGetters(['uid']),
 		data: function() {
 			return {
 				url: `${HTTP_REQUEST_URL}/api/upload/image`,
@@ -490,14 +497,16 @@
 			getHistory() {
 				if (this.loading || this.loaded) return;
 				this.loading = true;
-				getChatRecord(this.toUid, {
+				getChatRecord({
 						page: this.page,
 						limit: this.limit
 					})
 					.then(({
 						data
 					}) => {
-						this.history = data.concat(this.history);
+						this.toUid = data.uid;
+						console.log(data);
+						this.history = data.serviceList.concat(this.history);
 						if (this.page === 1) {
 							this.$nextTick(function() {
 								window.scrollTo(0, document.documentElement.scrollHeight + 999);
@@ -506,10 +515,9 @@
 						}
 						this.page++;
 						this.loading = false;
-						this.loaded = data.length < this.limit;
+						this.loaded = data.serviceList.length < this.limit;
 					})
 					.catch(err => {
-						console.log(err);
 						this.$dialog.error(err.msg || "加载失败");
 					});
 			},
@@ -529,16 +537,14 @@
 			},
 			sendMsg(msn, type) {
 				this.height();
-				console.log(
-					this.socket.send({
-						data: {
-							msn,
-							type,
-							to_uid: this.toUid
-						},
-						type: "chat"
-					})
-				);
+				this.socket.send({
+					data: {
+						msn,
+						type,
+						to_uid: this.toUid
+					},
+					type: "chat"
+				});
 			},
 			sendTest() {
 				this.sendMsg(this.textCon, 1);

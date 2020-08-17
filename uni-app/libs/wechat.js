@@ -4,7 +4,8 @@ import WechatJSSDK from "@/plugin/jweixin-module/index.js";
 
 import {
 	getWechatConfig,
-	wechatAuth
+	wechatAuth,
+	getShopConfig
 } from "@/api/public";
 import {
 	WX_AUTH,
@@ -33,6 +34,13 @@ class AuthWechat {
 	isAndroid(){
 		let u = navigator.userAgent;
 		return u.indexOf('Android') > -1 || u.indexOf('Adr') > -1;
+	}
+	
+	signLink() {
+		if (typeof window.entryUrl === 'undefined' || window.entryUrl === '') {
+			  	window.entryUrl = document.location.href
+			}
+		return  /(Android)/i.test(navigator.userAgent) ? document.location.href : window.entryUrl;
 	}
 
 	/**
@@ -126,16 +134,16 @@ class AuthWechat {
 			});
 		});
 	}
-
+	
 	/**
 	 * 自动去授权
 	 */
-	oAuth() {
-		if (uni.getStorageSync(WX_AUTH) && store.state.app.token) return;
+	oAuth(snsapiBase) {
+		if (uni.getStorageSync(WX_AUTH) && store.state.app.token && snsapiBase == 'snsapi_base') return;
 		const {
 			code
 		} = parseQuery();
-		if (!code) return this.toAuth();
+		if (!code) return this.toAuth(snsapiBase);
 	}
 
 	clearAuthStatus() {
@@ -153,14 +161,10 @@ class AuthWechat {
 				.then(({
 					data
 				}) => {
-					let expires_time = data.expires_time.substring(0, 19);
-					expires_time = expires_time.replace(/-/g, '/');
-					expires_time = new Date(expires_time).getTime();
-					let newTime = Math.round(new Date() / 1000);
-					store.commit("LOGIN", {
-						token: data.token,
-						time: expires_time - newTime
-					});
+					// store.commit("LOGIN", {
+					// 	token: data.token,
+					// 	time: Cache.strTotime(data.expires_time) - Cache.time()
+					// });
 					Cache.set(WX_AUTH, code);
 					Cache.clear(STATE_KEY);
 					loginType && Cache.clear(LOGINTYPE);
@@ -174,9 +178,9 @@ class AuthWechat {
 	 * 获取跳转授权后的地址
 	 * @param {Object} appId
 	 */
-	getAuthUrl(appId) {
+	getAuthUrl(appId,snsapiBase) {
 		const redirect_uri = encodeURIComponent(
-			`${location.origin}/pages/auth/index?back_url=` +
+			`${location.origin}/pages/auth/index?scope=${snsapiBase}&back_url=` +
 			encodeURIComponent(
 				encodeURIComponent(
 					uni.getStorageSync(BACK_URL) ?
@@ -190,16 +194,21 @@ class AuthWechat {
 			("" + Math.random()).split(".")[1] + "authorizestate"
 		);
 		uni.setStorageSync(STATE_KEY, state);
-		return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`;
+		if(snsapiBase==='snsapi_base'){
+			return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_base&state=${state}#wechat_redirect`;
+		}else{
+			return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`;
+		}
+		
 	}
 
 	/**
 	 * 跳转自动登陆
 	 */
-	toAuth() {
+	toAuth(snsapiBase) {
 		let that = this;
 		this.wechat().then(wx => {
-			location.href = this.getAuthUrl(that.initConfig.appId);
+			location.href = this.getAuthUrl(that.initConfig.appId,snsapiBase);
 		})
 	}
 
@@ -241,6 +250,7 @@ class AuthWechat {
 			})
 		});
 	}
+	
 
 	isWeixin() {
 		return navigator.userAgent.toLowerCase().indexOf("micromessenger") !== -1;

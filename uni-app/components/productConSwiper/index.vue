@@ -17,12 +17,12 @@
 		            <swiper-item v-if="videoline">
 		              <view class="item">
 		                 <video id="myVideo" :src='videoline' objectFit="cover" controls	 style="width:100%;height:100% " show-center-play-btn show-mute-btn="true" auto-pause-if-navigate  :custom-cache="false"></video>
-		                 <cover-view class="poster" v-if="controls">
-		                    <cover-image class="image" :src="imgUrls[0]"></cover-image>
-		                 </cover-view>
-		                 <cover-view class="stop" v-if="controls"  @tap="bindPause">
-		                     <cover-image class="image" src="../../static/images/stop.png"></cover-image>
-		                 </cover-view>
+		                 <view class="poster" v-if="controls">
+		                    <image class="image" :src="imgUrls[0]"></image>
+		                 </view>
+		                 <view class="stop" v-if="controls"  @tap="bindPause">
+		                     <image class="image" src="../../static/images/stop.png"></image>
+		                 </view>
 		              </view>  
 		            </swiper-item>
 		            <block v-for="(item,index) in imgUrls" :key='index'> 

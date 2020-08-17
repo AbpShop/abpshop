@@ -1,13 +1,13 @@
 <template>
 	<view class="time" :style="justifyLeft">
 		<text class="red" v-if="tipText">{{ tipText }}</text>
-		<text class="styleAll" v-if="isDay === true">{{ day }}</text>
+		<text class="styleAll" :style="'background-color:'+ bgColor +';color:'+ colors +';'" v-if="isDay === true">{{ day }}</text>
 		<text class="timeTxt red" v-if="dayText">{{ dayText }}</text>
-		<text class="styleAll">{{ hour }}</text>
+		<text class="styleAll" :style="'background-color:'+ bgColor +';color:'+ colors +';'">{{ hour }}</text>
 		<text class="timeTxt red" v-if="hourText">{{ hourText }}</text>
-		<text class="styleAll">{{ minute }}</text>
+		<text class="styleAll" :style="'background-color:'+ bgColor +';color:'+ colors +';'">{{ minute }}</text>
 		<text class="timeTxt red" v-if="minuteText">{{ minuteText }}</text>
-		<text class="styleAll">{{ second }}</text>
+		<text class="styleAll" :style="'background-color:'+ bgColor +';color:'+ colors +';'">{{ second }}</text>
 		<text class="timeTxt red" v-if="secondText">{{ secondText }}</text>
 	</view>
 </template>
@@ -48,6 +48,14 @@
 			isDay: {
 				type: Boolean,
 				default: true
+			},
+			bgColor:{
+				type: String,
+				default: ""
+			},
+			colors:{
+				type: String,
+				default: ""
 			}
 		},
 		data: function() {

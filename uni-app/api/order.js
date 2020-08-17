@@ -5,14 +5,24 @@ import request from "@/utils/request.js";
  * @param numType boolean true 购物车数量,false=购物车产品数量
  */
 export function getCartCounts(numType) {
-  return request.get("cart/count", { numType: numType === undefined ? true : numType });
+	return request.get("cart/count", {
+		numType: numType === undefined ? 0 : numType
+	});
 }
 /**
  * 获取购物车列表
  * 
  */
-export function getCartList() {
-  return request.get("cart/list");
+export function getCartList(data) {
+	return request.get("cart/list", data);
+}
+
+/**
+ * 修改购物车
+ * 
+ */
+export function getResetCart(data) {
+	return request.post("v2/reset_cart", data);
 }
 
 /**
@@ -21,99 +31,114 @@ export function getCartList() {
  * @param int number 修改数量
  */
 export function changeCartNum(cartId, number) {
-  return request.post("cart/num", { id: cartId, number: number });
+	return request.post("cart/num", {
+		id: cartId,
+		number: number
+	});
 }
 /**
  * 清除购物车
  * @param object ids join(',') 切割成字符串
-*/
-export function cartDel(ids){
-  if (typeof id === 'object') 
-    ids = ids.join(',');
-  return request.post('cart/del', { ids: ids});
+ */
+export function cartDel(ids) {
+	if (typeof id === 'object')
+		ids = ids.join(',');
+	return request.post('cart/del', {
+		ids: ids
+	});
 }
 /**
  * 订单列表
  * @param object data
-*/
-export function getOrderList(data){
-  return request.get('order/list',data);
+ */
+export function getOrderList(data) {
+	return request.get('order/list', data);
 }
 
 /**
  * 订单产品信息
  * @param string unique 
-*/
-export function orderProduct(unique){
-  return request.post('order/product', { unique: unique});
+ */
+export function orderProduct(unique) {
+	return request.post('order/product', {
+		unique: unique
+	});
 }
 
 /**
  * 订单评价
  * @param object data
  * 
-*/
-export function orderComment(data){
-  return request.post('order/comment',data);
+ */
+export function orderComment(data) {
+	return request.post('order/comment', data);
 }
 
 /**
  * 订单支付
  * @param object data
-*/
-export function orderPay(data){
-  return request.post('order/pay',data);
+ */
+export function orderPay(data) {
+	return request.post('order/pay', data);
 }
 
 /**
  * 订单统计数据
-*/
-export function orderData(){
-  return request.get('order/data')
+ */
+export function orderData() {
+	return request.get('order/data')
 }
 
 /**
  * 订单取消
  * @param string id
  * 
-*/
-export function orderCancel(id){
-  return request.post('order/cancel',{id:id});
+ */
+export function orderCancel(id) {
+	return request.post('order/cancel', {
+		id: id
+	});
 }
 
 /**
  * 删除已完成订单
  * @param string uni
  * 
-*/
-export function orderDel(uni){
-  return request.post('order/del',{uni:uni});
+ */
+export function orderDel(uni) {
+	return request.post('order/del', {
+		uni: uni
+	});
 }
 
 /**
  * 订单详情
  * @param string uni 
-*/
-export function getOrderDetail(uni){
-  return request.get('order/detail/'+uni);
+ */
+export function getOrderDetail(uni) {
+	return request.get('order/detail/' + uni);
 }
 
 /**
  * 再次下单
  * @param string uni
  * 
-*/
-export function orderAgain(uni){
-  return request.post('order/again',{uni:uni});
+ */
+export function orderAgain(uni) {
+	return request.post('order/again', {
+		uni: uni
+	});
 }
 
 /**
  * 订单收货
  * @param string uni
  * 
-*/
-export function orderTake(uni){
-  return request.post('order/take',{uni:uni});
+ */
+export function orderTake(uni) {
+	return request.post('order/take', {
+		uni: uni
+	});
 }
 
 /**
@@ -121,40 +146,43 @@ export function orderTake(uni){
  * @returns {*}
  */
 export function express(uni) {
-  return request.get("order/express/" + uni);
+	return request.get("order/express/" + uni);
 }
 
 /**
  * 获取退款理由
  * 
-*/
-export function ordeRefundReason(){
-  return request.get('order/refund/reason');
+ */
+export function ordeRefundReason() {
+	return request.get('order/refund/reason');
 }
 
 /**
  * 订单退款审核
  * @param object data
-*/
-export function orderRefundVerify(data){
-  return request.post('order/refund/verify',data);
+ */
+export function orderRefundVerify(data) {
+	return request.post('order/refund/verify', data);
 }
 
 /**
  * 订单确认获取订单详细信息
  * @param string cartId
-*/
-export function orderConfirm(cartId){
-  return request.post('order/confirm', { cartId: cartId});
+ */
+export function orderConfirm(cartId, news) {
+	return request.post('order/confirm', {
+		cartId: cartId,
+		'new': news
+	});
 }
 
 /**
  * 获取当前金额能使用的优惠卷
  * @param string price
  * 
-*/
-export function getCouponsOrderPrice(price, data){
-  return request.get('coupons/order/' + price, data)
+ */
+export function getCouponsOrderPrice(price, data) {
+	return request.get('coupons/order/' + price, data)
 }
 
 /**
@@ -162,9 +190,9 @@ export function getCouponsOrderPrice(price, data){
  * @param string key
  * @param object data
  * 
-*/
-export function orderCreate(key,data){
-  return request.post('order/create/'+key,data);
+ */
+export function orderCreate(key, data) {
+	return request.post('order/create/' + key, data);
 }
 
 /**
@@ -174,5 +202,15 @@ export function orderCreate(key,data){
  * @returns {*}
  */
 export function postOrderComputed(key, data) {
-  return request.post("/order/computed/" + key, data);
+	return request.post("order/computed/" + key, data);
+}
+
+/**
+ * 订单优惠券
+ * @param key
+ * @param data
+ * @returns {*}
+ */ 
+export function orderCoupon(orderId) {
+	return request.post("v2/order/product_coupon/" + orderId);
 }

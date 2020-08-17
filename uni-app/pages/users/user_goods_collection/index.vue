@@ -27,6 +27,7 @@
 		<!-- #ifdef MP -->
 		<authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize>
 		<!-- #endif -->
+		<home></home>
 	</view>
 </template>
 
@@ -46,12 +47,14 @@
 	// #ifdef MP
 	import authorize from '@/components/Authorize';
 	// #endif
+	import home from '@/components/home';
 	export default {
 		components: {
 			recommend,
 			// #ifdef MP
-			authorize
+			authorize,
 			// #endif
+			home
 		},
 		data() {
 			return {
@@ -72,6 +75,9 @@
 		computed: mapGetters(['isLogin']),
 		onLoad() {
 			if (this.isLogin) {
+				this.loadend = false;
+				this.page = 1;
+				this.collectProductList = [];
 				this.get_user_collect_product();
 				this.get_host_product();
 			} else {
@@ -84,6 +90,12 @@
 				// #endif
 			}
 		},
+		onShow(){
+			this.loadend = false;
+			this.page = 1;
+			this.$set(this,'collectProductList',[]);
+			this.get_user_collect_product();
+		},
 		/**
 		 * 页面上拉触底事件的处理函数
 		 */
@@ -95,6 +107,9 @@
 			 * 授权回调
 			 */
 			onLoadFun: function() {
+				this.loadend = false;
+				this.page = 1;
+				this.$set(this,'collectProductList',[]);
 				this.get_user_collect_product();
 				this.get_host_product();
 			},

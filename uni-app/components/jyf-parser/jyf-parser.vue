@@ -9,10 +9,10 @@
 <template>
 	<view>
 		<slot v-if="!nodes.length" />
-		<!--#ifdef APP-PLUS-NVUE-->
+		<!--#ifdef MP-NVUE-->
 		<web-view id="top" ref="web" :src="src" :style="'margin-top:-2px;height:'+height+'px'" @onPostMessage="_message" />
 		<!--#endif-->
-		<!--#ifndef APP-PLUS-NVUE-->
+		<!--#ifndef MP-NVUE-->
 		<view id="top" :style="showAm+(selectable?';user-select:text;-webkit-user-select:text':'')" :animation="scaleAm" @tap="_tap"
 		 @touchstart="_touchstart" @touchmove="_touchmove">
 			<!--#ifdef H5-->
@@ -47,24 +47,24 @@
 	var rpx = uni.getSystemInfoSync().screenWidth / 750,
 		cfg = require('./libs/config.js');
 	// #endif
-	// #ifdef APP-PLUS-NVUE
+	// #ifdef MP-NVUE
 	var dom = weex.requireModule('dom');
 	// #endif
 	export default {
 		name: 'parser',
 		data() {
 			return {
-				// #ifdef APP-PLUS
+				// #ifdef MP
 				loadVideo: false,
 				// #endif
 				// #ifdef H5
 				uid: this._uid,
 				// #endif
-				// #ifdef APP-PLUS-NVUE
+				// #ifdef MP-NVUE
 				src: '',
 				height: 1,
 				// #endif
-				// #ifndef APP-PLUS-NVUE
+				// #ifndef MP-NVUE
 				scaleAm: '',
 				showAm: '',
 				imgs: [],
@@ -146,7 +146,7 @@
 						success: () => this[i] = filePath
 					})
 					// #endif
-					// #ifdef APP-PLUS
+					// #ifdef MP
 					filePath = `_doc/parser_tmp/${Date.now()}.${info[1]}`;
 					var bitmap = new plus.nativeObj.Bitmap();
 					bitmap.loadBase64Data(src, () => {
@@ -165,7 +165,7 @@
 			if (this._observer) this._observer.disconnect();
 			// #endif
 			this.imgList.each(src => {
-				// #ifdef APP-PLUS
+				// #ifdef MP
 				if (src && src.includes('_doc')) {
 					plus.io.resolveLocalFileSystemURL(src, entry => {
 						entry.remove();
@@ -217,7 +217,7 @@
 			},
 			// #endif
 			setContent(html, append) {
-				// #ifdef APP-PLUS-NVUE
+				// #ifdef MP-NVUE
 				if (!html) {
 					this.src = '';
 					this.height = 1;
@@ -440,7 +440,7 @@
 					console.warn('错误的 html 类型：object 类型已废弃');
 				} else
 					return console.warn('错误的 html 类型：' + typeof html);
-				// #ifdef APP-PLUS
+				// #ifdef MP
 				this.loadVideo = false;
 				// #endif
 				if (document) this.document = new document(this.nodes, 'nodes', this);
@@ -506,14 +506,14 @@
 					}, 200)
 					this.$emit('load');
 					// #endif
-					// #ifdef APP-PLUS
+					// #ifdef MP
 					setTimeout(() => {
 						this.loadVideo = true;
 					}, 3000);
 					// #endif
 				})
 				// #endif
-				// #ifndef APP-PLUS-NVUE
+				// #ifndef MP-NVUE
 				var height;
 				clearInterval(this._timer);
 				this._timer = setInterval(() => {
@@ -521,10 +521,10 @@
 					var res = [this.rtf.getBoundingClientRect()];
 					// #endif
 					// #ifndef H5
-					// #ifdef APP-PLUS
+					// #ifdef MP
 					uni.createSelectorQuery().in(this)
 					// #endif
-					// #ifndef APP-PLUS
+					// #ifndef MP
 					this.createSelectorQuery()
 						// #endif
 						.select('#top').boundingClientRect().exec(res => {
@@ -543,7 +543,7 @@
 				// #endif
 			},
 			getText(ns = this.nodes) {
-				// #ifdef APP-PLUS-NVUE
+				// #ifdef MP-NVUE
 				return this._text;
 				// #endif
 				// #ifdef H5
@@ -573,7 +573,7 @@
 					return obj.fail && obj.fail({
 						errMsg: 'Anchor is disabled'
 					})
-				// #ifdef APP-PLUS-NVUE
+				// #ifdef MP-NVUE
 				if (!obj.id)
 					dom.scrollToElement(this.$refs.web);
 				else
@@ -624,7 +624,7 @@
 				// #endif
 			},
 			getVideoContext(id) {
-				// #ifndef APP-PLUS-NVUE
+				// #ifndef MP-NVUE
 				if (!id) return this.videoContexts;
 				else
 					for (var i = this.videoContexts.length; i--;)
@@ -640,7 +640,7 @@
 					"';for(var imgs=contain.querySelectorAll('img'),i=imgs.length-1;i>=" + num +
 					";i--)imgs[i].removeAttribute('src');";
 				// #endif
-				// #ifdef APP-PLUS-NVUE
+				// #ifdef MP-NVUE
 				this.$refs.web.evalJs(script);
 				// #endif
 				// #ifdef H5
@@ -667,7 +667,7 @@
 					this.imgs = this.imgs.concat(this._wait.splice(0, 15 - this.imgs.length));
 				// #endif
 			},
-			// #ifdef APP-PLUS-NVUE
+			// #ifdef MP-NVUE
 			_message(e) {
 				// 接收 web-view 消息
 				var data = e.detail.data[0];
@@ -728,7 +728,7 @@
 				}
 			},
 			// #endif
-			// #ifndef APP-PLUS-NVUE
+			// #ifndef MP-NVUE
 			// #ifndef H5
 			_load(e) {
 				if (this._wait.length)

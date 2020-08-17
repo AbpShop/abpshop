@@ -22,15 +22,15 @@
 					<view class='wrapper'>
 						<view class='share acea-row row-between row-bottom'>
 							<view class='money font-color'>
-								￥<text class='num'>{{storeInfo.price}}</text><text class='y-money'>￥{{storeInfo.product_price}}</text>
+								￥<text class='num'>{{storeInfo.price || 0}}</text><text class='y-money'>￥{{storeInfo.product_price || 0}}</text>
 							</view>
 							<view class='iconfont icon-fenxiang' @click="listenerActionSheet"></view>
 						</view>
 						<view class='introduce'>{{storeInfo.title}}</view>
 						<view class='label acea-row row-between-wrapper'>
-							<view class='stock'>类型：{{storeInfo.people}}人团</view>
-							<view>累计销量：{{storeInfo.total?storeInfo.total:0}}件</view>
-							<view>限购: {{ storeInfo.quota ? storeInfo.quota : 0 }} 件</view>
+							<view class='stock'>类型：{{storeInfo.people || 0}}人团</view>
+							<view>累计销量：{{storeInfo.total?storeInfo.total:0}} {{storeInfo.unit_name || ''}}</view>
+							<view>限购: {{ storeInfo.quota_show ? storeInfo.quota_show : 0 }} {{storeInfo.unit_name || ''}}</view>
 						</view>
 					</view>
 					<view class='attribute acea-row row-between-wrapper' @tap='selecAttr' v-if='attribute.productAttr.length'>
@@ -64,7 +64,10 @@
 							<view class='right acea-row row-middle'>
 								<view>
 									<view class='lack'>还差<text class='font-color'>{{item.count}}</text>人成团</view>
-									<view class='time'><count-down :is-day="false" :tip-text="' '" :day-text="' '" :hour-text="':'" :minute-text="':'" :second-text="' '" :datatime="item.stop_time"></count-down></view>
+									<view class='time'>
+										<count-down :is-day="false" :tip-text="' '" :day-text="' '" :hour-text="':'" :minute-text="':'" :second-text="' '"
+										 :datatime="item.stop_time"></count-down>
+									</view>
 								</view>
 								<navigator hover-class='none' :url="'/pages/activity/goods_combination_status/index?id='+item.id" class='spellBnt'>
 									去拼单
@@ -189,8 +192,8 @@
 		<authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize>
 		<!-- #endif -->
 		<home></home>
-		<product-window :attr='attribute' :limitNum='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr" @ChangeCartNum="ChangeCartNum"  @iptCartNum="iptCartNum"
-		 @attrVal="attrVal"></product-window>
+		<product-window :attr='attribute' :limitNum='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr" @ChangeCartNum="ChangeCartNum"
+		 @iptCartNum="iptCartNum" @attrVal="attrVal"></product-window>
 	</view>
 </template>
 
@@ -223,7 +226,9 @@
 	import productWindow from '@/components/productWindow/index.vue'
 	import userEvaluation from '@/components/userEvaluation/index.vue'
 	import countDown from '@/components/countDown/index.vue'
-	import { getProductCode } from '@/api/store.js'
+	import {
+		getProductCode
+	} from '@/api/store.js'
 	export default {
 		components: {
 			productConSwiper,
@@ -299,7 +304,6 @@
 			}
 		},
 		onLoad(options) {
-			console.log(options,'options')
 			let that = this
 			// #ifdef MP
 			this.navH = app.globalData.navHeight;
@@ -316,7 +320,7 @@
 			});
 			//扫码携带参数处理
 			// #ifdef MP
-			
+
 			if (options.scene) {
 				let value = this.$util.getUrlParams(decodeURIComponent(options.scene));
 				if (value.id) options.id = value.id;
@@ -374,9 +378,9 @@
 			/**
 			 * 购物车手动填写
 			 * 
-			*/
-			iptCartNum: function (e) {
-				this.$set(this.attribute.productSelect,'cart_num',e);
+			 */
+			iptCartNum: function(e) {
+				this.$set(this.attribute.productSelect, 'cart_num', e);
 				this.$set(this, "cart_num", e);
 			},
 			// 返回
@@ -393,6 +397,7 @@
 					})
 					that.imgUrls = res.data.storeInfo.images
 					that.storeInfo = res.data.storeInfo;
+					that.attribute.productSelect.num = res.data.storeInfo.num;
 					that.pink = res.data.pink;
 					that.pindAll = res.data.pindAll;
 					that.reply = res.data.reply ? [res.data.reply] : [];
@@ -412,17 +417,17 @@
 					that.downloadFilestoreImage();
 					// #endif
 					// that.setProductSelect();
-					
+
 					that.DefaultSelect();
-					// setTimeout(function() {
-					// 	that.infoScroll();
-					// }, 500);
-					
+					setTimeout(function() {
+						that.infoScroll();
+					}, 500);
+
 				}).catch(function(err) {
 					that.$util.Tips({
-						title:err
-					},{
-						tab:3
+						title: err
+					}, {
+						tab: 3
 					})
 				})
 			},
@@ -512,7 +517,7 @@
 					this.$set(productAttr[i], "index", value[i]);
 				}
 				//sort();排序函数:数字-英文-汉字；
-				let productSelect = self.productValue[value.sort().join(",")];
+				let productSelect = self.productValue[value.join(",")];
 
 				if (productSelect && productAttr.length) {
 					self.$set(
@@ -528,8 +533,8 @@
 					self.$set(self.attribute.productSelect, "quota_show", productSelect.quota_show);
 					self.$set(self.attribute.productSelect, "product_stock", productSelect.product_stock);
 					self.$set(self.attribute.productSelect, "cart_num", 1);
-					self.$set(self, "attrValue", value.sort().join(","));
-					self.attrValue = value.sort().join(",")
+					self.$set(self, "attrValue", value.join(","));
+					self.attrValue = value.join(",")
 				} else if (!productSelect && productAttr.length) {
 					self.$set(
 						self.attribute.productSelect,
@@ -574,7 +579,7 @@
 					heightArr = [];
 				for (var i = 0; i < that.navList.length; i++) { //productList
 					//获取元素所在位置
-					var query = wx.createSelectorQuery().in(this);
+					var query = uni.createSelectorQuery().in(this);
 					var idView = "#past" + i;
 					// if (!that.data.good_list.length && i == 2) {
 					//   var idView = "#past" + 3;
@@ -608,51 +613,62 @@
 			 * 购物车数量加和数量减
 			 * 
 			 */
-		ChangeCartNum: function(changeValue) {
-			//changeValue:是否 加|减
-			//获取当前变动属性
-			let productSelect = this.productValue[this.attrValue];
-			if (this.cart_num) {
-			      productSelect.cart_num = this.cart_num;
-				  this.attribute.productSelect.cart_num = this.cart_num;
-			    }
-			//如果没有属性,赋值给商品默认库存
-			if (productSelect === undefined && !this.attribute.productAttr.length)
-				productSelect = this.attribute.productSelect;
-			//无属性值即库存为0；不存在加减；
-			if (productSelect === undefined) return;
-			let stock = productSelect.stock || 0;
-			let quotaShow = productSelect.quota_show || 0;
-			let productStock = productSelect.product_stock || 0;
-			let num = this.attribute.productSelect;
-			//设置默认数据
-			    if (productSelect.cart_num == undefined) productSelect.cart_num = 1;
-			if (changeValue) {
-				num.cart_num ++;
-				if(quotaShow >= productStock){
-					 if (num.cart_num > productStock) {
-					 	this.$set(this.attribute.productSelect, "cart_num", productStock);
-					 	this.$set(this, "cart_num", productStock);
-					 }
-				}else{
-					if (num.cart_num > quotaShow) {
-						this.$set(this.attribute.productSelect, "cart_num", quotaShow);
-						this.$set(this, "cart_num", quotaShow);
+			ChangeCartNum: function(changeValue) {
+				//changeValue:是否 加|减
+				//获取当前变动属性
+				let productSelect = this.productValue[this.attrValue];
+				if (this.cart_num) {
+					productSelect.cart_num = this.cart_num;
+					this.attribute.productSelect.cart_num = this.cart_num;
+				}
+				//如果没有属性,赋值给商品默认库存
+				if (productSelect === undefined && !this.attribute.productAttr.length)
+					productSelect = this.attribute.productSelect;
+				//无属性值即库存为0；不存在加减；
+				if (productSelect === undefined) return;
+				let stock = productSelect.stock || 0;
+				let quotaShow = productSelect.quota_show || 0;
+				let quota = productSelect.quota || 0;
+				let productStock = productSelect.product_stock || 0;
+				let num = this.attribute.productSelect;
+				let nums = this.storeInfo.num || 0;
+				//设置默认数据
+				if (productSelect.cart_num == undefined) productSelect.cart_num = 1;
+				if (changeValue) {
+					num.cart_num++;
+					let arrMin = [];
+					arrMin.push(nums);
+					arrMin.push(quota);
+					arrMin.push(productStock);
+					let minN = Math.min.apply(null, arrMin);
+					if (num.cart_num >= minN) {
+						this.$set(this.attribute.productSelect, "cart_num", minN ? minN : 1);
+						this.$set(this, "cart_num", minN ? minN : 1);
 					}
+					// if(quotaShow >= productStock){
+					// 	 if (num.cart_num > productStock) {
+					// 	 	this.$set(this.attribute.productSelect, "cart_num", productStock);
+					// 	 	this.$set(this, "cart_num", productStock);
+					// 	 }
+					// }else{
+					// 	if (num.cart_num > quotaShow) {
+					// 		this.$set(this.attribute.productSelect, "cart_num", quotaShow);
+					// 		this.$set(this, "cart_num", quotaShow);
+					// 	}
+					// }
+					this.$set(this, "cart_num", num.cart_num);
+					this.$set(this.attribute.productSelect, "cart_num", num.cart_num);
+
+				} else {
+					num.cart_num--;
+					if (num.cart_num < 1) {
+						this.$set(this.attribute.productSelect, "cart_num", 1);
+						this.$set(this, "cart_num", 1);
+					}
+					this.$set(this, "cart_num", num.cart_num);
+					this.$set(this.attribute.productSelect, "cart_num", num.cart_num);
 				}
-				this.$set(this, "cart_num", num.cart_num);
-				this.$set(this.attribute.productSelect, "cart_num", num.cart_num);
-				
-			} else {
-				num.cart_num--;
-				if (num.cart_num < 1) {
-					this.$set(this.attribute.productSelect, "cart_num", 1);
-					this.$set(this, "cart_num", 1);
-				}
-				this.$set(this, "cart_num", num.cart_num);
-				this.$set(this.attribute.productSelect, "cart_num", num.cart_num);
-			}
-		},
+			},
 			attrVal(val) {
 				this.attribute.productAttr[val.indexw].index = this.attribute.productAttr[val.indexw].attr_values[val.indexn];
 			},
@@ -661,7 +677,7 @@
 			 * 
 			 */
 			ChangeAttr: function(res) {
-				this.$set(this,'cart_num',1);
+				this.$set(this, 'cart_num', 1);
 				let productSelect = this.productValue[res];
 				if (productSelect) {
 					this.$set(this.attribute.productSelect, "image", productSelect.image);
@@ -719,7 +735,7 @@
 				postCartAdd(data).then(function(res) {
 					that.isOpen = false
 					uni.navigateTo({
-						url: '/pages/users/order_confirm/index?cartId=' + res.data.cartId
+						url: '/pages/users/order_confirm/index?new=1&cartId=' + res.data.cartId
 					});
 				}).catch(function(res) {
 					uni.showToast({
@@ -1197,6 +1213,7 @@
 		color: #82848f;
 		margin-top: 5rpx;
 	}
+
 	.product-con .assemble .item .right .spellBnt {
 		font-size: 24rpx;
 		color: #fff;

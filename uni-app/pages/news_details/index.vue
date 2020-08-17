@@ -8,7 +8,7 @@
 			<!-- 	<view class='item'><text class='iconfont icon-liulan'></text>{{articleInfo.visit}}</view> -->
 			</view>
 			<view class='conters'>
-				<rich-text :nodes="content" class="conter"></rich-text>
+				<jyf-parser :html="content" ref="article" :tag-style="tagStyle"></jyf-parser>
 			</view>
 			<view class="picTxt acea-row row-between-wrapper" v-if="store_info.id">
 				<view class="pictrue">
@@ -41,10 +41,12 @@
 	} from '@/api/api.js';
 	import shareInfo from '@/components/shareInfo';
 	import home from '@/components/home';
+	import parser from "@/components/jyf-parser/jyf-parser";
 	export default {
 		components: {
 			shareInfo,
-			home
+			home,
+			"jyf-parser": parser
 		},
 		data() {
 			return {
@@ -52,7 +54,10 @@
 				articleInfo: [],
 				store_info: {},
 				content:'',
-				shareInfoStatus:false
+				shareInfoStatus:false,
+				tagStyle: {
+					img: 'width:100%;'
+				}
 			};
 		},
 		 /**

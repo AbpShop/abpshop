@@ -39,6 +39,7 @@
 		<block v-if="bargain.length == 0">
 			<emptyPage title="暂无砍价记录～"></emptyPage>
 		</block>
+		<home></home>
 	</view>
 </template>
 <script>
@@ -52,13 +53,14 @@
 		getUserInfo
 	} from '@/api/user.js';
 	import Loading from "@/components/Loading";
-
+	import home from '@/components/home';
 	export default {
 		name: "BargainRecord",
 		components: {
 			CountDown,
 			Loading,
-			emptyPage
+			emptyPage,
+			home
 		},
 		props: {},
 		data: function() {
