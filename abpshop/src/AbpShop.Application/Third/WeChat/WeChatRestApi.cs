@@ -1,4 +1,5 @@
 ﻿using Abp;
+using AutoMapper;
 using Flurl.Http;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
@@ -37,6 +38,18 @@ namespace AbpShop.Third.WeChat
             AppSecret = _conf["WeChatSetting:WxOpenAppSecret"];
         }
         /// <summary>
+        /// 登录凭证校验。通过 wx.login 接口获得临时登录凭证 code 后传到开发者服务器调用此接口完成登录流程。
+        /// </summary>
+        /// <param name="jsCode">登录时获取的 code</param>
+        /// <param name="grantType">授权类型，此处只需填写 authorization_code</param>
+        public async Task<LoginResult> Code2SessionAsync(string jsCode, string grantType = "authorization_code")
+        {
+            var url = string.Format("sns/jscode2session?appid=[appid]&secret=[secret]&js_code={0}&grant_type={1}",
+                                  jsCode, grantType);
+            return await WeChatRequest<LoginResult>(url, true);
+        }
+
+        /// <summary>
         /// 推送微信小程序订阅消息
         /// <param name="openId">接收者（用户）的 openid</param>
         /// <param name="data">模板内容，格式形如 { "key1": { "value": any }, "key2": { "value": any } }</param>
@@ -44,27 +57,9 @@ namespace AbpShop.Third.WeChat
         /// <param name="pagePath">点击模板卡片后的跳转页面，仅限本小程序内的页面。支持带参数,（示例index?foo=bar）。该字段不填则模板无跳转。</param>
         /// <param name="miniprogramState">跳转小程序类型：developer为开发版；trial为体验版；formal为正式版；默认为正式版</param>
         /// </summary>
-        public async Task<bool> PushSubscribeMessage(string openId, object data, string templateId = "Rbw1l47kUiwfI9UI4cFZ8zRHq2tP6GqNB9g5XUsLIOs", string pagePath = "pages/index/index", string miniprogramState = "formal")
+        public async Task PushSubscribeMessage(string openId, object data, string templateId = "Rbw1l47kUiwfI9UI4cFZ8zRHq2tP6GqNB9g5XUsLIOs", string pagePath = "pages/index/index", string miniprogramState = "formal")
         {
-            try
-            {
-                //接口调用凭证
-                string access_token = GetAccessTokenResult(AppId).Result.access_token;
-                var result = await $"https://api.WeChat.qq.com/cgi-bin/message/subscribe/send?access_token={access_token}"
-    .PostJsonAsync(new { touser = openId, template_id = templateId, page = pagePath, data = data, miniprogram_state = miniprogramState })
-    .ReceiveJson();
-
-                if (result["errcode"] == ReturnCode.请求成功)
-                    return true;
-                else
-                    Logger.Error($"推送微信小程序订阅消息异常:{result["errmsg"]}");
-            }
-            catch (Exception ex)
-            {
-                Logger.Error($"微信消息推送异常: {ex.Message} {ex.StackTrace}");
-                return false;
-            }
-            return true;
+            await WeChatRequest<dynamic>($"cgi-bin/message/subscribe/send?access_token={WeChat.ACCESS_TOKEN}", true, new { touser = openId, template_id = templateId, page = pagePath, data = data, miniprogram_state = miniprogramState });
         }
 
         /// <summary>
@@ -72,22 +67,20 @@ namespace AbpShop.Third.WeChat
         /// </summary>
         public async Task<dynamic> GetTemplateList()
         {
-            var result = await WeChatRequest($"wxaapi/newtmpl/gettemplate?access_token={WeChat.ACCESS_TOKEN}", true);
-            return result.data;
+            return await WeChatRequest<dynamic>($"wxaapi/newtmpl/gettemplate?access_token={WeChat.ACCESS_TOKEN}", true);
         }
         /// <summary>
         /// 获取可用AccessTokenResult对象
         /// </summary>
-        /// <param name="appId"></param>
         /// <param name="getNewToken">是否强制重新获取新的Token</param>
         /// <returns></returns>
-        private async Task<AccessTokenResult> GetAccessTokenResult(string appId, bool getNewToken = false)
+        public async Task<AccessTokenResult> GetAccessTokenResult(bool getNewToken = false)
         {
-            var accessToken = await _cache.GetAsync(appId);
+            var accessToken = await _cache.GetAsync(AppId);
             if (accessToken == null || getNewToken == true || accessToken.expires_in < DateTime.Now.Second)
             {
                 accessToken = await GetTokenAsync();
-                _ = _cache.SetAsync(appId, accessToken, new DistributedCacheEntryOptions
+                _ = _cache.SetAsync(AppId, accessToken, new DistributedCacheEntryOptions
                 {
                     AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(accessToken.expires_in)
                 });
@@ -99,24 +92,12 @@ namespace AbpShop.Third.WeChat
             }
         }
         /// <summary>
-        /// 【异步方法】获取凭证接口
-        /// </summary>
-        /// <param name="grant_type">获取access_token填写client_credential</param>
-        /// <returns></returns>
-        private async Task<AccessTokenResult> GetTokenAsync(string grant_type = "client_credential")
-        {
-            var url = string.Format("cgi-bin/token?grant_type={0}&appid=[appid]&secret=[secret]",
-                                    grant_type);
-            return await WeChatRequest(url, true);
-        }
-
-        /// <summary>
         /// 微信通过接口处理
         /// <param name="api">微信接口地址</param>
         /// <param name="throwExceptionMsg">当接口返回错误码,是否直接抛出异常</param>
         /// <param name="data">请求数据</param>
         /// </summary>
-        private async Task<dynamic> WeChatRequest(string api, bool throwExceptionMsg = true, object data = null)
+        private async Task<T> WeChatRequest<T>(string api, bool throwExceptionMsg = true, object data = null)
         {
             try
             {
@@ -125,13 +106,14 @@ namespace AbpShop.Third.WeChat
                 if (api.Contains(WeChat.ACCESS_TOKEN))
                 {
                     //接口调用凭证
-                    string access_token = GetAccessTokenResult(AppId).Result.access_token;
+                    string access_token = GetAccessTokenResult().Result.access_token;
                     api = api.Replace(WeChat.ACCESS_TOKEN, access_token);
                 }
                 //如果存在参数appid,就替换
                 api = api.Replace(WeChat.APPID, AppId);
-                api = $"https://api.WeChat.qq.com/{api}";
+                api = $"https://api.weixin.qq.com/{api}";
                 ExpandoObject json = null;
+                json.m
                 if (api.Contains("/get"))
                     json = await api.GetJsonAsync();
                 else
@@ -143,33 +125,33 @@ namespace AbpShop.Third.WeChat
                         result.errcode = int.Parse(json.Single(pair => pair.Key == "errcode").Value.ToString());
                     if (json.Any(pair => pair.Key == "errmsg"))
                         result.errmsg = json.Single(pair => pair.Key == "errmsg").Value.ToString();
-                    if (json.Any(pair => pair.Key == "data"))
-                        result.data = json.Single(pair => pair.Key == "data").Value;
-                    if (json.Any(pair => pair.Key == "count"))
-                        result.count = int.Parse(json.Single(pair => pair.Key == "count").Value.ToString());
                 }
-                //调用日志处理
+                //调用日志处理 
                 String loggerMsg = $"微信小程序调用接口异常{api} 请求数据{JsonConvert.SerializeObject(data)} 返回数据 {JsonConvert.SerializeObject(result)}";
-                if (result.errcode == 0)
-                    Logger.Info(loggerMsg);
-                else
+                if (result.errcode != 0)
                 {
                     Logger.Error(loggerMsg);
                     if (throwExceptionMsg)
                         throw new UserFriendlyException(result.errmsg);
                 }
-                //抛出异常,返回数据
-                if (throwExceptionMsg)
-                    return result.data;
-                else
-                    return result;
+                return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(json));
             }
             catch (Exception ex)
             {
                 Logger.Error(JsonConvert.SerializeObject(ex));
                 throw new UserFriendlyException("微信接口开小差了");
             }
-
+        }
+        /// <summary>
+        /// 【异步方法】获取凭证接口
+        /// </summary>
+        /// <param name="grant_type">获取access_token填写client_credential</param>
+        /// <returns></returns>
+        private async Task<AccessTokenResult> GetTokenAsync(string grant_type = "client_credential")
+        {
+            var url = string.Format("cgi-bin/token?grant_type={0}&appid=[appid]&secret=[secret]",
+                                    grant_type);
+            return await WeChatRequest<AccessTokenResult>(url, true);
         }
     }
 }

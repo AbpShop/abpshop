@@ -1,0 +1,1293 @@
+<template>
+    <div class="article-manager">
+        <div class="i-layout-page-header">
+            <PageHeader class="product_tabs" hidden-breadcrumb>
+                <div slot="title" class="ivu-mt ivu-mb">
+                    <router-link :to="{path:'/admin/product/product_list'}"><Button icon="ios-arrow-back" size="small"  class="mr20">返回</Button></router-link>
+                    <span v-text="$route.params.id?'编辑商品':'添加商品'" class="mr20"></span>
+                </div>
+            </PageHeader>
+        </div>
+        <Card :bordered="false" dis-hover class="ivu-mt">
+            <Tabs v-model="currentTab" @on-click="onhangeTab">
+                <TabPane label="商品信息" name="1"></TabPane>
+                <TabPane label="商品详情" name="2"></TabPane>
+                <TabPane label="其他设置" name="3"></TabPane>
+            </Tabs>
+            <Form class="formValidate mt20" ref="formValidate" :rules="ruleValidate" :model="formValidate" :label-width="labelWidth" :label-position="labelPosition" @submit.native.prevent>
+                <Row :gutter="24" type="flex" v-show="currentTab === '1'">
+                    <!-- 商品信息-->
+                    <Col v-bind="grid2">
+                        <FormItem label="商品名称：" prop="store_name">
+                            <Input v-model="formValidate.store_name" placeholder="请输入商品名称"  />
+                        </FormItem>
+                    </Col>
+                    <Col v-bind="grid2">
+                        <FormItem label="商品分类：" prop="cate_id">
+                            <Select v-model="formValidate.cate_id" multiple>
+                                <Option v-for="item in treeSelect" :disabled="item.pid === 0" :value="item.id" :key="item.id">{{ item.html + item.cate_name }}</Option>
+                            </Select>
+                        </FormItem>
+                    </Col>
+                    <Col v-bind="grid2">
+                        <FormItem label="商品关键字：" prop="">
+                            <Input v-model="formValidate.keyword" placeholder="请输入商品关键字"  />
+                        </FormItem>
+                    </Col>
+                    <Col v-bind="grid2">
+                        <FormItem label="单位：" prop="unit_name">
+                            <Input v-model="formValidate.unit_name"  placeholder="请输入单位" />
+                        </FormItem>
+                    </Col>
+                    <Col v-bind="grid2">
+                        <FormItem label="商品简介：" prop="">
+                            <Input v-model="formValidate.store_info" type="textarea" :rows="3" placeholder="请输入商品简介" />
+                        </FormItem>
+                    </Col>
+                    <!--<Col v-bind="grid2">-->
+                        <!--<FormItem label="邮费：">-->
+                            <!--<InputNumber v-width="'100%'" v-model="formValidate.postage" placeholder="请输入邮费"  />-->
+                        <!--</FormItem>-->
+                    <!--</Col>-->
+                    <Col v-bind="grid2">
+                        <FormItem label="商品封面图：" prop="image">
+                            <div class="pictrueBox" @click="modalPicTap('dan','danFrom')">
+                                <div class="pictrue" v-if="formValidate.image"><img v-lazy="formValidate.image"></div>
+                                <div class="upLoad acea-row row-center-wrapper"   v-else>
+                                    <Icon type="ios-camera-outline" size="26" class="iconfont"/>
+                                </div>
+                            </div>
+                        </FormItem>
+                    </Col>
+                    <Col span="24">
+                        <FormItem label="商品轮播图：" prop="slider_image">
+                            <div class="acea-row">
+                                <div class="pictrue" v-for="(item,index) in formValidate.slider_image" :key="index"
+                                     draggable="true"
+                                     @dragstart="handleDragStart($event, item)"
+                                     @dragover.prevent="handleDragOver($event, item)"
+                                     @dragenter="handleDragEnter($event, item)"
+                                     @dragend="handleDragEnd($event, item)">
+                                    <img v-lazy="item">
+                                    <Button shape="circle" icon="md-close"  @click.native="handleRemove(index)" class="btndel"></Button>
+                                </div>
+                                <div class="upLoad acea-row row-center-wrapper" @click="modalPicTap('duo')">
+                                    <Icon type="ios-camera-outline" size="26" class="iconfont"/>
+                                </div>
+                            </div>
+                        </FormItem>
+                    </Col>
+                    <Col span="24">
+                        <FormItem label="主图视频：" prop="video_link">
+                            <Input v-width="'35%'" v-model="videoLink" placeholder="请输入视频连接"/>
+                            <input type="file" ref='refid' @change="zh_uploadFile_change" style="display:none">
+                            <Button type="primary" icon="ios-cloud-upload-outline" class="uploadVideo" @click="zh_uploadFile">{{videoLink ? '确认添加' : '上传视频'}}</Button>
+                            <Progress :percent = progress :stroke-width="5" v-if="upload.videoIng" />
+                            <div class="iview-video-style" v-if="formValidate.video_link">
+                                <video style="width:100%;height: 100%!important;border-radius: 10px;" :src="formValidate.video_link" controls="controls">
+                                    您的浏览器不支持 video 标签。
+                                </video>
+                                <div class="mark">
+                                </div>
+                                <Icon type="ios-trash-outline" class="iconv" @click="delVideo"/>
+                            </div>
+                        </FormItem>
+                    </Col>
+                    <Col span="24">
+                        <FormItem label="商品规格：" props="spec_type">
+                            <RadioGroup v-model="formValidate.spec_type"  @on-change="changeSpec">
+                                <Radio :label="0" class="radio">单规格</Radio>
+                                <Radio :label="1">多规格{{formValidate.spec_typ}}</Radio>
+                            </RadioGroup>
+                        </FormItem>
+                    </Col>
+                    <!-- 多规格添加-->
+                    <Col span="24" v-if="formValidate.spec_type === 1" class="noForm">
+                        <Col span="24">
+                            <FormItem label="选择规格：" prop="">
+                                <div  class="acea-row row-middle">
+                                    <Select v-model="formValidate.selectRule" style="width: 23%;">
+                                        <Option v-for="(item, index) in ruleList" :value="item.rule_name" :key="index">{{ item.rule_name }}</Option>
+                                    </Select>
+                                    <Button type="primary" class="mr20" @click="confirm">确认</Button>
+                                    <Button @click="addRule">添加规则</Button>
+                                </div>
+                            </FormItem>
+                        </Col>
+                        <Col span="24">
+                            <FormItem v-if="attrs.length!==0">
+                                <div  v-for="(item, index) in attrs" :key="index">
+                                    <div class="acea-row row-middle"><span class="mr5">{{item.value}}</span><Icon type="ios-close-circle" size="14" class="curs" @click="handleRemoveRole(index)"/></div>
+                                    <div class="rulesBox">
+                                        <Tag type="dot" closable color="primary" v-for="(j, indexn) in item.detail" :key="indexn" :name="j" class="mr20" @on-close="handleRemove2(item.detail,indexn)">{{j}}</Tag>
+                                        <Input search enter-button="添加" placeholder="请输入属性名称" v-model="item.detail.attrsVal" @on-search="createAttr(item.detail.attrsVal,index)" style="width: 150px"/>
+                                    </div>
+                                </div>
+                            </FormItem>
+                        </Col>
+                        <Col span="24" v-if="createBnt">
+                            <FormItem>
+                                <Button type="primary" icon="md-add" @click="addBtn" class="mr15">添加新规格</Button>
+                                <Button type="success" @click="generate">立即生成</Button>
+                            </FormItem>
+                        </Col>
+                        <Col span="24" v-if="showIput">
+                            <Col  :xl="6" :lg="9" :md="10" :sm="24" :xs="24" >
+                                <FormItem label="规格：">
+                                    <Input  placeholder="请输入规格" v-model="formDynamic.attrsName"  />
+                                </FormItem>
+                            </Col>
+                            <Col  :xl="6" :lg="9" :md="10" :sm="24" :xs="24">
+                                <FormItem label="规格值：">
+                                    <Input v-model="formDynamic.attrsVal" placeholder="请输入规格值"  />
+                                </FormItem>
+                            </Col>
+                            <Col :xl="6" :lg="5" :md="10" :sm="24" :xs="24" >
+                                <FormItem>
+                                    <Button type="primary" class="mr15"   @click="createAttrName">确定</Button>
+                                    <Button  @click="offAttrName" >取消</Button>
+                                </FormItem>
+                            </Col>
+                        </Col>
+                        <!-- 多规格设置-->
+                        <Col :xl="24" :lg="24" :md="24" :sm="24" :xs="24" v-if="manyFormValidate.length && formValidate.header.length!==0 && attrs.length!==0">
+                            <!-- 批量设置-->
+                            <Col span="24">
+                                <FormItem label="批量设置：" class="labeltop">
+                                    <Table :data="oneFormBatch" :columns="columns2" border>
+                                        <template slot-scope="{ row, index }" slot="pic">
+                                            <div class="acea-row row-middle row-center-wrapper" @click="modalPicTap('dan','duopi',index)">
+                                                <div class="pictrue pictrueTab" v-if="oneFormBatch[0].pic"><img v-lazy="oneFormBatch[0].pic"></div>
+                                                <div class="upLoad pictrueTab acea-row row-center-wrapper"   v-else>
+                                                    <Icon type="ios-camera-outline" size="21" class="iconfont"/>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <template slot-scope="{ row, index }" slot="price">
+                                            <InputNumber  v-model="oneFormBatch[0].price" :min="0"  class="priceBox"></InputNumber>
+                                        </template>
+                                        <template slot-scope="{ row, index }" slot="cost">
+                                            <InputNumber  v-model="oneFormBatch[0].cost" :min="0"  class="priceBox"></InputNumber>
+                                        </template>
+                                        <template slot-scope="{ row, index }" slot="ot_price">
+                                            <InputNumber  v-model="oneFormBatch[0].ot_price" :min="0"  class="priceBox"></InputNumber>
+                                        </template>
+                                        <template slot-scope="{ row, index }" slot="stock">
+                                            <InputNumber  v-model="oneFormBatch[0].stock" :min="0" class="priceBox"></InputNumber>
+                                        </template>
+                                        <template slot-scope="{ row, index }" slot="bar_code">
+                                            <Input  v-model="oneFormBatch[0].bar_code"></Input>
+                                        </template>
+                                        <template slot-scope="{ row, index }" slot="weight">
+                                            <InputNumber  v-model="oneFormBatch[0].weight" :min="0" class="priceBox"></InputNumber>
+                                        </template>
+                                        <template slot-scope="{ row, index }" slot="volume">
+                                            <InputNumber  v-model="oneFormBatch[0].volume" :min="0"  class="priceBox"></InputNumber>
+                                        </template>
+                                        <template slot-scope="{ row, index }" slot="action">
+                                            <a @click="batchAdd">批量添加</a>
+                                            <Divider type="vertical"/>
+                                            <a @click="batchDel">清空</a>
+                                        </template>
+                                    </Table>
+                                </FormItem>
+                            </Col>
+                            <!-- 多规格表格-->
+                            <Col span="24">
+                                <FormItem label="商品属性：" class="labeltop">
+                                    <Table :data="manyFormValidate" :columns="formValidate.header" border>
+                                        <template slot-scope="{ row, index }" slot="pic">
+                                            <div class="acea-row row-middle row-center-wrapper" @click="modalPicTap('dan','duoTable',index)">
+                                                <div class="pictrue pictrueTab" v-if="manyFormValidate[index].pic"><img v-lazy="manyFormValidate[index].pic"></div>
+                                                <div class="upLoad pictrueTab acea-row row-center-wrapper"   v-else>
+                                                    <Icon type="ios-camera-outline" size="21" class="iconfont"/>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <template slot-scope="{ row, index }" slot="price">
+                                            <InputNumber  v-model="manyFormValidate[index].price" :min="0"  class="priceBox"></InputNumber>
+                                        </template>
+                                        <template slot-scope="{ row, index }" slot="cost">
+                                            <InputNumber  v-model="manyFormValidate[index].cost" :min="0"  class="priceBox"></InputNumber>
+                                        </template>
+                                        <template slot-scope="{ row, index }" slot="ot_price">
+                                            <InputNumber  v-model="manyFormValidate[index].ot_price" :min="0"  class="priceBox"></InputNumber>
+                                        </template>
+                                        <template slot-scope="{ row, index }" slot="stock">
+                                            <InputNumber  v-model="manyFormValidate[index].stock" :min="0" class="priceBox"></InputNumber>
+                                        </template>
+                                        <template slot-scope="{ row, index }" slot="bar_code">
+                                            <Input  v-model="manyFormValidate[index].bar_code"></Input>
+                                        </template>
+                                        <template slot-scope="{ row, index }" slot="weight">
+                                            <InputNumber  v-model="manyFormValidate[index].weight" :min="0" class="priceBox"></InputNumber>
+                                        </template>
+                                        <template slot-scope="{ row, index }" slot="volume">
+                                            <InputNumber  v-model="manyFormValidate[index].volume" :min="0" class="priceBox"></InputNumber>
+                                        </template>
+                                        <template slot-scope="{ row, index }" slot="action">
+                                            <a @click="delAttrTable(index)">删除</a>
+                                        </template>
+                                    </Table>
+                                </FormItem>
+                            </Col>
+                        </Col>
+                    </Col>
+                    <!-- 单规格表格-->
+                    <Col :xl="23" :lg="24" :md="24" :sm="24" :xs="24" v-if="formValidate.spec_type === 0">
+                        <FormItem >
+                            <Table :data="oneFormValidate" :columns="columns" border>
+                                <template slot-scope="{ row, index }" slot="pic">
+                                    <div class="acea-row row-middle row-center-wrapper" @click="modalPicTap('dan','danTable',index)">
+                                        <div class="pictrue pictrueTab" v-if="oneFormValidate[0].pic"><img v-lazy="oneFormValidate[0].pic"></div>
+                                        <div class="upLoad pictrueTab acea-row row-center-wrapper"   v-else>
+                                            <Icon type="ios-camera-outline" size="21" class="iconfont"/>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template slot-scope="{ row, index }" slot="price">
+                                    <InputNumber  v-model="oneFormValidate[0].price" :min="0"  class="priceBox"></InputNumber>
+                                </template>
+                                <template slot-scope="{ row, index }" slot="cost">
+                                    <InputNumber  v-model="oneFormValidate[0].cost" :min="0"  class="priceBox"></InputNumber>
+                                </template>
+                                <template slot-scope="{ row, index }" slot="ot_price">
+                                    <InputNumber  v-model="oneFormValidate[0].ot_price" :min="0"  class="priceBox"></InputNumber>
+                                </template>
+                                <template slot-scope="{ row, index }" slot="stock">
+                                    <InputNumber  v-model="oneFormValidate[0].stock" :min="0" :precision="0" class="priceBox"></InputNumber>
+                                </template>
+                                <template slot-scope="{ row, index }" slot="bar_code">
+                                    <Input  v-model="oneFormValidate[0].bar_code"></Input>
+                                </template>
+                                <template slot-scope="{ row, index }" slot="weight">
+                                    <InputNumber  v-model="oneFormValidate[0].weight" :min="0" :precision="0" class="priceBox"></InputNumber>
+                                </template>
+                                <template slot-scope="{ row, index }" slot="volume">
+                                    <InputNumber  v-model="oneFormValidate[0].volume" :min="0" :precision="0" class="priceBox"></InputNumber>
+                                </template>
+                            </Table>
+                        </FormItem>
+                    </Col>
+                    <Col span="24">
+                        <FormItem label="运费模板：" prop="temp_id">
+                            <div class="acea-row">
+                                <Select v-model="formValidate.temp_id" v-width="'23%'" class="mr20">
+                                    <Option v-for="(item,index) in templateList" :value="item.id" :key="index">{{ item.name }}</Option>
+                                </Select>
+                                <Button @click="addTemp">添加运费模板</Button>
+                            </div>
+                        </FormItem>
+                    </Col>
+                </Row>
+                <!-- 商品详情-->
+                <Row v-show="currentTab === '2'">
+                    <Col span="24">
+                        <FormItem label="商品详情：">
+                            <vue-ueditor-wrap v-model="formValidate.description"  @beforeInit="addCustomDialog"  :config="myConfig"  style="width: 90%;"></vue-ueditor-wrap>
+                        </FormItem>
+                    </Col>
+                </Row>
+                <!-- 其他设置-->
+                <Row type="flex" justify="space-between" v-show="currentTab === '3'">
+                    <Col v-bind="grid">
+                        <FormItem label="虚拟销量：">
+                            <InputNumber v-width="'90%'" :min="0" v-model="formValidate.ficti" placeholder="请输入虚拟销量"  />
+                        </FormItem>
+                    </Col>
+                    <Col v-bind="grid">
+                        <FormItem label="积分：">
+                            <InputNumber v-width="'90%'" v-model="formValidate.give_integral" :min="0" placeholder="请输入积分" />
+                        </FormItem>
+                    </Col>
+                    <Col v-bind="grid">
+                        <FormItem label="排序：">
+                            <InputNumber :min="0" v-width="'90%'" v-model="formValidate.sort" placeholder="请输入排序" />
+                        </FormItem>
+                    </Col>
+                    <Col span="24">
+                        <FormItem label="佣金设置：">
+                            <RadioGroup v-model="formValidate.is_sub">
+                                <Radio :label="1" class="radio">单独设置</Radio>
+                                <Radio :label="0">默认设置</Radio>
+                            </RadioGroup>
+                        </FormItem>
+                    </Col>
+                    <Col span="24" v-if="formValidate.is_sub === 1">
+                        <!--单规格返佣-->
+                        <FormItem label="商品属性：" v-if="formValidate.spec_type === 0">
+                            <Table :data="oneFormValidate" :columns="columnsInstall" border>
+                                <template slot-scope="{ row, index }" slot="pic">
+                                    <div class="pictrue pictrueTab"><img v-lazy="oneFormValidate[0].pic"></div>
+                                </template>
+                                <template slot-scope="{ row, index }" slot="price">{{oneFormValidate[0].price}}</template>
+                                <template slot-scope="{ row, index }" slot="cost">{{oneFormValidate[0].cost}}</template>
+                                <template slot-scope="{ row, index }" slot="ot_price">{{oneFormValidate[0].ot_price}}</template>
+                                <template slot-scope="{ row, index }" slot="stock">{{oneFormValidate[0].stock}}</template>
+                                <template slot-scope="{ row, index }" slot="bar_code">{{oneFormValidate[0].bar_code}}</template>
+                                <template slot-scope="{ row, index }" slot="weight">{{oneFormValidate[0].weight}}</template>
+                                <template slot-scope="{ row, index }" slot="volume">{{oneFormValidate[0].volume}}</template>
+                                <template slot-scope="{ row, index }" slot="brokerage">
+                                    <InputNumber  v-model="oneFormValidate[0].brokerage" :min="0" :precision="0" class="priceBox"></InputNumber>
+                                </template>
+                                <template slot-scope="{ row, index }" slot="brokerage_two">
+                                    <InputNumber  v-model="oneFormValidate[0].brokerage_two" :min="0" :precision="0" class="priceBox"></InputNumber>
+                                </template>
+                            </Table>
+                        </FormItem>
+                        <!--多规格返佣-->
+                        <FormItem label="批量设置：" v-if="formValidate.spec_type === 1">
+                            <InputNumber v-width="'20%'" placeholder="请输入一级返佣" :min="0" class="columnsBox" v-model="manyBrokerage"></InputNumber>
+                            <InputNumber v-width="'20%'" placeholder="请输入二级返佣" :min="0" class="columnsBox" v-model="manyBrokerageTwo"></InputNumber>
+                            <Button type="primary" @click="brokerageSetUp">批量设置</Button>
+                        </FormItem>
+                        <FormItem label="商品属性：" v-if="formValidate.spec_type === 1 && manyFormValidate.length">
+                            <Table :data="manyFormValidate" :columns="columnsInstal2" border>
+                                <template slot-scope="{ row, index }" slot="pic">
+                                    <div class="pictrue pictrueTab"><img v-lazy="manyFormValidate[index].pic"></div>
+                                </template>
+                                <template slot-scope="{ row, index }" slot="price">{{manyFormValidate[index].price}}</template>
+                                <template slot-scope="{ row, index }" slot="cost">{{manyFormValidate[index].cost}}</template>
+                                <template slot-scope="{ row, index }" slot="ot_price">{{manyFormValidate[index].ot_price}}</template>
+                                <template slot-scope="{ row, index }" slot="stock">{{manyFormValidate[index].stock}}</template>
+                                <template slot-scope="{ row, index }" slot="bar_code">{{manyFormValidate[index].bar_code}}</template>
+                                <template slot-scope="{ row, index }" slot="weight">{{manyFormValidate[index].weight}}</template>
+                                <template slot-scope="{ row, index }" slot="volume">{{manyFormValidate[index].volume}}</template>
+                                <template slot-scope="{ row, index }" slot="brokerage">
+                                    <InputNumber  v-model="manyFormValidate[index].brokerage" :min="0" class="priceBox"></InputNumber>
+                                </template>
+                                <template slot-scope="{ row, index }" slot="brokerage_two">
+                                    <InputNumber  v-model="manyFormValidate[index].brokerage_two" :min="0" class="priceBox"></InputNumber>
+                                </template>
+                            </Table>
+                        </FormItem>
+                    </Col>
+                    <Col v-bind="grid">
+                        <FormItem label="商品状态：">
+                            <RadioGroup v-model="formValidate.is_show" >
+                                <Radio :label="1" class="radio">上架</Radio>
+                                <Radio :label="0">下架</Radio>
+                            </RadioGroup>
+                        </FormItem>
+                    </Col>
+                    <Col v-bind="grid">
+                        <FormItem label="热卖单品：">
+                            <RadioGroup v-model="formValidate.is_hot" >
+                                <Radio :label="1" class="radio">开启</Radio>
+                                <Radio :label="0">关闭</Radio>
+                            </RadioGroup>
+                        </FormItem>
+                    </Col>
+                    <Col v-bind="grid">
+                        <FormItem label="促销单品：">
+                            <RadioGroup v-model="formValidate.is_benefit" >
+                                <Radio :label="1" class="radio">开启</Radio>
+                                <Radio :label="0">关闭</Radio>
+                            </RadioGroup>
+                        </FormItem>
+                    </Col>
+                    <Col v-bind="grid">
+                        <FormItem label="精品推荐：">
+                            <RadioGroup v-model="formValidate.is_best" >
+                                <Radio :label="1" class="radio">开启</Radio>
+                                <Radio :label="0">关闭</Radio>
+                            </RadioGroup>
+                        </FormItem>
+                    </Col>
+                    <Col v-bind="grid">
+                        <FormItem label="首发新品：">
+                            <RadioGroup v-model="formValidate.is_new" >
+                                <Radio :label="1" class="radio">开启</Radio>
+                                <Radio :label="0">关闭</Radio>
+                            </RadioGroup>
+                        </FormItem>
+                    </Col>
+                    <Col v-bind="grid">
+                        <FormItem label="优品推荐：">
+                            <RadioGroup v-model="formValidate.is_good">
+                                <Radio :label="1" class="radio">开启</Radio>
+                                <Radio :label="0">关闭</Radio>
+                            </RadioGroup>
+                        </FormItem>
+                    </Col>
+                    <Col v-bind="grid3">
+                        <FormItem label="活动优先级：">
+                            <div class="color-list acea-row row-middle">
+                                <div
+                                        class="color-item" :class="activity[color]"
+                                        v-for="color in formValidate.activity" v-dragging="{ item: color, list: formValidate.activity, group: 'color' }"
+                                        :key="color"
+                                >{{color}}</div>
+                                <div class="tip">可拖动按钮调整活动的优先展示顺序</div>
+                            </div>
+                        </FormItem>
+                    </Col>
+                </Row>
+                <FormItem>
+                    <Button v-if="currentTab !== '1'" @click="upTab">上一步</Button>
+                    <Button type="primary" class="submission" v-if="currentTab !== '3'" @click="downTab">下一步</Button>
+                    <Button type="primary" class="submission" @click="handleSubmit('formValidate')" v-if="$route.params.id || currentTab === '3'">保存</Button>
+                </FormItem>
+                <Spin size="large" fix v-if="spinShow"></Spin>
+            </Form>
+            <Modal v-model="modalPic" width="60%" scrollable  footer-hide closable title='上传商品图' :mask-closable="false" :z-index="1">
+                <uploadPictures :isChoice="isChoice" @getPic="getPic" @getPicD="getPicD" :gridBtn="gridBtn" :gridPic="gridPic" v-if="modalPic"></uploadPictures>
+            </Modal>
+        </Card>
+        <freightTemplate :template="template" v-on:changeTemplate="changeTemplate" ref="templates"></freightTemplate>
+        <add-attr ref="addattr" @getList="userSearchs"></add-attr>
+
+    </div>
+</template>
+
+<script>
+    // import COS from 'cos-js-sdk-v5'
+    import { mapState } from 'vuex';
+    import uploadPictures from '@/components/uploadPictures';
+    import freightTemplate from '@/components/freightTemplate';
+    import addAttr from '../productAttr/addAttr';
+    import VueUeditorWrap from 'vue-ueditor-wrap';
+    import { productInfoApi, treeListApi, productAddApi, generateAttrApi, productGetRuleApi, productGetTemplateApi, productGetTempKeysApi, checkActivityApi } from '@/api/product';
+    export default {
+        name: 'product_productAdd',
+        components: { VueUeditorWrap, uploadPictures, freightTemplate, addAttr },
+        data () {
+            return {
+                spinShow: false,
+                grid2: {
+                    xl: 10,
+                    lg: 12,
+                    md: 12,
+                    sm: 24,
+                    xs: 24
+                },
+                grid3: {
+                    xl: 18,
+                    lg: 18,
+                    md: 20,
+                    sm: 24,
+                    xs: 24
+                },
+                // 批量设置表格data
+                oneFormBatch: [
+                    {
+                        pic: '',
+                        price: 0,
+                        cost: 0,
+                        ot_price: 0,
+                        stock: 0,
+                        bar_code: '',
+                        weight: 0,
+                        volume: 0
+                    }
+                ],
+                // 规格数据
+                formDynamic: {
+                    attrsName: '',
+                    attrsVal: ''
+                },
+                formDynamicNameData: [],
+                isBtn: false,
+                myConfig: {
+                    autoHeightEnabled: false, // 编辑器不自动被内容撑高
+                    initialFrameHeight: 500, // 初始容器高度
+                    initialFrameWidth: '100%', // 初始容器宽度
+                    UEDITOR_HOME_URL: '/admin/UEditor/',
+                    serverUrl: ''
+                },
+                columns2: [
+                    {
+                        title: '图片',
+                        slot: 'pic',
+                        align: 'center',
+                        minWidth: 80
+                    },
+                    {
+                        title: '售价',
+                        slot: 'price',
+                        align: 'center',
+                        minWidth: 95
+                    },
+                    {
+                        title: '成本价',
+                        slot: 'cost',
+                        align: 'center',
+                        minWidth: 95
+                    },
+                    {
+                        title: '原价',
+                        slot: 'ot_price',
+                        align: 'center',
+                        minWidth: 95
+                    },
+                    {
+                        title: '库存',
+                        slot: 'stock',
+                        align: 'center',
+                        minWidth: 95
+                    },
+                    {
+                        title: '商品编号',
+                        slot: 'bar_code',
+                        align: 'center',
+                        minWidth: 120
+                    },
+                    {
+                        title: '重量（KG）',
+                        slot: 'weight',
+                        align: 'center',
+                        minWidth: 95
+                    },
+                    {
+                        title: '体积(m³)',
+                        slot: 'volume',
+                        align: 'center',
+                        minWidth: 95
+                    },
+                    {
+                        title: '操作',
+                        slot: 'action',
+                        fixed: 'right',
+                        align: 'center',
+                        minWidth: 140
+                    }
+                ],
+                columns: [],
+                columnsInstall: [
+                    {
+                        title: '一级返佣',
+                        slot: 'brokerage',
+                        align: 'center',
+                        width: 95
+                    },
+                    {
+                        title: '二级返佣',
+                        slot: 'brokerage_two',
+                        align: 'center',
+                        width: 95
+                    }
+                ],
+                columnsInstal2: [
+                    {
+                        title: '一级返佣',
+                        slot: 'brokerage',
+                        align: 'center',
+                        width: 95
+                    },
+                    {
+                        title: '二级返佣',
+                        slot: 'brokerage_two',
+                        align: 'center',
+                        width: 95
+                    }
+                ],
+                gridPic: {
+                    xl: 6,
+                    lg: 8,
+                    md: 12,
+                    sm: 12,
+                    xs: 12
+                },
+                gridBtn: {
+                    xl: 4,
+                    lg: 8,
+                    md: 8,
+                    sm: 8,
+                    xs: 8
+                },
+                formValidate: {
+                    store_name: '',
+                    cate_id: [],
+                    keyword: '',
+                    unit_name: '',
+                    store_info: '',
+                    image: '',
+                    slider_image: [],
+                    description: '',
+                    ficti: 0,
+                    give_integral: 0,
+                    sort: 0,
+                    is_show: 1,
+                    is_hot: 0,
+                    is_benefit: 0,
+                    is_best: 0,
+                    is_new: 0,
+                    is_good: 0,
+                    is_postage: 0,
+                    is_sub: 0,
+                    id: 0,
+                    spec_type: 0,
+                    video_link: '',
+                    // postage: 0,
+                    temp_id: '',
+                    attrs: [],
+                    items: [
+                        {
+                            pic: '',
+                            price: 0,
+                            cost: 0,
+                            ot_price: 0,
+                            stock: 0,
+                            bar_code: ''
+                        }
+                    ],
+                    activity: ['秒杀', '砍价', '拼团'],
+                    header: [],
+                    selectRule: ''
+                },
+                ruleList: [],
+                templateList: [],
+                createBnt: false,
+                showIput: false,
+                manyFormValidate: [],
+                // 单规格表格data
+                oneFormValidate: [
+                    {
+                        pic: '',
+                        price: 0,
+                        cost: 0,
+                        ot_price: 0,
+                        stock: 0,
+                        bar_code: '',
+                        weight: 0,
+                        volume: 0,
+                        brokerage: 0,
+                        brokerage_two: 0
+                    }
+                ],
+                images: [],
+                imagesTable: '',
+                currentTab: '1',
+                isChoice: '',
+                grid: {
+                    xl: 8,
+                    lg: 8,
+                    md: 12,
+                    sm: 24,
+                    xs: 24
+                },
+                loading: false,
+                modalPic: false,
+                template: false,
+                uploadList: [],
+                treeSelect: [],
+                picTit: '',
+                tableIndex: 0,
+                ruleValidate: {
+                    store_name: [
+                        { required: true, message: '请输入商品名称', trigger: 'blur' }
+                    ],
+                    cate_id: [
+                        { required: true, message: '请选择商品分类', trigger: 'change', type: 'array', min: '1' }
+                    ],
+                    keyword: [
+                        { required: true, message: '请输入商品关键字', trigger: 'blur' }
+                    ],
+                    unit_name: [
+                        { required: true, message: '请输入单位', trigger: 'blur' }
+                    ],
+                    store_info: [
+                        { required: true, message: '请输入商品简介', trigger: 'blur' }
+                    ],
+                    image: [
+                        { required: true, message: '请上传商品图', trigger: 'change' }
+                    ],
+                    slider_image: [
+                        { required: true, message: '请上传商品轮播图', type: 'array', trigger: 'change' }
+                    ],
+                    spec_type: [
+                        { required: true, message: '请选择商品规格', trigger: 'change' }
+                    ],
+                    selectRule: [
+                        { required: true, message: '请选择商品规格属性', trigger: 'change' }
+                    ],
+                    temp_id: [
+                        { required: true, message: '请选择运费模板', trigger: 'change', type: 'number' }
+                    ]
+                },
+                manyBrokerage: 0,
+                manyBrokerageTwo: 0,
+                upload: {
+                    videoIng: false // 是否显示进度条；
+                },
+                progress: 0, // 进度条默认0
+                videoLink: '',
+                attrs: [],
+                activity: { '秒杀': 'blue', '砍价': 'green', '拼团': 'yellow' }
+            }
+        },
+        computed: {
+            ...mapState('admin/layout', [
+                'isMobile'
+            ]),
+            labelWidth () {
+                return this.isMobile ? undefined : 120;
+            },
+            labelPosition () {
+                return this.isMobile ? 'top' : 'right';
+            },
+            labelBottom () {
+                return this.isMobile ? undefined : 15;
+            }
+        },
+        created () {
+            this.columns = this.columns2.slice(0, 8);
+            this.columnsInstall = this.columns2.slice(0, 8).concat(this.columnsInstall);
+        },
+        mounted () {
+            if (this.$route.params.id !== '0' && this.$route.params.id) {
+                this.getInfo();
+            }
+            this.goodsCategory();
+            this.productGetRule();
+            this.productGetTemplate();
+        },
+        methods: {
+            // 运费模板
+            getList () {
+                this.productGetTemplate();
+            },
+            // 添加运费模板
+            addTemp () {
+                this.$refs.templates.isTemplate = true;
+            },
+            // 删除视频；
+            delVideo () {
+                let that = this;
+                that.$set(that.formValidate, 'video_link', '');
+            },
+            zh_uploadFile () {
+                if (this.videoLink) {
+                    this.formValidate.video_link = this.videoLink;
+                } else {
+                    this.$refs.refid.click();
+                }
+            },
+            zh_uploadFile_change (evfile) {
+                let that = this;
+                let suffix = evfile.target.files[0].name.substr(evfile.target.files[0].name.indexOf('.'));
+                if (suffix !== '.mp4') {
+                    return that.$Message.error('只能上传MP4文件');
+                }
+                productGetTempKeysApi().then(res => {
+                    that.$videoCloud.videoUpload({
+                        type: res.data.type,
+                        evfile: evfile,
+                        res: res,
+                        uploading (status, progress) {
+                            that.upload.videoIng = status;
+                            console.log(status, progress);
+                        }
+                    }).then(res => {
+                        that.formValidate.video_link = res.url;
+                        that.$Message.success('视频上传成功');
+                    }).catch(res => {
+                        that.$Message.error(res);
+                    });
+                });
+            },
+            // 上一页；
+            upTab () {
+                this.currentTab = (Number(this.currentTab) - 1).toString();
+            },
+            // 下一页；
+            downTab () {
+                this.currentTab = (Number(this.currentTab) + 1).toString();
+            },
+            // 属性弹窗回调函数；
+            userSearchs () {
+                this.productGetRule();
+            },
+            // 添加规则；
+            addRule () {
+                this.$refs.addattr.modal = true;
+            },
+            // 批量设置分佣；
+            brokerageSetUp () {
+                let that = this;
+                if (that.manyBrokerage <= 0 || that.manyBrokerageTwo <= 0) {
+                    return that.$Message.error('请填写返佣金额在进行批量添加');
+                } else {
+                    for (let val of that.manyFormValidate) {
+                        this.$set(val, 'brokerage', that.manyBrokerage);
+                        this.$set(val, 'brokerage_two', that.manyBrokerageTwo);
+                    }
+                }
+            },
+            batchDel () {
+                this.oneFormBatch = [
+                    {
+                        pic: '',
+                        price: 0,
+                        cost: 0,
+                        ot_price: 0,
+                        stock: 0,
+                        bar_code: '',
+                        weight: 0,
+                        volume: 0
+                    }
+                ];
+            },
+            confirm () {
+                let that = this;
+                that.createBnt = true;
+                if (that.formValidate.selectRule.trim().length <= 0) {
+                    return that.$Message.error('请选择属性');
+                }
+                that.ruleList.forEach(function (item, index) {
+                    if (item.rule_name === that.formValidate.selectRule) {
+                        that.attrs = item.rule_value;
+                    }
+                });
+            },
+            // 获取商品属性模板；
+            productGetRule () {
+                productGetRuleApi().then(res => {
+                    this.ruleList = res.data;
+                })
+            },
+            // 获取运费模板；
+            productGetTemplate () {
+                productGetTemplateApi().then(res => {
+                    this.templateList = res.data;
+                })
+            },
+            // 删除表格中的属性
+            delAttrTable (index) {
+                let that = this;
+                let id = this.$route.params.id;
+                if (id) {
+                    checkActivityApi(id).then(res => {
+                        that.$Message.success(res.msg)
+                    });
+                } else {
+                    that.manyFormValidate.splice(index, 1);
+                }
+            },
+            // 批量添加
+            batchAdd () {
+                // if (!this.oneFormBatch[0].pic || !this.oneFormBatch[0].price || !this.oneFormBatch[0].cost || !this.oneFormBatch[0].ot_price ||
+                //     !this.oneFormBatch[0].stock || !this.oneFormBatch[0].bar_code) return this.$Message.warning('请填写完整的批量设置内容！');
+                if (!this.oneFormBatch[0].pic) {
+                    return this.$Message.warning('请选择有效图片');
+                }
+                for (let val of this.manyFormValidate) {
+                    this.$set(val, 'pic', this.oneFormBatch[0].pic);
+                    this.$set(val, 'price', this.oneFormBatch[0].price);
+                    this.$set(val, 'cost', this.oneFormBatch[0].cost);
+                    this.$set(val, 'ot_price', this.oneFormBatch[0].ot_price);
+                    this.$set(val, 'stock', this.oneFormBatch[0].stock);
+                    this.$set(val, 'bar_code', this.oneFormBatch[0].bar_code);
+                    this.$set(val, 'weight', this.oneFormBatch[0].weight);
+                    this.$set(val, 'volume', this.oneFormBatch[0].volume);
+                }
+            },
+            // 添加按钮
+            addBtn () {
+                this.clearAttr();
+                this.createBnt = false;
+                this.showIput = true;
+            },
+            // 立即生成
+            generate () {
+                generateAttrApi({ attrs: this.attrs }, this.formValidate.id).then(res => {
+                    let info = res.data.info;
+                    this.manyFormValidate = info.value;
+                    let headerdel = {
+                        title: '操作',
+                        slot: 'action',
+                        fixed: 'right',
+                        width: 220
+                    };
+                    info.header.push(headerdel);
+                    this.formValidate.header = info.header;
+                    let header = info.header;
+                    header.pop();
+                    this.columnsInstal2 = header.concat(this.columnsInstal2);
+                    if (!this.$route.params.id && this.formValidate.spec_type === 1) {
+                        this.manyFormValidate.map((item) => {
+                            item.pic = this.formValidate.image
+                        });
+                        this.oneFormBatch[0].pic = this.formValidate.image;
+                    }
+                }).catch(res => {
+                    this.$Message.error(res.msg);
+                })
+            },
+            // 取消
+            offAttrName () {
+                this.showIput = false;
+                this.createBnt = true;
+            },
+            clearAttr () {
+                this.formDynamic.attrsName = '';
+                this.formDynamic.attrsVal = '';
+            },
+            // 删除规格
+            handleRemoveRole (index) {
+                this.attrs.splice(index, 1);
+                this.manyFormValidate.splice(index, 1);
+            },
+            // 删除属性
+            handleRemove2 (item, index) {
+                item.splice(index, 1);
+            },
+            // 添加规则名称
+            createAttrName () {
+                if (this.formDynamic.attrsName && this.formDynamic.attrsVal) {
+                    let data = {
+                        value: this.formDynamic.attrsName,
+                        detail: [
+                            this.formDynamic.attrsVal
+                        ]
+                    };
+                    this.attrs.push(data);
+                    var hash = {};
+                    this.attrs = this.attrs.reduce(function (item, next) {
+                        /* eslint-disable */
+                        hash[next.value] ? '' : hash[next.value] = true && item.push(next);
+                        return item
+                    }, [])
+                    this.clearAttr();
+                    this.showIput = false;
+                    this.createBnt = true;
+                } else {
+                    this.$Message.warning('请添加完整的规格！');
+                }
+            },
+            // 添加属性
+            createAttr (num, idx) {
+                if (num) {
+                    this.attrs[idx].detail.push(num);
+                    var hash = {};
+                    this.attrs[idx].detail = this.attrs[idx].detail.reduce(function (item, next) {
+                        /* eslint-disable */
+                        hash[next] ? '' : hash[next] = true && item.push(next);
+                        return item
+                    }, [])
+                } else {
+                    this.$Message.warning('请添加属性');
+                }
+            },
+            // 商品分类；
+            goodsCategory () {
+                treeListApi().then(res => {
+                    this.treeSelect = res.data;
+                }).catch(res => {
+                    this.$Message.error(res.msg);
+                })
+            },
+            // 改变规格
+            changeSpec () {
+            },
+            // 详情
+            getInfo () {
+                let that = this;
+                that.spinShow = true;
+                productInfoApi(that.$route.params.id).then(async res => {
+                    let data = res.data.productInfo;
+                    let cate_id = data.cate_id.map(Number);
+                    this.attrs = data.items || [];
+                    that.formValidate = data;
+                    that.formValidate.cate_id = cate_id;
+                    that.oneFormValidate = [data.attr];
+                    that.formValidate.header = [];
+                    that.generate();
+                    that.manyFormValidate = data.attrs;
+                    if(data.spec_type === 0){
+                        that.manyFormValidate = [];
+                    }else {
+                        that.createBnt = true;
+                        that.oneFormValidate = [
+                            {
+                                pic: '',
+                                price: 0,
+                                cost: 0,
+                                ot_price: 0,
+                                stock: 0,
+                                bar_code: '',
+                                weight:0,
+                                volume:0,
+                                brokerage:0,
+                                brokerage_two:0
+                            }
+                        ]
+                    }
+                    this.spinShow = false;
+                }).catch(res => {
+                    this.spinShow = false;
+                    this.$Message.error(res.msg);
+                })
+            },
+            // tab切换
+            onhangeTab (name) {
+                this.currentTab = name;
+            },
+            handleRemove (i) {
+                this.images.splice(i, 1);
+                this.formValidate.slider_image.splice(i, 1);
+            },
+            // 关闭图片上传模态框
+            changeCancel (msg) {
+                this.modalPic = false
+            },
+            // 点击商品图
+            modalPicTap (tit,picTit,index) {
+                this.modalPic = true;
+                this.isChoice = tit === 'dan' ? '单选' : '多选';
+                this.picTit = picTit;
+                this.tableIndex = index;
+            },
+            // 获取单张图片信息
+            getPic (pc) {
+                switch (this.picTit) {
+                    case 'danFrom':
+                        this.formValidate.image = pc.att_dir;
+                        if(!this.$route.params.id){
+                            if(this.formValidate.spec_type === 0){
+                                this.oneFormValidate[0].pic =  pc.att_dir;
+                            }else{
+                                this.manyFormValidate.map((item) => {
+                                    item.pic = pc.att_dir;
+                                });
+                                this.oneFormBatch[0].pic =  pc.att_dir;
+                            }
+                        }
+                        break;
+                    case 'danTable':
+                        this.oneFormValidate[this.tableIndex].pic = pc.att_dir;
+                        break;
+                    case 'duopi':
+                        this.oneFormBatch[this.tableIndex].pic = pc.att_dir;
+                        break;
+                    default:
+                        this.manyFormValidate[this.tableIndex].pic=pc.att_dir;
+                }
+                this.modalPic = false;
+            },
+            // 获取多张图信息
+            getPicD (pc) {
+                this.images = pc;
+                this.images.map((item) => {
+                    this.formValidate.slider_image.push(item.att_dir)
+                });
+                this.modalPic = false;
+            },
+            // 提交
+            handleSubmit (name) {
+                this.$refs[name].validate((valid) => {
+                    if (valid) {
+                        if(this.formValidate.spec_type ===0 ){
+                            this.formValidate.attrs = this.oneFormValidate;
+                            this.formValidate.header = [];
+                            this.formValidate.items = [];
+                        }else{
+                            this.formValidate.items = this.attrs;
+                            this.formValidate.attrs = this.manyFormValidate;
+                        }
+                        if(this.formValidate.spec_type === 1 && this.manyFormValidate.length===0){
+                            return this.$Message.warning('请点击生成规格！');
+                        }
+                        productAddApi(this.formValidate).then(async res => {
+                            this.$Message.success(res.msg);
+                            setTimeout(() => {
+                                this.$router.push({ path: '/admin/product/product_list' });
+                            }, 500);
+                        }).catch(res => {
+                            this.$Message.error(res.msg);
+                        })
+                    } else {
+                       if(!this.formValidate.store_name || !this.formValidate.cate_id || !this.formValidate.keyword
+                       || !this.formValidate.unit_name || !this.formValidate.store_info
+                           || !this.formValidate.image || !this.formValidate.slider_image){
+                           this.$Message.warning("请填写完整商品信息！");
+                       }
+                    }
+                })
+            },
+            changeTemplate (msg) {
+                this.template = msg
+            },
+            // 表单验证
+            validate (prop, status, error) {
+                if (status === false) {
+                    this.$Message.warning(error);
+                }
+            },
+            // 移动
+            handleDragStart (e, item) {
+                this.dragging = item;
+            },
+            handleDragEnd (e, item) {
+                this.dragging = null
+            },
+            handleDragOver (e) {
+                e.dataTransfer.dropEffect = 'move'
+            },
+            handleDragEnter (e, item) {
+                e.dataTransfer.effectAllowed = 'move'
+                if (item === this.dragging) {
+                    return
+                }
+                const newItems = [...this.formValidate.slider_image]
+                const src = newItems.indexOf(this.dragging)
+                const dst = newItems.indexOf(item)
+                newItems.splice(dst, 0, ...newItems.splice(src, 1))
+                this.formValidate.slider_image = newItems;
+            },
+            // 添加自定义弹窗
+            addCustomDialog (editorId) {
+                window.UE.registerUI('test-dialog', function (editor, uiName) {
+                    // 创建 dialog
+                    let dialog = new window.UE.ui.Dialog({
+                        iframeUrl: '/admin/widget.images/index.html?fodder=dialog',
+                        editor: editor,
+                        name: uiName,
+                        title: '上传图片',
+                        cssRules: 'width:1200px;height:500px;padding:20px;'
+                    });
+                    this.dialog = dialog;
+                    let btn = new window.UE.ui.Button({
+                        name: 'dialog-button',
+                        title: '上传图片',
+                        cssRules: `background-image: url(../../../assets/images/icons.png);background-position: -726px -77px;`,
+                        onclick: function () {
+                            // 渲染dialog
+                            dialog.render();
+                            dialog.open();
+                        }
+                    });
+                    return btn;
+                }, 37);
+                window.UE.registerUI('video-dialog', function (editor, uiName) {
+                    let dialog = new window.UE.ui.Dialog({
+                        iframeUrl: '/admin/widget.video/index.html?fodder=video',
+                        editor: editor,
+                        name: uiName,
+                        title: '上传视频',
+                        cssRules: 'width:1000px;height:500px;padding:20px;'
+                    });
+                    this.dialog = dialog;
+                    let btn = new window.UE.ui.Button({
+                        name: 'video-button',
+                        title: '上传视频',
+                        cssRules: `background-image: url(../../../assets/images/icons.png);background-position: -320px -20px;`,
+                        onclick: function () {
+                            // 渲染dialog
+                            dialog.render();
+                            dialog.open();
+                        }
+                    });
+                    return btn;
+                }, 38);
+            }
+        }
+    }
+</script>
+<style scoped lang="stylus">
+    .noLeft
+        >>> .ivu-form-item-content
+         margin-left 0 !important
+    .iview-video-style{
+        width: 40%;
+        height: 180px;
+        border-radius: 10px;
+        background-color: #707070;
+        margin-top: 10px;
+        position: relative;
+        overflow: hidden;
+    }
+    .iview-video-style .iconv{
+        color: #fff;
+        line-height: 180px;
+        width: 50px;
+        height: 50px;
+        display: inherit;
+        font-size: 26px;
+        position: absolute;
+        top: -74px;
+        left: 50%;
+        margin-left: -25px;
+    }
+    .iview-video-style .mark{
+        position: absolute;
+        width: 100%;
+        height: 30px;
+        top: 0;
+        background-color: rgba(0,0,0,.5);
+        text-align: center;
+    }
+        .uploadVideo
+            margin-left 10px;
+        .submission
+            margin-left 10px;
+        .color-list .tip{
+            color: #c9c9c9;
+        }
+        .color-list .color-item{
+            height: 30px;
+            line-height: 30px;
+            padding: 0 10px;
+            color:#fff;
+            margin-right :10px;
+        }
+        .color-list .color-item.blue{
+            background-color: #1E9FFF;
+        }
+        .color-list .color-item.yellow{
+            background-color: rgb(254, 185, 0);
+        }
+        .color-list .color-item.green{
+            background-color: #009688;
+        }
+        .columnsBox
+            margin-right 10px
+        .priceBox
+            width 100%
+        .rulesBox
+            display flex
+            flex-wrap: wrap;
+        .pictrueBox
+            display inline-block;
+        .pictrueTab
+            width:40px !important;
+            height:40px !important;
+        .pictrue
+            width:60px;
+            height:60px;
+            border:1px dotted rgba(0,0,0,0.1);
+            margin-right:15px;
+            display: inline-block;
+            position: relative;
+            cursor: pointer;
+            img
+                width 100%
+                height 100%
+            .btndel
+                position: absolute;
+                z-index: 1;
+                width :20px !important;
+                height: 20px !important;
+                left: 46px;
+                top: -4px;
+        .upLoad {
+            width: 58px;
+            height: 58px;
+            line-height: 58px;
+            border: 1px dotted rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.02);
+            cursor: pointer;
+        }
+        .curs
+            cursor pointer
+        .inpWith
+            width 60%;
+        .labeltop
+            >>> .ivu-form-item-label
+                float: none !important;
+                display: inline-block !important;
+                margin-left: 120px !important;
+                width auto !important
+
+</style>

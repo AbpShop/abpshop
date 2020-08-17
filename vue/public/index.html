@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+    <link rel="shortcut icon" href="<%= BASE_URL %>favicon.ico">
+    <title><%= VUE_APP_TITLE %></title>
+</head>
+<body>
+<noscript>
+    <strong>
+        请开启 JavaScript 功能来使用 <%= VUE_APP_TITLE %>。
+    </strong>
+</noscript>
+<div id="app">
+
+</div>
+</body>
+<script>
+    // dataset 方法兼容 IE 浏览器。ie10及以下不支持dataset
+    if (window.HTMLElement) {
+        if (Object.getOwnPropertyNames(HTMLElement.prototype).indexOf('dataset') === -1) {
+            Object.defineProperty(HTMLElement.prototype, 'dataset', {
+                get: function () {
+                    var attributes = this.attributes // 获取节点的所有属性
+                    var name = []
+                    var value = [] // 定义两个数组保存属性名和属性值
+                    var obj = {} // 定义一个空对象
+                    for (var i = 0; i < attributes.length; i++) { // 遍历节点的所有属性
+                        if (attributes[i].nodeName.slice(0, 5) === 'data-') { // 如果属性名的前面5个字符符合"data-"
+                            // 取出属性名的"data-"的后面的字符串放入name数组中
+                            name.push(attributes[i].nodeName.slice(5));
+                            // 取出对应的属性值放入value数组中
+                            value.push(attributes[i].nodeValue);
+                        }
+                    }
+                    for (var j = 0; j < name.length; j++) { // 遍历name和value数组
+                        obj[name[j]] = value[j]; // 将属性名和属性值保存到obj中
+                    }
+                    return obj // 返回对象
+                }
+            })
+        }
+    }
+</script>
+</html>

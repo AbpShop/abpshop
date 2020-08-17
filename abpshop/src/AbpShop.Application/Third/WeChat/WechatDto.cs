@@ -10,6 +10,7 @@ namespace AbpShop.Third.WeChat
     public class WeChat
     {
         public const string APPID = "[appid]"; //参数名约束规则定义
+        public const string SECRET = "[secret]"; //参数名约束规则定义
         public const string ACCESS_TOKEN = "[access_token]"; //参数名约束规则定义
     }
 
@@ -34,13 +35,21 @@ namespace AbpShop.Third.WeChat
     }
 
     /// <summary>
+    /// 微信登录请求后的JSON返回格式
+    /// </summary>
+    public class LoginResult : WxJsonResult
+    {
+        public string openid { get; set; } //用户唯一标识
+        public string session_key { get; set; } //会话密钥
+        public string unionid { get; set; } //用户在开放平台的唯一标识符
+    }
+
+    /// <summary>
     /// 小程序返回结果
     /// </summary>
     public class WxJsonResult
     {
         public int errcode { get; set; } //错误码
         public string errmsg { get; set; } //错误信息
-        public dynamic data { get; set; } //返回数据
-        public int count { get; set; } //总数
     }
 }

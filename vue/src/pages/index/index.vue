@@ -1,0 +1,73 @@
+<template>
+    <div>
+        <!--头部-->
+        <base-info ref="baseInfo"/>
+        <!--小方块-->
+        <grid-menu/>
+        <!--订单统计-->
+        <visit-chart ref="visitChart"/>
+        <!--用户-->
+        <user-chart ref="userChart"/>
+    </div>
+</template>
+
+<script>
+    import baseInfo from './components/baseInfo';
+    import gridMenu from './components/gridMenu';
+    import visitChart from './components/visitChart';
+    import userChart from './components/userChart';
+    import hotSearch from './hot-search';
+    import userPreference from './user-preference';
+    import { checkAuth } from '@/api/index';
+    import { Notice } from 'iview'
+    import util from '@/libs/util';
+
+    export default {
+        name: 'index',
+        components: { baseInfo, gridMenu, visitChart, userChart, hotSearch, userPreference },
+        data () {
+            return {
+                visitType: 'day', // day, month, year
+                visitDate: [(new Date()), (new Date())]
+            }
+        },
+        mounted () {
+            if (!util.cookies.get('auth')) {
+                checkAuth().then(res => {
+                    return Notice.warning({
+                        title: '授权提醒',
+                        duration: 3,
+                        desc: res.msg,
+                        render: h => {
+                            return h('div', [
+                                h('a', {
+                                    attrs: {
+                                        href: 'http://shop.AbpShop.net'
+                                    }
+                                }, res.msg)
+                            ])
+                        },
+                        onClose () {
+                            util.cookies.set('auth', true, 86400);
+                        }
+                    });
+                }).catch(res => {
+                })
+            }
+        },
+        methods: {}
+    }
+</script>
+
+<style lang="less">
+    .dashboard-console-visit {
+        .ivu-radio-group-button .ivu-radio-wrapper {
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 12px;
+        }
+        .ivu-radio-group-button .ivu-radio-wrapper:before, .ivu-radio-group-button .ivu-radio-wrapper:after {
+            display: none;
+        }
+    }
+</style>
