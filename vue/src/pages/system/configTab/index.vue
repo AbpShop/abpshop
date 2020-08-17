@@ -57,7 +57,7 @@
                 </vxe-table-column>
             </vxe-table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="formValidate.page" show-elevator show-total @on-change="pageChange"
                       :page-size="formValidate.limit"/>
             </div>
         </Card>
@@ -173,6 +173,7 @@
             },
             // 表格搜索
             userSearchs () {
+                this.formValidate.page = 1;
                 this.getList();
             },
             // 修改成功

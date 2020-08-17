@@ -1,0 +1,104 @@
+<template>
+    <div class="line-box" v-if="configData">
+        <div class="title">
+            <p>搜索热词</p>
+            <span>热词最多20个字，鼠标拖拽左侧圆点可调整</span>
+        </div>
+        <div class="input-box">
+            <draggable
+                    class="dragArea list-group"
+                    :list="hotWordList"
+                    group="peoples"
+                    handle=".icon"
+            >
+                <div class="input-item" v-for="(item,index) in configData.list" :key="index">
+                    <div class="icon">
+                        <Icon type="ios-keypad" size="20" />
+                    </div>
+                    <Input v-model="item.val" placeholder="选填，不超过十个字" clearable  />
+                </div>
+            </draggable>
+            <div class="add-btn" @click="addHotTxt">
+                <Button type="primary" ghost style="width: 100%; height: 40px;border-color:#1890FF; color: #1890FF;"">添加热词</Button>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+    import vuedraggable from 'vuedraggable'
+    export default {
+        name: 'c_hot_word',
+        props: {
+            configObj: {
+                type: Object
+            },
+            configNme: {
+                type: String
+            }
+        },
+        components: {
+            draggable: vuedraggable
+        },
+        data () {
+            return {
+                hotWordList: [],
+                hotIndex: 1,
+                defaults: {},
+                configData: {}
+            }
+        },
+        created () {
+            this.defaults = this.configObj
+            this.configData = this.configObj[this.configNme]
+        },
+        watch: {
+            configObj: {
+                handler (nVal, oVal) {
+                    // this.hotWordList = nVal.hotList
+                    this.configData = nVal[this.configNme]
+                },
+                immediate: true,
+                deep: true
+            }
+        },
+        methods: {
+            addHotTxt () {
+                let obj = JSON.parse(JSON.stringify(this.configData.list[this.configData.list.length - 1]))
+                this.configData.list.push(obj)
+                // this.$emit('input', this.hotWordList);
+            }
+        }
+    }
+</script>
+
+<style scoped lang="stylus">
+    .line-box
+        margin-top 20px
+        padding 10px 0 20px
+        border-top 1px solid rgba(0,0,0,.05)
+        border-bottom 1px solid rgba(0,0,0,.05)
+        .title
+            p
+                font-size 14px
+                color #000000
+            span
+                color #999999
+        .input-box
+            margin-top 10px
+            .add-btn
+                margin-top 18px
+            .input-item
+                display flex
+                align-items center
+                margin-bottom 15px
+                .icon
+                    display flex
+                    align-items center
+                    justify-content center
+                    width 36px
+                    cursor move
+                /deep/.ivu-input
+                    flex 1
+                    height 36px
+
+</style>

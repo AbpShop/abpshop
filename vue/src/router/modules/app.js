@@ -127,7 +127,7 @@ export default {
             name: `${pre}routineTemplate`,
             meta: {
                 auth: ['routine-routine_template'],
-                title: '小程序模板消息'
+                title: '小程序订阅消息'
             },
             component: () => import('@/pages/app/routine/routineTemplate/index')
         }

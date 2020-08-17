@@ -69,10 +69,11 @@
             }
         },
         async created () {
-            const db = await this.$store.dispatch('admin/db/database', {
-                user: true
-            });
-            const menuSider = db.get('menus').value();
+            // const db = await this.$store.dispatch('admin/db/database', {
+            //     user: true
+            // });
+            // const menuSider = db.get('menus').value();
+            let menuSider = this.$store.state.admin.menus.menusName;
             this.allSiderMenu = flattenSiderMenu(menuSider, []);
         },
         methods: {

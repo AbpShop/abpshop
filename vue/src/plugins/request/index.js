@@ -103,7 +103,7 @@ service.interceptors.response.use(
             // [ 示例 ] code === 0 代表没有错误
             return response.data;
         case 400:case 400011:case 400012:
-            return Promise.reject(response.data || { msg: '未知错误', data: [] });
+            return Promise.reject(response.data || { msg: '未知错误' });
         // [ 示例 ] 其它和后台约定的 code
         // errorCreate(response.data.msg);
         // break;

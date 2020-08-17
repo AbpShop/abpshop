@@ -2,9 +2,10 @@
     <div>
         <div class="i-layout-page-header">
             <PageHeader class="product_tabs" hidden-breadcrumb>
-                <div slot="title" class="ivu-mt ivu-mb">
+                <div slot="title">
                     <router-link :to="{path:'/admin/app/wechat/reply/keyword'}"><Button icon="ios-arrow-back" size="small"  class="mr20" v-show="$route.params.id">返回</Button></router-link>
-                    <span v-text="$route.meta.title" class="mr20"></span>
+                    <span v-text="($route.params.key || $route.params.id !== '0')?'关键字编辑':'关键字添加'" class="mr20" v-if="$route.params.id"></span>
+                    <span v-text="$route.meta.title" class="mr20" v-else></span>
                 </div>
             </PageHeader>
         </div>
@@ -49,11 +50,13 @@
                                           :label-width="100" class="mt20" @submit.native.prevent>
                                         <FormItem label="关键字：" prop="val" v-if="$route.params.id">
                                             <div class="arrbox">
-                                                <Tag  @on-close="handleClose" :name="item" :closable="$route.params.id==='0'? true : false"
+                                                <!--:closable="$route.params.id==='0'? true : false"-->
+                                                <Tag  @on-close="handleClose" :name="item" :closable="true"
                                                      v-for="(item, index) in labelarr" :key="index">{{item}}
                                                 </Tag>
+                                                <!--:readonly="$route.params.id!=='0'"-->
                                                 <input class="arrbox_ip" v-model="val" placeholder="输入后回车"
-                                                       style="width: 90%;" @keyup.enter="addlabel" :readonly="$route.params.id!=='0'"></input>
+                                                       style="width: 90%;" @keyup.enter="addlabel"></input>
                                             </div>
                                         </FormItem>
                                         <FormItem label="规则状态：">
@@ -178,7 +181,7 @@
                     },
                     id: 0
                 },
-                fileUrl: Setting.apiBaseURL + 'file/upload/1',
+                fileUrl: Setting.apiBaseURL + '/file/upload/1',
                 ruleValidate: {
                     val: [
                         { required: true, validator: validateVal, trigger: 'change' }
@@ -349,7 +352,7 @@
             },
             // 保存成功操作
             operation () {
-                if (this.$route.params.id) {
+                if (this.$route.params.id && this.$route.params.id === '0') {
                     this.$Modal.confirm({
                         title: '提示',
                         content: '<p>是否继续添加？</p>',
@@ -371,6 +374,9 @@
                             }, 500);
                         }
                     });
+                } else if (this.$route.params.id && this.$route.params.id !== '0') {
+                    this.$Modal.remove();
+                    this.$router.push({ path: '/admin/app/wechat/reply/keyword' })
                 }
             }
         }

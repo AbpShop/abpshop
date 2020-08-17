@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="i-layout-page-header">
-            <PageHeader class="product_tabs" title="已发布管理" hidden-breadcrumb></PageHeader>
+            <PageHeader class="product_tabs" title="优惠券列表" hidden-breadcrumb></PageHeader>
         </div>
         <Card :bordered="false" dis-hover class="ivu-mt">
             <Form ref="tableFrom" :model="tableFrom"  :label-width="labelWidth" :label-position="labelPosition" @submit.native.prevent>
@@ -53,7 +53,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="tableFrom.page" show-elevator show-total @on-change="pageChange"
                       :page-size="tableFrom.limit"/>
             </div>
         </Card>
@@ -112,11 +112,11 @@
                     },
                     {
                         title: '优惠券名称',
-                        key: 'title',
+                        key: 'coupon_title',
                         minWidth: 150
                     },
                     {
-                        title: '领取日期',
+                        title: '有效期限',
                         slot: 'start_time',
                         minWidth: 250
                     },

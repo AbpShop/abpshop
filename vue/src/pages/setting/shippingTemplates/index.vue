@@ -36,7 +36,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="levelFrom.page" show-elevator show-total @on-change="pageChange"
                       :page-size="levelFrom.limit"/>
             </div>
         </Card>
@@ -67,7 +67,7 @@
                     {
                         title: 'ID',
                         key: 'id',
-                        minWidth: 100
+                        width: 80
                     },
                     {
                         title: '模板名称',
@@ -126,7 +126,7 @@
             }
         },
         methods: {
-            //添加运费模板
+            // 添加运费模板
             freight () {
                 this.$refs.template.id = 0;
                 this.$refs.template.isTemplate = true;
@@ -172,6 +172,7 @@
             },
             // 表格搜索
             userSearchs () {
+                this.levelFrom.page = 1;
                 this.getList();
             }
         }

@@ -20,7 +20,7 @@
                 </Col>
             </Row>
         </Form>
-        <Table ref="table" no-data-text="暂无数据" no-filtered-data-text="暂无筛选结果" max-height="400" :columns="columns4"
+        <Table ref="table" no-data-text="暂无数据" @on-selection-change="changeCheckbox" no-filtered-data-text="暂无筛选结果" max-height="400" :columns="columns4"
                :data="tableList" :loading="loading">
             <template slot-scope="{ row, index }" slot="image">
                 <viewer>
@@ -166,6 +166,14 @@
             this.getList();
         },
         methods: {
+            changeCheckbox(selection) {
+                let images = [];
+                selection.forEach(function (item){
+                    let imageObject = { image:item.image,product_id:item.id};
+                    images.push(imageObject)
+                });
+                this.images = images;
+            },
             // 商品分类；
             goodsCategory() {
                 treeListApi().then(res => {

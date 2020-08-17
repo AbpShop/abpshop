@@ -6,7 +6,7 @@
         <Card :bordered="false" dis-hover class="ivu-mt">
             <Row type="flex">
                 <Col v-bind="grid">
-                    <Button type="primary"  icon="md-add" @click="add">添加标签</Button>
+                    <Button v-auth="['admin-user-label_add']" type="primary"  icon="md-add" @click="add">添加标签</Button>
                 </Col>
             </Row>
             <Table :columns="columns1" :data="labelLists" ref="table" class="mt25"

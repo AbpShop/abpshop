@@ -22,7 +22,7 @@
                     </Col>
                     <Col  v-bind="grid" >
                         <FormItem class="tab_data">
-                            <DatePicker  :value="value2" format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="Select date" style="width: 200px;"></DatePicker>
+                            <DatePicker :editable="false" :value="value2" format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="Select date" style="width: 200px;"></DatePicker>
                         </FormItem>
                     </Col>
                 </Col>

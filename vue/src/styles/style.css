@@ -1,4 +1,47 @@
 @charset "UTF-8";
+.mobile-page{
+    width: 100%;
+}
+.paddingBox{
+    padding:0 10px 10px;
+}
+.mobile-config{
+    width: 100%;
+    padding: 15px;
+}
+.c_label{
+    font-size: 14px;
+    color: #999999;
+}
+.c_label span{
+    margin-left: 10px;
+    color: #333;
+}
+.c_row-item{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.btn-box{
+    margin-top: 20px;
+    text-align: center;
+}
+.empty-box{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #CBCBCB;
+    border-radius: 6px;
+}
+.empty-box.on{
+    border-radius: 0px;
+}
+.empty-box .iconfont-diy{
+    color: #999;
+    font-size: 30px;
+}
 .acea-row {
     display: -webkit-box;
     display: -moz-box;
@@ -145,7 +188,18 @@
     -webkit-justify-content: space-between;
     justify-content: space-between;
 }
-
+.line1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.line2 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient: vertical;
+}
 /*表单公共样式*/
 html, body {
     font-size: 12px !important;
@@ -154,6 +208,7 @@ html, body {
 .ivu-table-wrapper {
     overflow: unset !important;
 }
+
 
 .page {
     margin-top: 22px;
@@ -172,7 +227,7 @@ html, body {
 .ivu-table-header table{
     border-top: 1px #e8eaec dashed !important;
 }
-.ivu-form .ivu-form-item-label, .ivu-radio-group-button .ivu-radio-wrapper, .ivu-table {
+.ivu-form .ivu-form-item-label, .ivu-radio-group-button .ivu-radio-wrapper, .ivu-table,.ivu-select,.ivu-select-item {
     font-size: 12px !important;
 }
 
@@ -209,7 +264,7 @@ html, body {
 }
 
 .ivu-input {
-    font-size: 12px !important;
+    font-size: 14px !important;
 }
 
 .modalBody .ivu-modal-body {
@@ -339,6 +394,22 @@ html, body {
 .ivu-form-item-content {
     font-size: 12px !important;
 }
+
+/*添加商品页面*/
+#shopp-manager .ivu-form-item-content{
+    line-height: 23px !important;
+}
+
+#shopp-manager .ivu-tag{
+    background-color: unset !important;
+    height: 28px !important;
+    line-height: 28px !important;
+    padding: 0 10px !important;
+}
+#shopp-manager .ivu-tag .ivu-icon-ios-close{
+    top:0
+}
+
 
 /*字体上移变蓝色*/
 .font-blue:hover {

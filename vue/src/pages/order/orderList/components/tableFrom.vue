@@ -5,7 +5,7 @@
                 <Col span="24" class="ivu-text-left">
                         <FormItem label="订单状态：">
                             <RadioGroup v-model="orderData.status" type="button"  @on-change="selectChange2(orderData.status)">
-                                <Radio label="">全部 {{  '(' +orderChartType.all?orderChartType.all:0 + ')' }}</Radio>
+                                <Radio label="">全部 {{  '(' +orderChartType.statusAll?orderChartType.statusAll:0 + ')' }}</Radio>
                                 <Radio label="0">未支付 {{  '(' +orderChartType.unpaid?orderChartType.unpaid:0+ ')' }}</Radio>
                                 <Radio label="1">未发货 {{  '(' +orderChartType.unshipped?orderChartType.unshipped:0+ ')' }}</Radio>
                                 <Radio label="2">待收货 {{  '(' +orderChartType.untake?orderChartType.untake:0+ ')' }}</Radio>
@@ -20,7 +20,7 @@
                     </Col>
                 <Col span="24" class="ivu-text-left">
                     <FormItem label="创建时间：">
-                        <DatePicker @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd"
+                        <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd"
                                     type="datetimerange" placement="bottom-start" placeholder="自定义时间"
                                     style="width: 300px;" class="mr20" :options="options"></DatePicker>
                     </FormItem>
@@ -37,12 +37,14 @@
                     <!--</Col>-->
                 </Col>
                 <Col span="24">
-                    <Button v-auth="['order-dels']" class="mr10" type="primary" @click="delAll">批量删除订单</Button>
-                    <Button v-auth="['order-write']" type="success" class="ml20 mr10 greens" size="default" @click="writeOff">
-                        <Icon type="md-list"></Icon>
-                        订单核销
-                    </Button>
-                    <Button class="export" icon="ios-share-outline" @click="exports">导出</Button>
+                    <div class="ml20">
+                        <Button v-auth="['order-dels']" class="mr10" type="primary" @click="delAll">批量删除订单</Button>
+                        <Button v-auth="['order-write']" type="success" class="mr10 greens" size="default" @click="writeOff">
+                            <Icon type="md-list"></Icon>
+                            订单核销
+                        </Button>
+                        <Button v-auth="['export-storeOrder']" class="export" icon="ios-share-outline" @click="exports">导出</Button>
+                    </div>
                 </Col>
             </Row>
         </Form>
@@ -53,6 +55,23 @@
                     <Input search enter-button="验证" style="width: 100%;" type="text" placeholder="请输入12位核销码" @on-search="search('writeOffFrom')" v-model.number="writeOffFrom.code" number/>
                 </FormItem>
             </Form>
+            <div class="order-wrapper" v-if="orderInfo">
+                <div class="title">订单信息</div>
+                <div class="order-box">
+                    <div class="item">
+                        <div class="label">订单号</div>
+                        <div class="con">{{orderInfo.order_id}}</div>
+                    </div>
+                    <div class="item">
+                        <div class="label">购买金额</div>
+                        <div class="con">{{orderInfo.status}}</div>
+                    </div>
+                    <div class="item">
+                        <div class="label">购买用户</div>
+                        <div class="con">{{orderInfo.nickname}}</div>
+                    </div>
+                </div>
+            </div>
             <div slot="footer">
                 <Button type="primary"  @click="ok">立即核销</Button>
                 <Button @click="del('writeOffFrom')">取消</Button>
@@ -185,7 +204,9 @@
                             }
                         }
                     ]
-                }
+                },
+                orderStatus: false,
+                orderInfo:''
             }
         },
         computed: {
@@ -241,7 +262,7 @@
                 this.orderData.data = this.timeVal[0] ? this.timeVal.join('-') : '';
                 this.$store.dispatch('admin/order/getOrderTabs', { data: this.orderData.data })
                 this.getOrderTime(this.orderData.data);
-                this.$emit('getList');
+                this.$emit('getList', 1);
             },
             // 选择时间
             selectChange (tab) {
@@ -254,7 +275,7 @@
             // 订单选择状态
             selectChange2 (tab) {
                 this.getOrderStatus(tab);
-                this.$emit('getList');
+                this.$emit('getList', 1);
             },
             // 时间状态
             timeChange (time) {
@@ -314,10 +335,11 @@
                     if (valid) {
                         putWrite(this.writeOffFrom).then(async res => {
                             if (res.status === 200) {
+                                this.orderInfo = res.data;
                                 this.$Message.success(res.msg);
-                                this.modals2 = false;
-                                this.$refs[name].resetFields();
-                                this.$emit('getList');
+                                // this.modals2 = false;
+                                // this.$refs[name].resetFields();
+                                // this.$emit('getList');
                             } else {
                                 this.$Message.error(res.msg);
                             }
@@ -325,7 +347,7 @@
                             this.$Message.error(res.msg);
                         })
                     } else {
-                        this.$Message.error('Fail!');
+                        this.$Message.error('请填写正确的核销码');
                     }
                 })
             },
@@ -350,6 +372,7 @@
                 }
             },
             del (name) {
+                this.orderInfo = ''
                 this.modals2 = false;
                 this.$refs[name].resetFields();
             },
@@ -382,4 +405,26 @@
      font-size 12px
      color #1890FF
      cursor pointer
+  .order-wrapper
+      margin-top 10px
+      padding 10px
+      border 1px solid #ddd
+      .title
+        font-size 16px
+      .order-box
+          margin-top 10px
+          border 1px solid #ddd
+          .item
+              display flex
+              align-items center
+              border-bottom 1px solid #ddd
+              &:last-child
+                  border-bottom 0
+              .label
+                  width 100px
+                  padding 10px 0 10px 10px
+                  border-right 1px solid #ddd
+              .con
+                  flex 1
+                  padding 10px 0 10px 10px
 </style>

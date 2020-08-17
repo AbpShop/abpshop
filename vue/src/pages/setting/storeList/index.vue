@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="i-layout-page-header">
-            <PageHeader class="product_tabs" title="提货点列表">
+            <PageHeader class="product_tabs" title="提货点" hidden-breadcrumb>
                 <div slot="content">
                     <Tabs v-model="artFrom.type"  @on-click="onClickTab">
                         <TabPane :label="headeNum.show.name +'('+headeNum.show.num +')' " name="0" />
@@ -19,14 +19,14 @@
                             <Input search enter-button placeholder="请输入提货点名称,电话" v-model="artFrom.keywords"  @on-search="userSearchs"/>
                         </FormItem>
                     </Col>
-                    <Col v-bind="grid">
-                        <Button class="mr">导出</Button>
-                    </Col>
+<!--                    <Col v-bind="grid">-->
+<!--                        <Button class="mr">导出</Button>-->
+<!--                    </Col>-->
                 </Row>
             </Form>
             <Row type="flex" v-auth="['setting-merchant-system_store-save']">
                 <Col v-bind="grid">
-                    <Button type="primary"  icon="md-add" @click="add">添加提货点</Button>
+                    <Button v-auth="['setting-merchant-system_store-save']" type="primary"  icon="md-add" @click="add">添加提货点</Button>
                 </Col>
             </Row>
             <Table :columns="columns" :data="storeLists" ref="table" class="mt25"
@@ -53,7 +53,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="artFrom.page" show-elevator show-total @on-change="pageChange"
                       :page-size="artFrom.limit"/>
             </div>
         </Card>
@@ -66,7 +66,7 @@
     import { storeGetHeaderApi, merchantStoreApi, storeSetShowApi } from '@/api/setting';
     import systemStore from '@/components/systemStore/index';
     export default {
-        name: "setting_store",
+        name: 'setting_store',
         components: { systemStore },
         computed: {
             ...mapState('admin/layout', [
@@ -92,9 +92,9 @@
                     xs: 24
                 },
                 headeNum: {
-                    show:{name:'',num:0},
-                    hide:{name:'',num:0},
-                    recycle:{name:'',num:0}
+                    show: { name: '', num: 0 },
+                    hide: { name: '', num: 0 },
+                    recycle: { name: '', num: 0 }
                 },
                 artFrom: {
                     page: 1,
@@ -103,7 +103,7 @@
                     keywords: ''
                 },
                 loading: false,
-                columns:[
+                columns: [
                     {
                         title: 'ID',
                         key: 'id',
@@ -155,33 +155,35 @@
             this.storeHeade();
             this.getList();
         },
-        methods :{
-            //获取表单头部信息；
+        methods: {
+            // 获取表单头部信息；
             storeHeade () {
                 let that = this;
-                storeGetHeaderApi().then(res=>{
+                storeGetHeaderApi().then(res => {
                     that.headeNum = res.data.count;
-                }).catch(res=>{
+                }).catch(res => {
                     this.$Message.error(res.msg);
                 })
             },
             getList () {
                 let that = this;
                 that.loading = true;
-                merchantStoreApi (that.artFrom).then(res=>{
+                merchantStoreApi(that.artFrom).then(res => {
                     that.loading = false;
                     that.storeLists = res.data.list;
                     that.total = res.data.count;
-                }).catch(res=>{
+                }).catch(res => {
                     this.$Message.error(res.msg);
                 })
             },
-            //搜索；
+            // 搜索；
             userSearchs () {
+                this.artFrom.page = 1;
                 this.getList();
             },
-            //切换导航；
+            // 切换导航；
             onClickTab () {
+                this.artFrom.page = 1;
                 this.artFrom.keywords = '';
                 this.getList();
             },
@@ -205,13 +207,13 @@
                     this.$Message.error(res.msg);
                 });
             },
-            //添加提货点；
+            // 添加提货点；
             add () {
                 this.$refs.template.isTemplate = true;
             },
-            onchangeIsShow (id,is_show) {
+            onchangeIsShow (id, is_show) {
                 let that = this;
-                storeSetShowApi(id,is_show).then(res=>{
+                storeSetShowApi(id, is_show).then(res => {
                     that.$Message.success(res.msg);
                     that.getList();
                     that.storeHeade();

@@ -55,6 +55,18 @@ export function productShowApi (data) {
 }
 
 /**
+ * @description 商品属性 -- 批量下架
+ * @param {Object} param data {Object} 传值对象
+ */
+export function productUnshowApi (data) {
+    return request({
+        url: `product/product/product_unshow`,
+        method: 'put',
+        data
+    });
+}
+
+/**
  * @description 商品管理-- 分类
  */
 export function treeListApi () {
@@ -114,7 +126,7 @@ export function productCreateApi () {
  */
 export function productEditApi (id) {
     return request({
-        url: `product/category/${id}/edit`,
+        url: `product/category/${id}`,
         method: 'get'
     });
 }
@@ -171,7 +183,7 @@ export function setReplyApi (data, id) {
  */
 export function crawlFromApi (data) {
     return request({
-        url: `product/crawl`,
+        url: `product/copy`,
         method: 'POST',
         data
     });
@@ -193,9 +205,9 @@ export function crawlSaveApi (data) {
  * @description 商品管理 -- 生成属性
  * @param {Object} param data {Object} 传值参数
  */
-export function generateAttrApi (data, id) {
+export function generateAttrApi (data, id, type) {
     return request({
-        url: `product/generate_attr/${id}`,
+        url: `product/generate_attr/${id}/${type}`,
         method: 'POST',
         data
     });
@@ -239,10 +251,11 @@ export function ruleInfoApi (id) {
 
 /**
  * @description 商品评价 -- 虚拟评价
+ * @id--产品id；
  */
-export function fictitiousReply () {
+export function fictitiousReply (id) {
     return request({
-        url: `product/reply/fictitious_reply`,
+        url: `product/reply/fictitious_reply/${id}`,
         method: 'get'
     });
 }
@@ -294,6 +307,16 @@ export function storeProductApi (data) {
 export function checkActivityApi (id) {
     return request({
         url: `product/product/check_activity/${id}`,
+        method: 'get'
+    });
+}
+
+/**
+ * @description 商品添加编辑-- 用户标签
+ */
+export function labelListApi () {
+    return request({
+        url: 'user/user_label',
         method: 'get'
     });
 }

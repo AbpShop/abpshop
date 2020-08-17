@@ -56,7 +56,7 @@ export default {
             name: `${pre}productAttr`,
             meta: {
                 auth: ['admin-store-storeProuduct-index'],
-                title: '属性规则'
+                title: '商品规格'
             },
             component: () => import('@/pages/product/productAttr')
         }

@@ -2,7 +2,7 @@
     <div class="article-manager">
         <div class="i-layout-page-header">
             <PageHeader class="product_tabs" hidden-breadcrumb>
-                <div slot="title" class="ivu-mt ivu-mb">
+                <div slot="title">
                     <router-link :to="{path:'/admin/cms/article/index'}"><Button icon="ios-arrow-back" size="small"  class="mr20">返回</Button></router-link>
                     <span v-text="$route.params.id?'编辑文章':'添加文章'" class="mr20"></span>
                 </div>

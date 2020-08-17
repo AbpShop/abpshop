@@ -11,7 +11,7 @@
                 <Divider style="margin: 20px 0 !important;"/>
                 <DescriptionList title="订单信息" :col="2">
                     <Description term="订单ID：">{{orderDatalist.orderInfo.order_id}}</Description>
-                    <Description term="订单状态：" class="fontColor1">{{orderDatalist.orderInfo.status_name}}</Description>
+                    <Description term="订单状态：" class="fontColor1">{{orderDatalist.orderInfo._status._title}}</Description>
                     <Description term="商品总数：">{{orderDatalist.orderInfo.total_num}}</Description>
                     <Description term="商品总价：">{{orderDatalist.orderInfo.total_price}}</Description>
                     <Description term="交付邮费：">{{orderDatalist.orderInfo.pay_postage}}</Description>

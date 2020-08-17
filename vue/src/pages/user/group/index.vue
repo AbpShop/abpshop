@@ -6,7 +6,7 @@
         <Card :bordered="false" dis-hover class="ivu-mt">
             <Row type="flex">
                 <Col v-bind="grid">
-                    <Button type="primary"  icon="md-add" @click="add">添加分组</Button>
+                    <Button v-auth="['admin-user-group']" type="primary"  icon="md-add" @click="add">添加分组</Button>
                 </Col>
             </Row>
             <Table :columns="columns1" :data="groupLists" ref="table" class="mt25"

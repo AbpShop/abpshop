@@ -3,7 +3,7 @@
         <Row class="colLeft">
             <Col :xl="6" :lg="6" :md="6" :sm="6" :xs="24" class="colLeft">
                 <div class="Nav">
-                    <div class="input"><Input search enter-button placeholder="选择分类" v-model="uploadName.name" style="width: 90%;" @on-search="changePage"/></div>
+                    <div class="input"><Input search enter-button placeholder="请输入分类名称" v-model="uploadName.name" style="width: 90%;" @on-search="changePage"/></div>
                     <div class="trees-coadd">
                         <div class="scollhide">
                             <div class="trees">
@@ -136,6 +136,47 @@
             },
             // 树状图
             renderContent (h, { root, node, data }) {
+                let actionData = [];
+                if (data.id !== '' && data.pid == 0) {
+                    actionData.push(h('Button', {
+                        props: Object.assign({}, this.buttonProps, {
+                            icon: 'ios-add'
+                        }),
+                        style: {
+                            marginRight: '8px',
+                            display: data.flag ? 'inline' : 'none'
+                        },
+                        on: {
+                            click: () => { this.append(root, node, data) }
+
+                        }
+                    }));
+                }
+                if (data.id !== '') {
+                    actionData.push(h('Button', {
+                        props: Object.assign({}, this.buttonProps, {
+                            icon: 'md-create'
+                        }),
+                        style: {
+                            marginRight: '8px',
+                            display: data.flag ? 'inline' : 'none'
+                        },
+                        on: {
+                            click: () => { this.editPic(root, node, data) }
+                        }
+                    }));
+                    actionData.push(h('Button', {
+                        props: Object.assign({}, this.buttonProps, {
+                            icon: 'ios-remove'
+                        }),
+                        style: {
+                            display: data.flag ? 'inline' : 'none'
+                        },
+                        on: {
+                            click: () => { this.remove(root, node, data, '分类') }
+                        }
+                    }));
+                }
                 return h('div', {
                     style: {
                         display: 'inline-block',
@@ -162,44 +203,7 @@
                             display: 'inline-block',
                             float: 'right'
                         }
-                    }, [
-                        h('Button', {
-                            props: Object.assign({}, this.buttonProps, {
-                                icon: 'ios-add'
-                            }),
-                            style: {
-                                marginRight: '8px',
-                                display: data.flag ? 'inline' : 'none'
-                            },
-                            on: {
-                                click: () => { this.append(root, node, data) }
-
-                            }
-                        }),
-                        h('Button', {
-                            props: Object.assign({}, this.buttonProps, {
-                                icon: 'md-create'
-                            }),
-                            style: {
-                                marginRight: '8px',
-                                display: data.flag ? 'inline' : 'none'
-                            },
-                            on: {
-                                click: () => { this.editPic(root, node, data) }
-                            }
-                        }),
-                        h('Button', {
-                            props: Object.assign({}, this.buttonProps, {
-                                icon: 'ios-remove'
-                            }),
-                            style: {
-                                display: data.flag ? 'inline' : 'none'
-                            },
-                            on: {
-                                click: () => { this.remove(root, node, data, '分类') }
-                            }
-                        })
-                    ])
+                    }, actionData)
                 ]);
             },
             renderContentSel (h, { root, node, data }) {

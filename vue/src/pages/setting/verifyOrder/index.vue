@@ -11,7 +11,7 @@
                             <RadioGroup v-model="formValidate.data" type="button" class="mr">
                                 <Radio :label=item.val v-for="(item,i) in fromList.fromTxt" :key="i">{{item.text}}</Radio>
                             </RadioGroup>
-                            <DatePicker @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd" type="daterange"
+                            <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd" type="daterange"
                                         placement="bottom-end" placeholder="自定义时间" style="width: 200px;" ></DatePicker>
                         </FormItem>
                     </Col>
@@ -22,7 +22,7 @@
                     </Col>
                     <Col span="12" class="mr">
                         <FormItem label="选择门店："  label-for="store_name">
-                            <Select v-model="formValidate.store_id">
+                            <Select v-model="formValidate.store_id" element-id="store_id" clearable @on-change="userSearchs">
                                 <Option v-for="item in storeSelectList" :value="item.id" :key="item.id">{{ item.name }}</Option>
                             </Select>
                         </FormItem>
@@ -62,7 +62,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="formValidate.page" show-elevator show-total @on-change="pageChange"
                       :page-size="formValidate.limit"/>
             </div>
         </Card>
@@ -71,7 +71,7 @@
 </template>
 
 <script>
-    import { verifyOrderApi, merchantStoreListApi, verifyBadgeApi } from '@/api/setting';
+    import { verifyOrderApi, merchantStoreListApi } from '@/api/setting';
     import cardsData from '@/components/cards/cards';
     import referrerInfo from '@/components/referrerInfo/index';
     export default {
@@ -122,7 +122,7 @@
                     {
                         title: '商品信息',
                         slot: 'info',
-                        minWidth: 190
+                        minWidth: 360
                     },
                     {
                         title: '实际支付',
@@ -164,7 +164,6 @@
         mounted () {
             this.getList();
             this.storeList();
-            this.verifyBadge();
         },
         methods: {
             getList () {
@@ -174,11 +173,13 @@
                     that.loading = false;
                     that.orderList = res.data.data;
                     that.total = res.data.count;
+                    that.cardLists = res.data.badge;
                 }).catch(res => {
                     that.$Message.error(res.msg);
                 })
             },
             userSearchs () {
+                this.formValidate.page = 1;
                 this.getList();
             },
             // 具体日期
@@ -197,14 +198,6 @@
             pageChange (index) {
                 this.formValidate.page = index;
                 this.getList();
-            },
-            verifyBadge () {
-                let that = this;
-                verifyBadgeApi().then(res => {
-                    that.cardLists = res.data;
-                }).catch(res => {
-                    that.$Message.error(res.msg);
-                })
             },
             referenceInfo (uid) {
                 this.$refs.info.isTemplate = true;

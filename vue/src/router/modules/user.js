@@ -21,7 +21,7 @@ export default {
             name: `${pre}list`,
             meta: {
                 auth: ['admin-user-user-index'],
-                title: '会员管理'
+                title: '用户管理'
             },
             component: () => import('@/pages/user/list/index')
         },
@@ -41,7 +41,7 @@ export default {
             meta: {
                 auth: ['user-user-group'],
                 footer: true,
-                title: '会员分组'
+                title: '用户分组'
             },
             component: () => import('@/pages/user/group/index')
         },
@@ -51,7 +51,7 @@ export default {
             meta: {
                 auth: ['user-user-label'],
                 footer: true,
-                title: '会员标签'
+                title: '用户标签'
             },
             component: () => import('@/pages/user/label/index')
         }

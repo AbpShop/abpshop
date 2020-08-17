@@ -28,6 +28,7 @@
                           :icon-color="item.iconColor"
                           :time="item.time"
                           :read="item.read"
+                          @on-item-click="jumpUrl(item.url)"
                   />
             </NotificationTab>
         </Notification>
@@ -47,7 +48,8 @@
                 },
                 needList: [],
                 messageList: [],
-                messageLoading: false
+                messageLoading: false,
+                newOrderAudioLink: ''
             }
         },
         computed: {
@@ -57,6 +59,13 @@
         },
         mounted () {
             this.getNotict();
+            this.$store.dispatch('admin/db/get', {
+                dbName: 'sys',
+                path: 'user.info',
+                user: true
+            }).then(res => {
+                this.newOrderAudioLink = res.newOrderAudioLink;
+            })
             Socket.init(this);
             let that = this;
             that.$on('ADMIN_NEW_PUSH', function (data) {
@@ -70,7 +79,7 @@
                     duration: 8,
                     desc: '您有一个新的订单(' + data.order_id + '),请注意查看'
                 });
-                if (window.newOrderAudioLink) (new Audio(window.newOrderAudioLink)).play();
+                if (this.newOrderAudioLink) (new Audio(this.newOrderAudioLink)).play();
                 that.messageList.push({
                     title: '新订单提醒',
                     icon: 'md-bulb',
@@ -138,6 +147,9 @@
             });
         },
         methods: {
+            jumpUrl (url) {
+                this.$router.push({ path: url })
+            },
             getNotict () {
                 jnoticeRequest().then(res => {
                     this.needList = res.data || [];

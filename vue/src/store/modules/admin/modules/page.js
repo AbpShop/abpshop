@@ -325,7 +325,7 @@ export default {
                 // 持久化
                 await dispatch('opened2db');
                 // 关闭所有的标签页后需要判断一次现在是不是在首页
-                if (router.app.$route.name !== '/home/index') {
+                if (router.app.$route.name !== '/admin/home') {
                     router.push({
                         name: 'home_index'
                     });

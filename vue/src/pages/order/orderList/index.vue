@@ -66,7 +66,12 @@
             },
             onClickTab () {
                 this.onChangeTabs(Number(this.currentTab))
+                this.$store.dispatch('admin/order/getOrderTabs', {
+                    data: '',
+                    type: Number(this.currentTab)
+                });
                 this.$refs.productlist.getChangeTabs()
+                this.$store.dispatch('admin/order/getOrderTabs', { type: this.currentTab });
             }
         }
     }

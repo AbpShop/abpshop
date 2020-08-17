@@ -32,7 +32,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="artFrom.page" show-elevator show-total @on-change="pageChange"
                       :page-size="artFrom.limit"/>
             </div>
         </Card>

@@ -35,7 +35,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="levelFrom.page" show-elevator show-total @on-change="pageChange"
                       :page-size="levelFrom.limit"/>
             </div>
         </Card>
@@ -182,6 +182,7 @@
             },
             // 表格搜索
             userSearchs () {
+                this.levelFrom.page = 1;
                 this.getList();
             }
         }

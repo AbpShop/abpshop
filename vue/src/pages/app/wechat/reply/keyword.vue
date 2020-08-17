@@ -7,8 +7,8 @@
             <Form ref="levelFrom" :model="formValidate"  :label-width="labelWidth" :label-position="labelPosition" @submit.native.prevent>
                 <Row type="flex" :gutter="24">
                     <Col v-bind="grid">
-                        <FormItem label="回复类型：" prop="key" label-for="key">
-                            <Select v-model="formValidate.key" placeholder="请选择" element-id="key" clearable @on-change="userSearchs">
+                        <FormItem label="回复类型：" prop="type" label-for="type">
+                            <Select v-model="formValidate.type" placeholder="请选择" element-id="type" clearable @on-change="userSearchs">
                                 <Option value="text">文字消息</Option>
                                 <Option value="image">图片消息</Option>
                                 <Option value="news">图文消息</Option>
@@ -17,8 +17,8 @@
                         </FormItem>
                     </Col>
                     <Col v-bind="grid">
-                        <FormItem label="关键字：" prop="type" label-for="type">
-                            <Input search enter-button  v-model="formValidate.type" placeholder="请输入关键字" @on-search="userSearchs"/>
+                        <FormItem label="关键字：" prop="key" label-for="key">
+                            <Input search enter-button  v-model="formValidate.key" placeholder="请输入关键字" @on-search="userSearchs"/>
                         </FormItem>
                     </Col>
                 </Row>
@@ -45,7 +45,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="formValidate.page" show-elevator show-total @on-change="pageChange"
                       :page-size="formValidate.limit"/>
             </div>
         </Card>
@@ -151,6 +151,7 @@
             },
             // 表格搜索
             userSearchs () {
+                this.formValidate.page = 1;
                 this.getList();
             },
             // 添加

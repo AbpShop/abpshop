@@ -43,7 +43,7 @@ export default {
             name: `${pre}storeCoupon`,
             meta: {
                 auth: ['marketing-store_coupon'],
-                title: '优惠券制作'
+                title: '优惠券模板'
             },
             component: () => import('@/pages/marketing/storeCoupon/index')
         },
@@ -52,7 +52,7 @@ export default {
             name: `${pre}storeCouponIssue`,
             meta: {
                 auth: ['marketing-store_coupon_issue'],
-                title: '已发布管理'
+                title: '优惠券列表'
             },
             component: () => import('@/pages/marketing/storeCouponIssue/index')
         },
@@ -61,7 +61,7 @@ export default {
             name: `${pre}storeCouponUser`,
             meta: {
                 auth: ['marketing-store_coupon_user'],
-                title: '会员领取记录'
+                title: '用户领取记录'
             },
             component: () => import('@/pages/marketing/storeCouponUser/index')
         },

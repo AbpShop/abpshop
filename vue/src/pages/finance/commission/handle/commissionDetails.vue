@@ -1,6 +1,6 @@
 <template>
     <div style="width: 100%">
-        <Modal v-model="modals" scrollable footer-hide closable title="会员详情" :mask-closable="false"
+        <Modal v-model="modals" scrollable footer-hide closable title="用户详情" :mask-closable="false"
                width="700">
             <Spin size="large" fix v-if="spinShow"></Spin>
             <div class="acea-row">
@@ -25,7 +25,7 @@
                     </Col>
                     <Col span="12">
                         <FormItem label="时间范围：" class="tab_data">
-                            <DatePicker style="width: 100%" @on-change="onchangeTime" format="yyyy-MM-dd"
+                            <DatePicker :editable="false" style="width: 100%" @on-change="onchangeTime" format="yyyy-MM-dd"
                                         type="daterange" placement="bottom-end" placeholder="自定义时间"></DatePicker>
                         </FormItem>
                     </Col>
@@ -42,7 +42,7 @@
                    no-filtered-userFrom-text="暂无筛选结果"
             ></Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="formValidate.page" show-elevator show-total @on-change="pageChange"
                       :page-size="formValidate.limit"/>
             </div>
         </Modal>
@@ -131,7 +131,7 @@
             getList () {
                 this.loading = true;
                 extractlistApi(this.Ids, this.formValidate).then(async res => {
-                    let data = res.data
+                    let data = res.data;
                     this.tabList = data.data;
                     this.total = data.count;
                     this.loading = false;
@@ -146,6 +146,7 @@
             },
             // 搜索
             userSearchs () {
+                this.formValidate.page = 1;
                 this.getList();
             }
         }

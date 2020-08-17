@@ -80,16 +80,18 @@
                 errorNum: 0,
                 jigsaw: null,
                 login_logo: '',
-                swiperList: [],
-                defaultSwiperList: require('@/assets/images/sw.jpg')
+                swiperList: []
             }
         },
         created () {
             var _this = this;
+            top != window && (top.location.href = location.href);
             document.onkeydown = function (e) {
-                let key = window.event.keyCode;
-                if (key === 13) {
-                    _this.handleSubmit('formInline');
+                if (_this.$route.name === 'login') {
+                    let key = window.event.keyCode;
+                    if (key === 13) {
+                        _this.handleSubmit('formInline');
+                    }
                 }
             };
             window.addEventListener('resize', this.handleResize)
@@ -109,7 +111,8 @@
                 }
             },
             $route (n) {
-                this.imgcode = Setting.apiBaseURL + '/captcha_pro?' + Date.parse(new Date());
+                console.log(n);
+                this.captchas();
             }
         },
         mounted: function () {
@@ -133,14 +136,13 @@
                 }
                 this.swiperData();
             });
-            this.imgcode = Setting.apiBaseURL + '/captcha_pro?' + Date.parse(new Date());
+            this.captchas();
         },
         methods: {
             swiperData () {
                 loginInfoApi().then(res => {
                     let data = res.data || {};
                     this.login_logo = data.login_logo ? data.login_logo : require('@/assets/images/logo.png');
-                    this.swiperList = data.slide.length ? data.slide : [{ slide: this.defaultSwiperList }];
                 }).catch(res => {
                     this.$Message.error(res.msg)
                 })
@@ -172,7 +174,9 @@
                         user: true
                     });
                     // 保存菜单信息
-                    db.set('menus', res.data.menus).set('unique_auth', res.data.unique_auth).set('user_info', res.data.user_info).write();
+                    // db.set('menus', res.data.menus).set('unique_auth', res.data.unique_auth).set('user_info', res.data.user_info).write();
+                    db.set('unique_auth', res.data.unique_auth).set('user_info', res.data.user_info).write();
+                    this.$store.commit('admin/menus/getmenusNav', res.data.menus);
                     // 记录用户信息
                     this.$store.dispatch('admin/user/set', {
                         name: res.data.user_info.account,
@@ -180,7 +184,8 @@
                         access: res.data.unique_auth,
                         logo: res.data.logo,
                         logoSmall: res.data.logo_square,
-                        version: res.data.version
+                        version: res.data.version,
+                        newOrderAudioLink: res.data.newOrderAudioLink
                     });
                     if (this.jigsaw) this.jigsaw.reset();
                     return this.$router.replace({ path: this.$route.query.redirect || '/admin/' });
@@ -188,7 +193,7 @@
                     msg();
                     let data = res === undefined ? {} : res;
                     this.errorNum++;
-                    this.imgcode = Setting.apiBaseURL + '/captcha_pro?' + Date.parse(new Date());
+                    this.captchas();
                     this.$Message.error(data.msg || '登录失败');
                     if (this.jigsaw) this.jigsaw.reset();
                 });

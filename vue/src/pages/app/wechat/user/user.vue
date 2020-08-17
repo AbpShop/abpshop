@@ -16,7 +16,7 @@
                                         {{itemn.text}}
                                     </Radio>
                                 </RadioGroup>
-                                <DatePicker @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd"
+                                <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd"
                                             type="daterange" placement="bottom-end" placeholder="自定义时间"
                                             style="width: 200px;"></DatePicker>
                             </FormItem>
@@ -300,7 +300,7 @@
             // 点击发送优惠券
             onSend () {
                 if (this.selectionList.length === 0) {
-                    this.$Message.warning('请选择要发送优惠券的会员');
+                    this.$Message.warning('请选择要发送优惠券的用户');
                 } else {
                     this.$refs.sends.modals = true;
                     this.$refs.sends.getList()
@@ -309,7 +309,7 @@
             // 发送图文消息
             onSendPic () {
                 if (this.selectionList.length === 0) {
-                    this.$Message.warning('请选择要发送图文消息的会员');
+                    this.$Message.warning('请选择要发送图文消息的用户');
                 } else {
                     this.modal13 = true;
                 }

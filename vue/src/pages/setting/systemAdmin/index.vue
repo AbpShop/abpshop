@@ -8,9 +8,10 @@
                 <Row type="flex"  :gutter="24">
                     <Col v-bind="grid">
                         <FormItem label="状态："  label-for="status1">
-                            <Select v-model="formValidate.roles" placeholder="请选择"  @on-change="userSearchs" clearable>
-                                <Option value="">身份</Option>
-                                <Option value="2">公测管理员</Option>
+                            <Select v-model="formValidate.status" placeholder="请选择"  @on-change="userSearchs" clearable>
+                                <Option value="">全部</Option>
+                                <Option value="1">开启</Option>
+                                <Option value="0">关闭</Option>
                             </Select>
                         </FormItem>
                     </Col>
@@ -22,7 +23,7 @@
                 </Row>
                 <Row type="flex">
                     <Col v-bind="grid">
-                            <Button type="primary" @click="add"  icon="md-add">添加身份</Button>
+                            <Button v-auth="['setting-system_admin-add']" type="primary" @click="add"  icon="md-add">添加管理员</Button>
                     </Col>
                 </Row>
             </Form>
@@ -46,7 +47,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="formValidate.page" show-elevator show-total @on-change="pageChange"
                       :page-size="formValidate.limit"/>
             </div>
         </Card>
@@ -78,9 +79,10 @@
                 },
                 formValidate: {
                     roles: '',
+                    status: '',
                     name: '',
                     page: 1, // 当前页
-                    limit: 15 // 每页显示条数
+                    limit: 20 // 每页显示条数
                 },
                 list: [],
                 columns1: [
@@ -163,7 +165,8 @@
                 this.loading = true;
                 this.formValidate.roles = this.formValidate.roles || ''
                 adminListApi(this.formValidate).then(async res => {
-                    this.list = res.data;
+                    this.total = res.data.count;
+                    this.list = res.data.list;
                     this.loading = false;
                 }).catch(res => {
                     this.loading = false;
@@ -186,7 +189,7 @@
             // 编辑
             edit (row) {
                 adminEditFromApi(row.id).then(async res => {
-                    if(res.data.status === false){
+                    if (res.data.status === false) {
                         return this.$authLapse(res.data);
                     }
                     this.FromData = res.data;
@@ -213,6 +216,8 @@
             },
             // 表格搜索
             userSearchs () {
+                this.formValidate.page = 1;
+                this.list = [];
                 this.getList();
             }
         }

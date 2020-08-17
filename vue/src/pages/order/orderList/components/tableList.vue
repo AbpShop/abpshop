@@ -28,6 +28,7 @@
                 <a @click="edit(row)"  v-if='row._status === 1'>编辑</a>
                 <a @click="sendOrder(row)" v-if='row._status === 2 && row.shipping_type === 1'>发送货</a>
                 <a @click="delivery(row)"  v-if='row._status === 4'>配送信息</a>
+                <a @click="bindWrite(row)"  v-if="row.shipping_type == 2 && row.status == 0  && row.paid == 1">立即核销</a>
                 <Divider type="vertical" v-if='row._status === 1 || row._status === 2 || row._status === 4'/>
                 <template>
                     <Dropdown @on-click="changeMenu(row,$event)">
@@ -38,6 +39,7 @@
                             <DropdownItem name="1" ref="ones" v-show='row._status === 1 && row.paid === 0 && row.pay_type === "offline" '>立即支付</DropdownItem>
                             <DropdownItem name="2">订单详情</DropdownItem>
                             <DropdownItem name="3">订单记录</DropdownItem>
+                            <DropdownItem name="10" v-show="row._status >= 2">订单打印</DropdownItem>
                             <DropdownItem name="4"  v-show='row._status !==1 || ( row._status === 3 && (row.use_integral > 0 && row.use_integral >= row.back_integral) ) '>订单备注</DropdownItem>
                             <DropdownItem name="5"  v-show='row._status !==1 && parseFloat(row.pay_price) > parseFloat(row.refund_price)'>立即退款</DropdownItem>
                             <DropdownItem name="6"  v-show='row._status !==1 && (row.use_integral > 0 && row.use_integral >= row.back_integral) '>退积分</DropdownItem>
@@ -50,7 +52,7 @@
             </template>
         </Table>
         <div class="acea-row row-right page">
-            <Page :total="page.total" show-elevator show-total @on-change="pageChange"
+            <Page :total="page.total" :current="page.pageNum" show-elevator show-total @on-change="pageChange"
                   :page-size="page.pageSize" show-sizer/>
         </div>
         <!-- 编辑 退款 退积分 不退款-->
@@ -68,7 +70,7 @@
 
 <script>
     import expandRow from './tableExpand.vue';
-    import { orderList, getOrdeDatas, getDataInfo, getRefundFrom, getnoRefund, refundIntegral, getDistribution } from '@/api/order';
+    import { orderList, getOrdeDatas, getDataInfo, getRefundFrom, getnoRefund, refundIntegral, getDistribution, writeUpdate } from '@/api/order';
     import { mapState, mapMutations } from 'vuex';
     import editFrom from '../../../../components/from/from';
     import detailsFrom from '../handle/orderDetails';
@@ -169,10 +171,15 @@
                 'orderType'
             ])
         },
-        mounted () {
-        },
+        mounted () {},
         created () {
             this.getList();
+        },
+        watch: {
+            'orderType': function () {
+                this.page.pageNum = 1;
+                this.getList();
+            }
         },
         methods: {
             ...mapMutations('admin/order', [
@@ -234,6 +241,23 @@
                     });
                     // this.modalTitleSs = '修改确认收货';
                     break;
+                case '10':
+                    this.delfromData = {
+                        title: '立即打印订单',
+                        info: '您确认打印此订单吗?',
+                        url: `/order/print/${row.id}`,
+                        method: 'get',
+                        ids: ''
+                    };
+                    this.$modalSure(this.delfromData).then((res) => {
+                        this.$Message.success(res.msg);
+                        this.$emit('changeGetTabs');
+                        this.getList();
+                    }).catch(res => {
+                        console.log(res);
+                        this.$Message.error(res.msg);
+                    });
+                    break;
                 default:
                     this.delfromData = {
                         title: '删除订单',
@@ -250,25 +274,26 @@
                 this.getList();
             },
             pageChange (index) {
-                this.page.pageNum = index
+                this.page.pageNum = index;
                 this.getList();
             },
             // 订单列表
             getList (res) {
+                this.page.pageNum = res === 1 ? 1 : this.page.pageNum;
                 this.loading = true;
                 orderList({
-                    page: res === 1 ? 1 : this.page.pageNum,
+                    page: this.page.pageNum,
                     limit: this.page.pageSize,
                     status: this.orderStatus,
                     data: this.orderTime,
                     real_name: this.orderNum,
                     type: this.orderType === 0 ? '' : this.orderType
                 }).then(async res => {
-                    let data = res.data
+                    let data = res.data;
                     this.orderList = data.data;
                     this.orderCards = data.stat;
                     this.page.total = data.count;
-                    this.$emit('on-changeCards', data.stat)
+                    this.$emit('on-changeCards', data.stat);
                     this.loading = false;
                 }).catch(res => {
                     this.loading = false;
@@ -376,6 +401,20 @@
             exportData: function () {
                 this.$refs.table.exportCsv({
                     filename: '商品列表'
+                });
+            },
+            // 核销订单
+            bindWrite (row) {
+                let self = this
+                this.$Modal.warning({
+                    title: '提示',
+                    content: '确定要核销该订单吗？',
+                    onOk: function () {
+                        writeUpdate(row.order_id).then(res => {
+                            self.$Message.success(res.msg)
+                            self.getList();
+                        })
+                    }
                 });
             }
         }

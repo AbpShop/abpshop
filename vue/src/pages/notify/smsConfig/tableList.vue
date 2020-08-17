@@ -16,7 +16,7 @@
                    no-userFrom-text="暂无数据"
                    no-filtered-userFrom-text="暂无筛选结果" class="mt25"></Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="tableFrom.page" show-elevator show-total @on-change="pageChange"
                       :page-size="tableFrom.limit"/>
             </div>
         </Card>
@@ -78,6 +78,7 @@
             // 选择
             selectChange (tab) {
                 this.tableFrom.type = tab;
+                this.tableFrom.page = 1;
                 this.getList();
             },
             // 列表

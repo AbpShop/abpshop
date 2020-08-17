@@ -22,7 +22,7 @@
                 </Row>
                 <Row type="flex">
                     <Col v-bind="grid">
-                            <Button type="primary"  icon="md-add" @click="add('添加')">添加身份</Button>
+                            <Button v-auth="['setting-system_role-add']" type="primary"  icon="md-add" @click="add('添加')">添加身份</Button>
                     </Col>
                 </Row>
             </Form>
@@ -43,7 +43,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="formValidate.page" show-elevator show-total @on-change="pageChange"
                       :page-size="formValidate.limit"/>
             </div>
         </Card>
@@ -104,7 +104,7 @@
                     status: '',
                     role_name: '',
                     page: 1,
-                    limit: 15
+                    limit: 20
                 },
                 columns1: [
                     {
@@ -229,6 +229,7 @@
             },
             // 表格搜索
             userSearchs () {
+                this.formValidate.page = 1;
                 this.getList();
             },
             // 编辑

@@ -192,6 +192,11 @@
             ...mapMutations('admin/layout', [
                 'updateMenuCollapse'
             ]),
+            ...mapMutations('admin/order', [
+                'getOrderStatus',
+                'getOrderTime',
+                'getOrderNum'
+            ]),
             handleToggleDrawer (state) {
                 if (typeof state === 'boolean') {
                     this.showDrawer = state;
@@ -232,6 +237,9 @@
             },
             handleReload () {
                 this.loadRouter = false;
+                this.getOrderStatus('');
+                this.getOrderTime('');
+                this.getOrderNum('');
                 this.$nextTick(() => {
                     this.loadRouter = true;
                 });
@@ -251,4 +259,6 @@
 <style scoped lang="stylus">
     .i-layout-content-main
        height 100%;
+    .i-layout-header
+       z-index 6;
 </style>

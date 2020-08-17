@@ -86,15 +86,15 @@
                                    @on-click="iconClick"></Input>
                         </FormItem>
                     </Col>
-                    <Col v-bind="grid" v-if="authType">
-                        <FormItem label="顶部菜单：">
-                            <Select v-model="formValidate.header" filterable allow-create @on-create="handleCreate1">
-                                <Option v-for="(item,i) in headerOptionsList" :value="item.value" :key="i">{{ item.label
-                                    }}
-                                </Option>
-                            </Select>
-                        </FormItem>
-                    </Col>
+                    <!--<Col v-bind="grid" v-if="authType">-->
+                        <!--<FormItem label="顶部菜单：">-->
+                            <!--<Select v-model="formValidate.header" filterable allow-create @on-create="handleCreate1">-->
+                                <!--<Option v-for="(item,i) in headerOptionsList" :value="item.value" :key="i">{{ item.label-->
+                                    <!--}}-->
+                                <!--</Option>-->
+                            <!--</Select>-->
+                        <!--</FormItem>-->
+                    <!--</Col>-->
                     <Col v-bind="grid">
                         <FormItem label="排序：">
                             <Input type="number" v-model="formValidate.sort" placeholder="请输入排序" number></Input>
@@ -1183,6 +1183,7 @@
                         this.modals = false;
                         this.$emit('getList');
                         this.getAddFrom();
+                        this.$store.dispatch('admin/menus/getMenusNavList');
                     }).catch(res => {
                         console.log(res);
                         this.$Message.error(res.msg);

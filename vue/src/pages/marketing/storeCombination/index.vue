@@ -21,8 +21,8 @@
                     </Col>
                 </Row>
                 <Row type="flex">
-                    <Button type="primary" class="bnt mr15" icon="md-add" @click="add">添加拼团商品</Button>
-                    <Button class="export" icon="ios-share-outline" @click="exports">导出</Button>
+                    <Button v-auth="['marketing-store_combination-create']" type="primary" class="bnt mr15" icon="md-add" @click="add">添加拼团商品</Button>
+                    <Button v-auth="['export-storeCombination']" class="export" icon="ios-share-outline" @click="exports">导出</Button>
                 </Row>
             </Form>
             <Alert class="mt20" closable>目前拥有{{tableList.length!==0?tableList.length:0}}个拼团商品</Alert>
@@ -56,7 +56,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="formValidate.page" show-elevator show-total @on-change="pageChange"
                       :page-size="formValidate.limit"/>
             </div>
         </Card>

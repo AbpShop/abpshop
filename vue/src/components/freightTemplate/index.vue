@@ -418,7 +418,7 @@
                     name: that.formData.name,
                     appoint: that.formData.appoint_check
                 };
-                templatesSaveApi(that.id, data).then(() => {
+                templatesSaveApi(that.id, data).then(res => {
                     this.isTemplate = false;
                     this.$parent.getList();
                     this.formData = {
@@ -444,6 +444,7 @@
                             continue_price: 0
                         }
                     ];
+                    this.$Message.success(res.msg);
                 });
             },
             // 删除

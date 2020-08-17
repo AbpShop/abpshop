@@ -254,8 +254,6 @@ export function groupAddApi (id) {
     });
 }
 
-
-
 /**
  * @description 个人中心 --- 修改密码
  * data 请求参数
@@ -288,7 +286,7 @@ export function userLabelApi (data) {
     return request({
         url: `user/user_label`,
         method: 'get',
-        data
+        params: data
     });
 }
 

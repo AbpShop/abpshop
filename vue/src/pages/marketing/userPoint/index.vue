@@ -8,17 +8,17 @@
             <Form ref="tableFrom" :model="tableFrom"  :label-width="labelWidth" :label-position="labelPosition" @submit.native.prevent>
                 <Row :gutter="24" type="flex">
                     <Col :xl="6" :lg="10" :md="10" :sm="24" :xs="24">
-                        <FormItem label="用户搜索：" label-for="store_name">
-                            <Input search enter-button placeholder="请输入用户微信昵称" v-model="tableFrom.nickname" @on-search="userSearchs"/>
+                        <FormItem label="搜索：" label-for="store_name">
+                            <Input search enter-button placeholder="请输入用户ID,订单ID,标题,备注" v-model="tableFrom.nickname" @on-search="userSearchs"/>
                         </FormItem>
                     </Col>
                     <Col :xl="6" :lg="10" :md="10" :sm="24" :xs="24">
                         <FormItem label="选择时间："  label-for="user_time">
-                            <DatePicker clearable @on-change="onchangeTime" v-model="timeVal" :value="timeVal"  format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="选择时间" v-width="'100%'"></DatePicker>
+                            <DatePicker :editable="false" clearable @on-change="onchangeTime" v-model="timeVal" :value="timeVal"  format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="选择时间" v-width="'100%'"></DatePicker>
                         </FormItem>
                     </Col>
                     <Col :xl="4" :lg="4" :md="4" :sm="24" :xs="24">
-                        <Button class="export" icon="ios-share-outline" @click="exports">导出</Button>
+                        <Button v-auth="['export-userPoint']" class="export" icon="ios-share-outline" @click="exports">导出</Button>
                     </Col>
                 </Row>
             </Form>
@@ -28,7 +28,7 @@
                    no-filtered-userFrom-text="暂无筛选结果">
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="tableFrom.page" show-elevator show-total @on-change="pageChange"
                       :page-size="tableFrom.limit"/>
             </div>
         </Card>
@@ -142,6 +142,7 @@
                 this.timeVal = e;
                 this.tableFrom.start_time = e[0];
                 this.tableFrom.end_time = e[1];
+                this.tableFrom.page = 1;
                 this.getList();
             },
             // 列表

@@ -35,10 +35,18 @@ router.beforeEach(async (to, from, next) => {
             user: true
         });
         const token = util.cookies.get('token');
-        const expiresTime = util.cookies.get('expires_time');
-        let newTime = Math.round(new Date() / 1000);
-        if (token && token !== 'undefined' && expiresTime > newTime) {
-            next();
+        if (token && token !== 'undefined') {
+            const access = db.get('unique_auth').value();
+            const isPermission = includeArray(to.meta.auth, access);
+            if (isPermission) {
+                next();
+            } else {
+                console.log(to.meta);
+                next({
+                    name: '403'
+                });
+            }
+            // next();
         } else {
             store.dispatch('admin/db/databaseClear', {
                 user: true
@@ -50,16 +58,6 @@ router.beforeEach(async (to, from, next) => {
                 query: {
                     redirect: to.fullPath
                 }
-            });
-        }
-        const access = db.get('unique_auth').value();
-        const isPermission = includeArray(to.meta.auth, access);
-        if (isPermission) {
-            next();
-        } else {
-            console.log(to.meta);
-            next({
-                name: '403'
             });
         }
     } else {

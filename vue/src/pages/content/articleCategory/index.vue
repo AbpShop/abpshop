@@ -16,7 +16,7 @@
                         </FormItem>
                     </Col>
                     <Col v-bind="grid">
-                        <FormItem label="会员查询：" prop="status2" label-for="status2">
+                        <FormItem label="用户查询：" prop="status2" label-for="status2">
                             <Input search enter-button placeholder="Enter something..." />
                         </FormItem>
                     </Col>

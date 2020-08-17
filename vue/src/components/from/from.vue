@@ -46,7 +46,11 @@
                         upload: {
                             props: {
                                 onSuccess (res, file) {
-                                    console.log(res, file);
+                                    if (res.status === 200) {
+                                        file.url = res.data.src;
+                                    } else {
+                                        this.Message.error(res.msg);
+                                    }
                                 }
                             }
                         }

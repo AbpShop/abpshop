@@ -11,7 +11,7 @@
                             <RadioGroup v-model="formValidate.data" type="button"  @on-change="selectChange(formValidate.data)" class="mr">
                                 <Radio :label=item.val v-for="(item,i) in fromList.fromTxt" :key="i">{{item.text}}</Radio>
                             </RadioGroup>
-                            <DatePicker @on-change="onchangeTime" :value="timeVal"  format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="自定义时间" style="width: 200px;"></DatePicker>
+                            <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal"  format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="自定义时间" style="width: 200px;"></DatePicker>
                         </FormItem>
                     </Col>
                     <Col v-bind="grid">
@@ -21,7 +21,7 @@
                     </Col>
                     <Col span="24">
                         <FormItem>
-                           <Button class="export" icon="ios-share-outline" @click="exports">导出</Button>
+                           <Button v-auth="['export-userAgent']" class="export" icon="ios-share-outline" @click="exports">导出</Button>
                         </FormItem>
                     </Col>
                 </Row>
@@ -64,7 +64,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="formValidate.page" show-elevator show-total @on-change="pageChange"
                       :page-size="formValidate.limit"/>
             </div>
         </Card>
@@ -316,11 +316,13 @@
             onchangeTime (e) {
                 this.timeVal = e;
                 this.formValidate.data = this.timeVal.join('-');
+                this.formValidate.page = 1;
                 this.getList();
                 this.getStatistics();
             },
             // 选择时间
             selectChange (tab) {
+                this.formValidate.page = 1;
                 this.formValidate.data = tab;
                 this.timeVal = [];
                 this.getList();

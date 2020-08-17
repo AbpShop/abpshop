@@ -58,10 +58,10 @@
                     <a @click="del(row,'删除分类',index)">删除</a>
                 </template>
             </Table>
-            <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
-                      :page-size="formValidate.limit"/>
-            </div>
+<!--            <div class="acea-row row-right page">-->
+<!--                <Page :total="total" show-elevator show-total @on-change="pageChange"-->
+<!--                      :page-size="formValidate.limit"/>-->
+<!--            </div>-->
         </Card>
 
         <!-- 新建 表单-->

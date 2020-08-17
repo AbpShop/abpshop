@@ -15,7 +15,7 @@
                         <span class="ivu-pl-8">图表展示</span>
                     </Col>
                     <Col span="16" class="ivu-text-right">
-                        <DatePicker v-model="visitDate" type="daterange" placement="bottom-end" placeholder="Select date" style="width: 200px"></DatePicker>
+                        <DatePicker :editable="false" v-model="visitDate" type="daterange" placement="bottom-end" placeholder="Select date" style="width: 200px"></DatePicker>
                     </Col>
                 </Row>
             </div>

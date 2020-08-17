@@ -6,7 +6,7 @@
         <Card :bordered="false" dis-hover class="ivu-mt">
             <Row type="flex" class="mb20">
                 <Col span="24">
-                    <Button type="primary"  icon="md-add" @click="add" class="mr10">添加客服</Button>
+                    <Button v-auth="['setting-store_service-add']" type="primary"  icon="md-add" @click="add" class="mr10">添加客服</Button>
                 </Col>
             </Row>
             <Table :columns="columns1" :data="tableList"
@@ -45,68 +45,68 @@
         </Card>
 
         <!--添加客户-->
-        <Modal v-model="modals" scrollable   closable title="添加客服"  width="1000"  @on-cancel="cancel">
-            <Form ref="formValidate" :model="formValidate" :label-width="labelWidth" :label-position="labelPosition" @submit.native.prevent>
-            <Row :gutter="24" type="flex">
-                <Col span="24" class="ivu-text-left">
-                    <FormItem label="选择时间：">
-                        <RadioGroup v-model="formValidate.data" type="button" @on-change="selectChange(formValidate.data)"
-                                    class="mr">
-                            <Radio :label=item.val v-for="(item,i) in fromList.fromTxt" :key="i">{{item.text}}</Radio>
-                        </RadioGroup>
-                        <DatePicker @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd" type="daterange"
-                                    placement="bottom-end" placeholder="自定义时间" style="width: 200px;"></DatePicker>
-                    </FormItem>
-                </Col>
-                <Col span="12" class="ivu-text-left">
-                    <FormItem label="用户名称：" >
-                        <Input search enter-button  placeholder="请输入用户名称" v-model="formValidate.nickname" style="width: 90%;" @on-search="userSearchs"></Input>
-                    </FormItem>
-                </Col>
-                <Col span="12" class="ivu-text-left">
-                    <FormItem label="用户类型：" >
-                        <Select v-model="formValidate.type" style="width:90%;" @on-change="userSearchs">
-                            <Option value="">全部用户</Option>
-                            <Option value="wechat">公众号</Option>
-                            <Option value="routine">小程序</Option>
-                        </Select>
-                    </FormItem>
-                </Col>
-            </Row>
-            </Form>
-            <Table :loading="loading2" highlight-row no-userFrom-text="暂无数据" max-height="400"
-                   @on-selection-change="onSelectTab"
-                   no-filtered-userFrom-text="暂无筛选结果" ref="selection" :columns="columns4" :data="tableList2">
-                <template slot-scope="{ row, index }" slot="headimgurl">
-                    <viewer>
-                        <div class="tabBox_img">
-                            <img v-lazy="row.headimgurl">
-                        </div>
-                    </viewer>
-                </template>
-                <template slot-scope="{ row, index }" slot="user_type">
-                    <span>{{ row.user_type | typeFilter }}</span>
-                </template>
-                <template slot-scope="{ row, index }" slot="sex">
-                    <span v-show="row.sex ===1">男</span>
-                    <span v-show="row.sex ===2">女</span>
-                    <span v-show="row.sex ===0">保密</span>
-                </template>
-                <template slot-scope="{ row, index }" slot="country">
-                    <span>{{row.country + row.province + row.city}}</span>
-                </template>
-                <template slot-scope="{ row, index }" slot="subscribe">
-                    <span v-text="row.subscribe === 1?'关注':'未关注'"></span>
-                </template>
-            </Table>
-            <div class="acea-row row-right page">
-                <Page :total="total2" show-elevator show-total @on-change="pageChange2"
-                      :page-size="formValidate.limit"/>
-            </div>
-            <div slot="footer">
-                <Button  type="primary"  @click="putRemark">提交</Button>
-            </div>
-        </Modal>
+        <!--<Modal v-model="modals" scrollable   closable title="添加客服"  width="1000"  @on-cancel="cancel">-->
+            <!--<Form ref="formValidate" :model="formValidate" :label-width="labelWidth" :label-position="labelPosition" @submit.native.prevent>-->
+            <!--<Row :gutter="24" type="flex">-->
+                <!--<Col span="24" class="ivu-text-left">-->
+                    <!--<FormItem label="选择时间：">-->
+                        <!--<RadioGroup v-model="formValidate.data" type="button" @on-change="selectChange(formValidate.data)"-->
+                                    <!--class="mr">-->
+                            <!--<Radio :label=item.val v-for="(item,i) in fromList.fromTxt" :key="i">{{item.text}}</Radio>-->
+                        <!--</RadioGroup>-->
+                        <!--<DatePicker @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd" type="daterange"-->
+                                    <!--placement="bottom-end" placeholder="自定义时间" style="width: 200px;"></DatePicker>-->
+                    <!--</FormItem>-->
+                <!--</Col>-->
+                <!--<Col span="12" class="ivu-text-left">-->
+                    <!--<FormItem label="用户名称：" >-->
+                        <!--<Input search enter-button  placeholder="请输入用户名称" v-model="formValidate.nickname" style="width: 90%;" @on-search="userSearchs"></Input>-->
+                    <!--</FormItem>-->
+                <!--</Col>-->
+                <!--<Col span="12" class="ivu-text-left">-->
+                    <!--<FormItem label="用户类型：" >-->
+                        <!--<Select v-model="formValidate.type" style="width:90%;" @on-change="userSearchs">-->
+                            <!--<Option value="">全部用户</Option>-->
+                            <!--<Option value="wechat">公众号</Option>-->
+                            <!--<Option value="routine">小程序</Option>-->
+                        <!--</Select>-->
+                    <!--</FormItem>-->
+                <!--</Col>-->
+            <!--</Row>-->
+            <!--</Form>-->
+            <!--<Table :loading="loading2" highlight-row no-userFrom-text="暂无数据" max-height="400"-->
+                   <!--@on-selection-change="onSelectTab"-->
+                   <!--no-filtered-userFrom-text="暂无筛选结果" ref="selection" :columns="columns4" :data="tableList2">-->
+                <!--<template slot-scope="{ row, index }" slot="headimgurl">-->
+                    <!--<viewer>-->
+                        <!--<div class="tabBox_img">-->
+                            <!--<img v-lazy="row.headimgurl">-->
+                        <!--</div>-->
+                    <!--</viewer>-->
+                <!--</template>-->
+                <!--<template slot-scope="{ row, index }" slot="user_type">-->
+                    <!--<span>{{ row.user_type | typeFilter }}</span>-->
+                <!--</template>-->
+                <!--<template slot-scope="{ row, index }" slot="sex">-->
+                    <!--<span v-show="row.sex ===1">男</span>-->
+                    <!--<span v-show="row.sex ===2">女</span>-->
+                    <!--<span v-show="row.sex ===0">保密</span>-->
+                <!--</template>-->
+                <!--<template slot-scope="{ row, index }" slot="country">-->
+                    <!--<span>{{row.country + row.province + row.city}}</span>-->
+                <!--</template>-->
+                <!--<template slot-scope="{ row, index }" slot="subscribe">-->
+                    <!--<span v-text="row.subscribe === 1?'关注':'未关注'"></span>-->
+                <!--</template>-->
+            <!--</Table>-->
+            <!--<div class="acea-row row-right page">-->
+                <!--<Page :total="total2" :current="formValidate.page" show-elevator show-total @on-change="pageChange2"-->
+                      <!--:page-size="formValidate.limit"/>-->
+            <!--</div>-->
+            <!--<div slot="footer">-->
+                <!--<Button  type="primary"  @click="putRemark">提交</Button>-->
+            <!--</div>-->
+        <!--</Modal>-->
 
         <!--聊天记录-->
         <Modal v-model="modals3" footer-hide scrollable   closable title="聊天记录"  width="700">
@@ -156,7 +156,7 @@
 
 <script>
     import { mapState } from 'vuex';
-    import { kefuListApi, kefucreateApi, kefuAddApi, kefusetStatusApi, kefuEditApi, kefuRecordApi, kefuChatlistApi } from '@/api/setting';
+    import { kefuListApi, kefucreateApi, kefuaddApi, kefuAddApi, kefusetStatusApi, kefuEditApi, kefuRecordApi, kefuChatlistApi } from '@/api/setting';
     export default {
         name: 'index',
         filters: {
@@ -241,7 +241,7 @@
                 FromData: null,
                 formValidate: {
                     page: 1,
-                    limit: 10,
+                    limit: 15,
                     data: '',
                     type: '',
                     nickname: ''
@@ -436,8 +436,8 @@
             getListRecord () {
                 this.loading3 = true;
                 kefuRecordApi(this.formValidate3, this.rows.id).then(async res => {
-                    let data = res.data
-                    this.tableList3 = data.list;
+                    let data = res.data;
+                    this.tableList3 = data.list ? data.list : [];
                     this.total3 = data.count;
                     this.loading3 = false;
                 }).catch(res => {
@@ -455,9 +455,10 @@
             },
             // 添加
             add () {
-                this.modals = true;
-                this.formValidate.data = '';
-                this.getListService();
+                // this.modals = true;
+                // this.formValidate.data = '';
+                // this.getListService();
+                this.$modalForm(kefuaddApi()).then(() => this.getList());
             },
             // 全选
             onSelectTab (selection) {
@@ -472,12 +473,14 @@
             onchangeTime (e) {
                 this.timeVal = e;
                 this.formValidate.data = this.timeVal.join('-');
+                this.formValidate.page = 1;
                 this.getListService();
             },
             // 选择时间
             selectChange (tab) {
                 this.formValidate.data = tab;
                 this.timeVal = [];
+                this.formValidate.page = 1;
                 this.getListService();
             },
             // 客服列表
@@ -503,6 +506,7 @@
             },
             // 搜索
             userSearchs () {
+                this.formValidate.page = 1;
                 this.getListService();
             },
             // 删除

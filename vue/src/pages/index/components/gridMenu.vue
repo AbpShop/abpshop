@@ -4,7 +4,7 @@
             <Card :bordered="false">
                 <router-link :to="{path:'/admin/user/list'}">
                     <Icon type="md-people" color="#69c0ff" />
-                    <p>会员管理</p>
+                    <p>用户管理</p>
                 </router-link>
             </Card>
         </Col>

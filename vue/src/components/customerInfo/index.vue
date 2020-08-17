@@ -8,7 +8,7 @@
                                     class="mr">
                             <Radio :label=item.val v-for="(item,i) in fromList.fromTxt" :key="i">{{item.text}}</Radio>
                         </RadioGroup>
-                        <DatePicker @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd" type="daterange"
+                        <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd" type="daterange"
                                     placement="bottom-end" placeholder="自定义时间" style="width: 200px;"></DatePicker>
                     </FormItem>
                 </Col>
@@ -47,7 +47,7 @@
     </div>
 </template>
 <script>
-    import { kefucreateApi, kefuAddApi } from '@/api/setting';
+    import { kefucreateApi } from '@/api/setting';
     export default {
         name: 'index',
         data () {

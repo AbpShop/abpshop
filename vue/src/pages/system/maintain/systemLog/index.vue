@@ -16,7 +16,7 @@
                                         {{itemn.text}}
                                     </Radio>
                                 </RadioGroup>
-                                <DatePicker @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd"
+                                <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd"
                                             type="daterange" placement="bottom-end" placeholder="自定义时间"
                                             style="width: 200px;"></DatePicker>
                             </FormItem>
@@ -29,11 +29,11 @@
                                     </Select>
                                 </FormItem>
                             </Col>
-                            <Col :xl="5" :lg="12" :md="12" :sm="24" :xs="24">
-                                <FormItem label="行为：">
-                                    <Input  placeholder="请输入行为" v-model="formValidate.pages" style="width: 90%;" clearable></Input>
-                                </FormItem>
-                            </Col>
+                            <!--<Col :xl="5" :lg="12" :md="12" :sm="24" :xs="24">-->
+                                <!--<FormItem label="行为：">-->
+                                    <!--<Input  placeholder="请输入行为" v-model="formValidate.pages" style="width: 90%;" clearable></Input>-->
+                                <!--</FormItem>-->
+                            <!--</Col>-->
                             <Col :xl="5" :lg="12" :md="12" :sm="24" :xs="24" class="subscribe_box">
                                 <FormItem label="链接：">
                                     <Input  placeholder="请输入链接" v-model="formValidate.path" style="width: 90%;" clearable></Input>
@@ -64,7 +64,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total   @on-change="pageChange"
+                <Page :total="total" :current="formValidate.page" show-elevator show-total @on-change="pageChange"
                       :page-size="formValidate.limit"  /></div>
         </Card>
     </div>
@@ -101,7 +101,7 @@
                 },
                 timeVal: [],
                 formValidate: {
-                    limit: 15,
+                    limit: 20,
                     page: 1,
                     pages: '',
                     data: '',
@@ -123,11 +123,11 @@
                         slot: 'nickname',
                         minWidth: 100
                     },
-                    {
-                        title: '行为',
-                        key: 'page',
-                        minWidth: 150
-                    },
+                    // {
+                    //     title: '行为',
+                    //     key: 'page',
+                    //     minWidth: 150
+                    // },
                     {
                         title: '链接',
                         key: 'path',
@@ -172,12 +172,14 @@
             onchangeTime (e) {
                 this.timeVal = e;
                 this.formValidate.data = this.timeVal.join('-');
+                this.formValidate.page = 1;
                 this.getList();
             },
             // 选择时间
             selectChange (tab) {
                 this.formValidate.data = tab;
                 this.timeVal = [];
+                this.formValidate.page = 1;
                 this.getList();
             },
             // 搜索条件
@@ -207,6 +209,7 @@
             },
             // 搜索
             userSearchs () {
+                this.formValidate.page = 1;
                 this.getList();
             }
         }

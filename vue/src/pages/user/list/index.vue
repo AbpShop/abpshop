@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="i-layout-page-header">
-            <PageHeader class="product_tabs" title="会员管理">
+            <PageHeader class="product_tabs" title="用户管理"  hidden-breadcrumb>
                 <div slot="content">
                     <Tabs @on-click="onClickTab">
                         <TabPane :label="item.name" :name="item.type" v-for="(item,index) in headeNum" :key="index"/>
@@ -15,7 +15,7 @@
                     <Col  span="18">
                         <Col span="24">
                             <Col v-bind="grid">
-                                <FormItem label="会员搜索："  label-for="nickname">
+                                <FormItem label="用户搜索："  label-for="nickname">
                                     <Input v-model="userFrom.nickname" placeholder="请输入" element-id="nickname" clearable/>
                                 </FormItem>
                             </Col>
@@ -32,7 +32,7 @@
                                 </FormItem>
                             </Col>
                             <Col v-bind="grid">
-                                <FormItem label="会员分组："  label-for="group_id">
+                                <FormItem label="用户分组："  label-for="group_id">
                                     <Select v-model="userFrom.group_id" placeholder="请选择" element-id="group_id" clearable>
                                         <Option value="">全部</Option>
                                         <Option :value="item.id" v-for="(item, index) in groupList" :key="index">{{item.group_name}}</Option>
@@ -40,7 +40,7 @@
                                 </FormItem>
                             </Col>
                             <Col v-bind="grid">
-                                <FormItem label="会员标签："  label-for="label_id">
+                                <FormItem label="用户标签："  label-for="label_id">
                                     <Select v-model="userFrom.label_id" placeholder="请选择" element-id="label_id" clearable>
                                         <Option value="">全部</Option>
                                         <Option :value="item.id" v-for="(item, index) in labelLists" :key="index">{{item.label_name}}</Option>
@@ -93,7 +93,7 @@
                                             <span>推广员</span>
                                         </Radio>
                                         <Radio label="0">
-                                            <span>普通会员</span>
+                                            <span>普通用户</span>
                                         </Radio>
                                     </RadioGroup>
                                 </FormItem>
@@ -128,7 +128,7 @@
                             <Col v-bind="grid">
                                 <FormItem label="选择时间："  label-for="user_time">
                                     <!--<DatePicker clearable @on-change="onchangeTime" v-model="timeVal" :value="timeVal"  format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="选择时间" v-width="'100%'"></DatePicker>-->
-                                    <DatePicker @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd"
+                                    <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal" format="yyyy/MM/dd"
                                                 type="datetimerange" placement="bottom-start" placeholder="自定义时间"
                                                 style="width: 300px;" class="mr20" :options="options"></DatePicker>
                                 </FormItem>
@@ -154,13 +154,13 @@
             <Divider dashed />
             <Row type="flex" justify="space-between" class="mt20">
                 <Col span="24">
-                    <Button type="primary" class="mr20" @click="onSend">发送优惠券</Button>
-                    <Button class="greens mr20" size="default" @click="onSendPic" v-if="userFrom.user_type === 'wechat'">
+                    <Button v-auth="['admin-user-coupon']" type="primary" class="mr20" @click="onSend">发送优惠券</Button>
+                    <Button v-auth="['admin-wechat-news']" class="greens mr20" size="default" @click="onSendPic" v-if="userFrom.user_type === 'wechat'">
                         <Icon type="md-list"></Icon>
                         发送图文消息
                     </Button>
-                    <Button class="mr20" @click="setGroup">批量设置分组</Button>
-                    <Button class="mr20" @click="setLabel">批量设置标签</Button>
+                    <Button v-auth="['admin-user-group_set']" class="mr20" @click="setGroup">批量设置分组</Button>
+                    <Button v-auth="['admin-user-set_label']" class="mr20" @click="setLabel">批量设置标签</Button>
                 </Col>
                 <Col span="24" class="userAlert" v-if="selectionList.length">
                     <Alert show-icon> 已选择<i class="userI"> {{selectionList.length}} </i>项</Alert>
@@ -216,7 +216,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="userFrom.page" show-elevator show-total @on-change="pageChange"
                       :page-size="userFrom.limit"  /></div>
         </Card>
         <!-- 编辑表单 积分余额-->
@@ -307,7 +307,7 @@
                 },
                 collapse: false,
                 headeNum: [
-                    { 'type': '', 'name': '全部会员' },
+                    { 'type': '', 'name': '全部' },
                     { 'type': 'wechat', 'name': '微信公众号' },
                     { 'type': 'routine', 'name': '微信小程序' },
                     { 'type': 'h5', 'name': 'H5' }
@@ -472,6 +472,7 @@
                 })
             },
             onClickTab (type) {
+                this.userFrom.page = 1;
                 this.userFrom.user_type = type;
                 this.getList();
             },
@@ -498,7 +499,7 @@
             // 批量设置分组；
             setGroup () {
                 if (this.selectionList.length === 0) {
-                    this.$Message.warning('请选择要设置分组的会员');
+                    this.$Message.warning('请选择要设置分组的用户');
                 } else {
                     let uids = { uids: this.array_ids };
                     this.$modalForm(userSetGroup(uids)).then(() => this.$refs.sends.getList());
@@ -507,7 +508,7 @@
             // 批量设置标签；
             setLabel () {
                 if (this.selectionList.length === 0) {
-                    this.$Message.warning('请选择要设置标签的会员');
+                    this.$Message.warning('请选择要设置标签的用户');
                 } else {
                     let uids = { uids: this.array_ids };
                     this.$modalForm(userSetLabelApi(uids)).then(() => this.$refs.sends.getList());
@@ -687,7 +688,7 @@
             // 点击发送优惠券
             onSend () {
                 if (this.selectionList.length === 0) {
-                    this.$Message.warning('请选择要发送优惠券的会员');
+                    this.$Message.warning('请选择要发送优惠券的用户');
                 } else {
                     this.$refs.sends.modals = true;
                     this.$refs.sends.getList()
@@ -696,7 +697,7 @@
             // 发送图文消息
             onSendPic () {
                 if (this.selectionList.length === 0) {
-                    this.$Message.warning('请选择要发送图文消息的会员');
+                    this.$Message.warning('请选择要发送图文消息的用户');
                 } else {
                     this.modal13 = true;
                 }

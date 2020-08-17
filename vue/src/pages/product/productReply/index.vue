@@ -1,10 +1,11 @@
 <template>
     <div class="article-manager">
         <div class="i-layout-page-header">
-            <PageHeader
-                    title="商品评论管理"
-                    hidden-breadcrumb
-            >
+            <PageHeader class="product_tabs" hidden-breadcrumb>
+                <div slot="title">
+                    <router-link :to="{path:'/admin/product/product_list'}" v-if="$route.params.id"><Button icon="ios-arrow-back" size="small"  class="mr20">返回</Button></router-link>
+                    <span class="mr20">商品评论管理</span>
+                </div>
             </PageHeader>
         </div>
         <Card :bordered="false" dis-hover class="ivu-mt">
@@ -15,7 +16,7 @@
                             <RadioGroup v-model="formValidate.data" type="button"  @on-change="selectChange(formValidate.data)" class="mr">
                                 <Radio :label=item.val v-for="(item,i) in fromList.fromTxt" :key="i">{{item.text}}</Radio>
                             </RadioGroup>
-                            <DatePicker @on-change="onchangeTime" :value="timeVal"  format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="自定义时间" style="width: 200px;"></DatePicker>
+                            <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal"  format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="自定义时间" style="width: 200px;"></DatePicker>
                         </FormItem>
                     </Col>
                     <Col v-bind="grid">
@@ -26,7 +27,7 @@
                             </Select>
                         </FormItem>
                     </Col>
-                    <Col v-bind="grid">
+                    <Col v-bind="grid" v-if="!$route.params.id">
                         <FormItem label="商品信息："  label-for="store_name">
                             <Input size="default" enter-button placeholder="请输入商品ID或者商品信息" clearable v-model="formValidate.store_name"/>
                         </FormItem>
@@ -81,7 +82,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="formValidate.page" show-elevator show-total @on-change="pageChange"
                       :page-size="formValidate.limit"/>
             </div>
         </Card>
@@ -119,7 +120,7 @@
                     data: '',
                     store_name: '',
                     account: '',
-                    product_id: this.$route.params.id || '',
+                    product_id: this.$route.params.id === undefined ? 0 : this.$route.params.id,
                     page: 1,
                     limit: 15
                 },
@@ -142,7 +143,7 @@
                 loading: false,
                 columns: [
                     {
-                        title: '商品ID',
+                        title: '评论ID',
                         key: 'id',
                         width: 80
                     },
@@ -211,10 +212,16 @@
         created () {
             this.getList();
         },
+        watch: {
+            '$route.params.id' (to, from) {
+                this.formValidate.product_id = 0;
+                this.getList();
+            }
+        },
         methods: {
             // 添加虚拟评论；
             add () {
-                this.$modalForm(fictitiousReply()).then(() => this.getList());
+                this.$modalForm(fictitiousReply(this.formValidate.product_id)).then(() => this.getList());
             },
             oks () {
                 this.modals = true;
@@ -262,12 +269,14 @@
             onchangeTime (e) {
                 this.timeVal = e;
                 this.formValidate.data = this.timeVal.join('-');
+                this.formValidate.page = 1;
                 this.getList();
             },
             // 选择时间
             selectChange (tab) {
                 this.formValidate.data = tab;
                 this.timeVal = [];
+                this.formValidate.page = 1;
                 this.getList();
             },
             // 列表

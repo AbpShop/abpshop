@@ -22,7 +22,7 @@
                 </Row>
                 <Row type="flex">
                     <Col v-bind="grid">
-                        <Button type="primary" @click="menusAdd('添加规则')"  icon="md-add">添加规则</Button>
+                        <Button v-auth="['setting-system_menus-add']" type="primary" @click="menusAdd('添加规则')"  icon="md-add">添加规则</Button>
                     </Col>
                 </Row>
             </Form>
@@ -54,8 +54,10 @@
                 </vxe-table-column>
                 <vxe-table-column field="date" title="操作" align="center"  width="200" fixed="right">
                     <template v-slot="{ row,index }">
-                        <a @click="addE(row,'添加子菜单')" v-if="row.auth_type === 1">添加子菜单</a>
-                        <a @click="addE(row,'添加规则')" v-else>添加规则</a>
+                        <span v-auth="['setting-system_menus-add']">
+                            <a @click="addE(row,'添加子菜单')" v-if="row.auth_type === 1">添加子菜单</a>
+                            <a @click="addE(row,'添加规则')" v-else>添加规则</a>
+                        </span>
                         <Divider type="vertical"/>
                         <a @click="edit(row,'编辑')">编辑</a>
                         <Divider type="vertical"/>
@@ -123,6 +125,7 @@
                 }
                 isShowApi(data).then(async res => {
                     this.$Message.success(res.msg);
+                    this.$store.dispatch('admin/menus/getMenusNavList');
                 }).catch(res => {
                     this.$Message.error(res.msg);
                 })
@@ -156,6 +159,7 @@
                 this.$modalSure(delfromData).then((res) => {
                     this.$Message.success(res.msg);
                     this.getData();
+                    this.$store.dispatch('admin/menus/getMenusNavList');
                 }).catch(res => {
                     this.$Message.error(res.msg);
                 });

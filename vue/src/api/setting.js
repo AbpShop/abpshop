@@ -295,6 +295,17 @@ export function kefucreateApi (params) {
 }
 
 /**
+ * @description 设置 客服管理 -- 添加客服
+ *  @param {Object} param params {Object} 传值参数
+ */
+export function kefuaddApi () {
+    return request({
+        url: `app/wechat/kefu/add`,
+        method: 'get'
+    });
+}
+
+/**
  * @description 设置 客服管理 -- 添加客服保存
  *  @param {Object} param params {Object} 传值参数
  */
@@ -497,7 +508,7 @@ export function storeStaffApi (data) {
     return request({
         url: `merchant/store_staff`,
         method: 'get',
-        data
+        params: data
     });
 }
 
@@ -539,16 +550,6 @@ export function verifyOrderApi (data) {
         url: `merchant/verify_order`,
         method: 'get',
         params: data
-    });
-}
-
-/**
- * @description 订单设置 -- 核销订单头部；
- */
-export function verifyBadgeApi () {
-    return request({
-        url: `merchant/verify_badge`,
-        method: 'get'
     });
 }
 

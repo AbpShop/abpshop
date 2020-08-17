@@ -28,7 +28,7 @@ const frameIn = [
         component: BasicLayout,
         children: [
             {
-                path: '/system/log',
+                path: '/admin/system/log',
                 name: 'log',
                 meta: {
                     title: '前端日志',
@@ -37,7 +37,7 @@ const frameIn = [
                 component: () => import('@/pages/system/log')
             },
             {
-                path: '/system/user',
+                path: '/admin/system/user',
                 name: `systemUser`,
                 meta: {
                     auth: true,
@@ -51,7 +51,7 @@ const frameIn = [
                 name: 'refresh',
                 hidden: true,
                 component: {
-                    beforeRouteEnter (to, from, next) {
+                    beforeRouteEnter(to, from, next) {
                         next(instance => instance.$router.replace(from.fullPath));
                     },
                     render: h => h()
@@ -63,7 +63,7 @@ const frameIn = [
                 name: 'redirect',
                 hidden: true,
                 component: {
-                    beforeRouteEnter (to, from, next) {
+                    beforeRouteEnter(to, from, next) {
                         next(instance => instance.$router.replace(JSON.parse(from.params.route)));
                     },
                     render: h => h()
@@ -75,7 +75,7 @@ const frameIn = [
         path: '/admin/widget.images/index.html',
         name: `images`,
         meta: {
-            auth: ['admin-user-user-index'],
+            auth: true,
             title: '上传图片'
         },
         component: () => import('@/components/uploadPictures/widgetImg')
@@ -84,7 +84,7 @@ const frameIn = [
         path: '/admin/widget.widgets/icon.html',
         name: `imagesIcon`,
         meta: {
-            auth: ['admin-user-user-index'],
+            auth: true,
             title: '上传图标'
         },
         component: () => import('@/components/iconFrom/index')

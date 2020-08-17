@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="i-layout-page-header">
-            <PageHeader class="product_tabs" title="优惠卷制作" hidden-breadcrumb></PageHeader>
+            <PageHeader class="product_tabs" title="优惠卷模板" hidden-breadcrumb></PageHeader>
         </div>
         <Card :bordered="false" dis-hover class="ivu-mt">
             <Form ref="tableFrom" :model="tableFrom"  :label-width="labelWidth" :label-position="labelPosition" @submit.native.prevent>
@@ -22,7 +22,7 @@
                 </Row>
                 <Row type="flex">
                     <Col v-bind="grid">
-                        <Button type="primary"  icon="md-add" @click="add">添加优惠卷</Button>
+                        <Button v-auth="['admin-marketing-store_coupon-add']" type="primary"  icon="md-add" @click="add">添加优惠卷</Button>
                     </Col>
                 </Row>
             </Form>
@@ -40,13 +40,13 @@
                 <template slot-scope="{ row, index }" slot="action">
                     <a @click="couponInvalid(row,'修改优惠券',index)" v-if="row.status">立即失效</a>
                     <Divider type="vertical" v-if="row.status"/>
-                    <a @click="couponSend(row)" v-if="row.status">发布</a>
+                    <a @click="couponSend(row)" v-if="row.status" v-auth="['admin-marketing-store_coupon-push']">发布</a>
                     <Divider type="vertical" v-if="row.status"/>
                     <a @click="couponDel(row,'删除优惠券',index)">删除</a>
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="tableFrom.page" show-elevator show-total @on-change="pageChange"
                       :page-size="tableFrom.limit"/>
             </div>
         </Card>

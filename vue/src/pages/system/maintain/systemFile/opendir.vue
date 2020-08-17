@@ -94,7 +94,7 @@
         },
         mounted () {
             this.editor = CodeMirror.fromTextArea(this.$refs.mycode, {
-                value: 'http://www.AbpShop.com', // 文本域默认显示的文本
+                value: 'http://www.yznt.com', // 文本域默认显示的文本
                 mode: 'text/javascript',
                 theme: 'ambiance', // CSS样式选择
                 indentUnit: 4, // 缩进单位，默认2

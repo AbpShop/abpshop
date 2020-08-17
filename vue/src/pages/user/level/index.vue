@@ -22,7 +22,7 @@
                 </Row>
                 <Row type="flex">
                     <Col v-bind="grid">
-                        <Button type="primary"  icon="md-add" @click="add">添加会员等级</Button>
+                        <Button v-auth="['admin-user-level_add']" type="primary"  icon="md-add" @click="add">添加会员等级</Button>
                     </Col>
                 </Row>
             </Form>
@@ -65,7 +65,7 @@
                                 <Icon type="ios-arrow-down"></Icon>
                             </a>
                             <DropdownMenu slot="list">
-                                <DropdownItem name="1">等级任务</DropdownItem>
+<!--                                <DropdownItem name="1">等级任务</DropdownItem>-->
                                 <DropdownItem name="2">删除等级</DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
@@ -73,7 +73,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="levelFrom.page" show-elevator show-total @on-change="pageChange"
                       :page-size="levelFrom.limit"/>
             </div>
         </Card>
@@ -125,21 +125,21 @@
                         key: 'discount',
                         minWidth: 100
                     },
-                    {
-                        title: '有效时间',
-                        key: 'valid_date',
-                        minWidth: 120
-                    },
-                    {
-                        title: '是否永久',
-                        slot: 'is_forevers',
-                        minWidth: 130
-                    },
-                    {
-                        title: '是否付费',
-                        slot: 'is_pays',
-                        minWidth: 120
-                    },
+                    // {
+                    //     title: '有效时间',
+                    //     key: 'valid_date',
+                    //     minWidth: 120
+                    // },
+                    // {
+                    //     title: '是否永久',
+                    //     slot: 'is_forevers',
+                    //     minWidth: 130
+                    // },
+                    // {
+                    //     title: '是否付费',
+                    //     slot: 'is_pays',
+                    //     minWidth: 120
+                    // },
                     {
                         title: '是否显示',
                         slot: 'is_shows',

@@ -61,7 +61,6 @@ export function lookxcxCodeApi (params) {
     });
 }
 
-
 /**
  * @description 分销 -- h5推广二维码
  * @param {Object} param params {Object} 传值参数

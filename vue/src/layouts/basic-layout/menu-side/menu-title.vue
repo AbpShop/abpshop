@@ -5,6 +5,9 @@
             <Icon :custom="menu.custom" v-else-if="menu.custom" />
             <!--<img :src="menu.img" v-else-if="menu.img" />-->
         </span>
+        <span class="i-layout-menu-side-title-icon-null" :class="{ 'i-layout-menu-side-title-icon-single': hideTitle }" v-else >
+            <Icon :custom="null" />
+        </span>
         <span class="i-layout-menu-side-title-text" :class="{ 'i-layout-menu-side-title-text-selected': selected }" v-if="!hideTitle">{{ tTitle(menu.title) }}</span>
     </span>
 </template>

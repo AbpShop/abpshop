@@ -42,7 +42,7 @@ export default function (formRequestPromise, { width = '700' } = { width: '700' 
                         return h('div', [
                             h('a', {
                                 attrs: {
-                                    href: 'http://shop.AbpShop.net'
+                                    href: 'http://www.yznt.com'
                                 }
                             }, data.info)
                         ])
@@ -50,8 +50,21 @@ export default function (formRequestPromise, { width = '700' } = { width: '700' 
                 });
             }
             data.config = {};
+            data.config.global = {
+                upload: {
+                    props: {
+                        onSuccess (res, file) {
+                            if (res.status === 200) {
+                                file.url = res.data.src;
+                            } else {
+                                Message.error(res.msg);
+                            }
+                        }
+                    }
+                }
+            }
             data.config.onSubmit = function (formData, $f) {
-                $f.btn.loading(true)
+                $f.btn.loading(true);
                 request[data.method.toLowerCase()](data.action, formData).then((res) => {
                     modalInstance.remove()
                     Message.success(res.msg || '提交成功')

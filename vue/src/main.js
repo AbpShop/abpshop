@@ -42,11 +42,15 @@ import iLink from '@/components/link';
 
 import VueCodeMirror from 'vue-codemirror'
 
+// 复制到粘贴板插件
+import VueClipboard from 'vue-clipboard2'
 // 使用样式，修改主题可以在 styles 目录下创建新的主题包并修改 iView 默认的 less 变量
 // 参考 https://www.iviewui.com/docs/guide/theme
 import './styles/index.less';
 import './libs/iview-pro/iview-pro.css';
 import 'swiper/dist/css/swiper.css'
+import './assets/iconfont/iconfont.css'
+
 // 引入外部表格；
 import 'xe-utils'
 import VXETable from 'vxe-table'
@@ -62,6 +66,8 @@ import videoCloud from '@/utils/videoCloud'
 import { modalSure } from '@/utils/public'
 import { authLapse } from '@/utils/authLapse'
 import VueDND from 'awe-dnd'
+VueClipboard.config.autoSetContainer = true
+Vue.use(VueClipboard)
 window.Promise = Promise;
 Vue.prototype.$modalForm = modalForm;
 Vue.prototype.$modalSure = modalSure;
@@ -118,57 +124,52 @@ new Vue({
             const path = to.path;
             // 是否使用动态侧边菜单
             if (Setting.dynamicSiderMenu) {
-                this.getMenus().then(menus => {
-                    // 处理手动清除db 跳转403问题
-                    if (!menus.length) {
-                        if (path !== '/admin/login') {
-                            this.$router.replace('/admin/login');
-                        } return
+                let menus = this.$store.state.admin.menus.menusName;
+                // var storage = window.localStorage;
+                // let menus = JSON.parse(storage.getItem('menuList'));
+                // this.getMenus().then(menus => {
+                // 处理手动清除db 跳转403问题
+                if (!menus.length) {
+                    if (path !== '/admin/login') {
+                        this.$router.replace('/admin/login');
+                    } return
+                }
+                const menuSider = menus;
+                const headerName = getHeaderName(to, menuSider);
+                // 在 404 时，是没有 headerName 的
+                if (headerName !== null) {
+                    // 是否开启顶部菜单
+                    if (Setting.layout.headerMenu) {
+                        // 设置顶栏菜单 后台添加一个接口，设置顶部菜单
+                        const headerSider = getHeaderSider(menuSider);
+                        this.$store.commit('admin/menu/setHeader', headerSider);
+                        // 指定当前侧边栏隶属顶部菜单名称。如果你没有使用顶部菜单，则设置为默认的（一般为 home）名称即可
+                        this.$store.commit('admin/menu/setHeaderName', headerName);
+                        // 获取侧边栏菜单
+                        const filterMenuSider = getMenuSider(menuSider, headerName);
+                        // console.log(filterMenuSider[0]['children']);
+                        // console.log(menuSider);
+                        // console.log(headerName);
+                        // 指定当前显示的侧边菜单
+                        this.$store.commit('admin/menu/setSider', filterMenuSider);
+                    } else {
+                        // console.log(34535435);
+                        // 指定当前侧边栏隶属顶部菜单名称。如果你没有使用顶部菜单，则设置为默认的（一般为 home）名称即可
+                        this.$store.commit('admin/menu/setHeaderName', 'home');
+                        // 指定当前显示的侧边菜单
+                        this.$store.commit('admin/menu/setSider', menuSider);
                     }
-                    const menuSider = menus;
-                    const headerName = getHeaderName(to, menuSider);
-                    // 在 404 时，是没有 headerName 的
-                    if (headerName !== null) {
-                        // 是否开启顶部菜单
-                        if (Setting.layout.headerMenu) {
-                            // 设置顶栏菜单 后台添加一个接口，设置顶部菜单
-                            const headerSider = getHeaderSider(menuSider);
-                            this.$store.commit('admin/menu/setHeader', headerSider);
-                            // 指定当前侧边栏隶属顶部菜单名称。如果你没有使用顶部菜单，则设置为默认的（一般为 home）名称即可
-                            this.$store.commit('admin/menu/setHeaderName', headerName);
-                            // 获取侧边栏菜单
-                            const filterMenuSider = getMenuSider(menuSider, headerName);
-                            // console.log(filterMenuSider[0]['children']);
-                            // console.log(menuSider);
-                            // console.log(headerName);
-                            // 指定当前显示的侧边菜单
-                            this.$store.commit('admin/menu/setSider', filterMenuSider);
-                        } else {
-                            // console.log(34535435);
-                            // 指定当前侧边栏隶属顶部菜单名称。如果你没有使用顶部菜单，则设置为默认的（一般为 home）名称即可
-                            this.$store.commit('admin/menu/setHeaderName', 'home');
-                            // 指定当前显示的侧边菜单
-                            this.$store.commit('admin/menu/setSider', menuSider);
-                        }
-                        // 指定当前菜单，即高亮项
-                        this.$store.commit('admin/menu/setActivePath', path);
-                        // 找到其所有父菜单 path 进行展开
-                        // const openNames = getSiderSubmenu(path, menuSider);
-                        const openNames = getSiderSubmenu(to, menuSider);
-                        this.$store.commit('admin/menu/setOpenNames', openNames);
-                    }
-                });
+                    // 指定当前菜单，即高亮项
+                    this.$store.commit('admin/menu/setActivePath', path);
+                    // 找到其所有父菜单 path 进行展开
+                    // const openNames = getSiderSubmenu(path, menuSider);
+                    const openNames = getSiderSubmenu(to, menuSider);
+                    console.log(openNames);
+                    this.$store.commit('admin/menu/setOpenNames', openNames);
+                }
+                // });
             }
             this.appRouteChange(to, from);
-        }
-    },
-    methods: {
-        async getMenus () {
-            const db = await this.$store.dispatch('admin/db/database', {
-                user: true
-            });
-            let menus = db.get('menus').value();
-            return menus !== undefined ? menus : [];
         }
     }
 }).$mount('#app');

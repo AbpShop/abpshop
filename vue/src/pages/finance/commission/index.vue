@@ -20,7 +20,7 @@
                     </Col>
                     <Col span="24">
                         <Button type="primary" icon="ios-search"  @click="userSearchs">搜索</Button>
-                        <Button class="export" icon="ios-share-outline" @click="exports">导出</Button>
+                        <Button v-auth="['export-userCommission']" class="export" icon="ios-share-outline" @click="exports">导出</Button>
                     </Col>
                 </Row>
             </Form>
@@ -38,7 +38,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total=total show-elevator :page-size="formValidate.limit" @on-change="pageChange"/>
+                <Page :total=total :current="formValidate.page" show-elevator :page-size="formValidate.limit" @on-change="pageChange"/>
             </div>
         </Card>
         <commission-details ref="commission"></commission-details>
@@ -122,7 +122,7 @@
                 this.loading = true;
                 commissionListApi(this.formValidate).then(async res => {
                     let data = res.data
-                    this.tabList = data.data;
+                    this.tabList = data.list;
                     this.total = data.count;
                     this.loading = false;
                 }).catch(res => {

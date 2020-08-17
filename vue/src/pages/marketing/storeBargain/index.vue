@@ -22,8 +22,8 @@
                 </Row>
                 <Row type="flex" class="mb20">
                     <Col v-bind="grid">
-                        <Button type="primary"  icon="md-add" @click="add" class="mr10">添加砍价商品</Button>
-                        <Button class="export" icon="ios-share-outline" @click="exports">导出</Button>
+                        <Button v-auth="['marketing-store_bargain-create']" type="primary"  icon="md-add" @click="add" class="mr10">添加砍价商品</Button>
+                        <Button v-auth="['export-storeBargain']" class="export" icon="ios-share-outline" @click="exports">导出</Button>
                     </Col>
                 </Row>
             </Form>
@@ -58,7 +58,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="tableFrom.page" show-elevator show-total @on-change="pageChange"
                       :page-size="tableFrom.limit"/>
             </div>
         </Card>

@@ -22,7 +22,7 @@
                 </Row>
                 <Row type="flex">
                     <Col v-bind="grid">
-                        <Button type="primary" icon="md-add" @click="add">添加文章分类</Button>
+                        <Button v-auth="['cms-category-create']" type="primary" icon="md-add" @click="add">添加文章分类</Button>
                     </Col>
                 </Row>
             </Form>
@@ -34,7 +34,7 @@
                     header-row-class-name="false"
                     :tree-config="{children: 'children'}"
                     :data="categoryList">
-                <vxe-table-column field="id" title="ID"  tooltip min-width="60"></vxe-table-column>
+                <vxe-table-column field="id" title="ID"  tooltip width="80"></vxe-table-column>
                 <vxe-table-column field="title" title="分类昵称" min-width="130"></vxe-table-column>
                 <vxe-table-column field="image" title="分类图片"  min-width="130">
                     <template v-slot="{ row }">
@@ -63,10 +63,10 @@
                     </template>
                 </vxe-table-column>
             </vxe-table>
-            <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="getList"
-                      :page-size="formValidate.limit"/>
-            </div>
+<!--            <div class="acea-row row-right page">-->
+<!--                <Page :total="total" :current="formValidate.page" show-elevator show-total @on-change="pageChange"-->
+<!--                      :page-size="formValidate.limit"/>-->
+<!--            </div>-->
         </Card>
      </div>
 </template>
@@ -89,7 +89,7 @@
                     status: '',
                     page: 1,
                     limit: 20,
-                    type: 1
+                    type: 0
                 },
                 total: 0,
                 columns1: [
@@ -185,7 +185,7 @@
                 this.loading = true;
                 categoryListApi(this.formValidate).then(async res => {
                     let data = res.data
-                    this.categoryList = data;
+                    this.categoryList = data.list;
                     this.total = data.count;
                     this.loading = false;
                 }).catch(res => {
@@ -199,6 +199,7 @@
             },
             // 表格搜索
             userSearchs () {
+                this.formValidate.page = 1;
                 this.getList();
             },
             // 修改是否显示

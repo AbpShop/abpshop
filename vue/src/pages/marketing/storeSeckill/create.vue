@@ -2,7 +2,7 @@
     <div>
         <div class="i-layout-page-header">
             <PageHeader class="product_tabs" hidden-breadcrumb>
-                <div slot="title" class="ivu-mt ivu-mb">
+                <div slot="title">
                     <router-link :to="{path:'/admin/marketing/store_seckill/index'}"><Button icon="ios-arrow-back" size="small"  class="mr20">返回</Button></router-link>
                     <span v-text="$route.params.id?'编辑秒杀商品':'添加秒杀商品'" class="mr20"></span>
                 </div>
@@ -74,7 +74,7 @@
                             </Col>
                             <Col v-bind="grid2">
                                 <FormItem label="活动时间：" prop="section_time">
-                                    <DatePicker type="daterange" format="yyyy-MM-dd" placeholder="请选择活动时间"
+                                    <DatePicker :editable="false" type="daterange" format="yyyy-MM-dd" placeholder="请选择活动时间"
                                                 @on-change="onchangeTime"     style="width: 100%" :value="formValidate.section_time" v-model="formValidate.section_time"></DatePicker>
                                 </FormItem>
                             </Col>
@@ -93,11 +93,11 @@
                                     <InputNumber placeholder="请输入排序" element-id="sort" :precision="0"  v-model="formValidate.sort" style="width: 100%"/>
                                 </FormItem>
                             </Col>
-                            <Col v-bind="grid2">
-                                <FormItem label="赠送积分：">
-                                    <InputNumber placeholder="请输入赠送积分" element-id="give_integral" :precision="0"  v-model="formValidate.give_integral" style="width: 100%"/>
-                                </FormItem>
-                            </Col>
+<!--                            <Col v-bind="grid2">-->
+<!--                                <FormItem label="赠送积分：">-->
+<!--                                    <InputNumber placeholder="请输入赠送积分" element-id="give_integral" :precision="0"  v-model="formValidate.give_integral" style="width: 100%"/>-->
+<!--                                </FormItem>-->
+<!--                            </Col>-->
                             <Col v-bind="grid2">
                                 <FormItem label="运费模板：" prop="temp_id">
                                     <div>
@@ -154,14 +154,14 @@
                                     <!--</RadioGroup>-->
                                 <!--</FormItem>-->
                             <!--</Col>-->
-                            <Col v-bind="grid2">
-                                <FormItem label="热门推荐：" props="is_hot" label-for="is_hot">
-                                    <RadioGroup element-id="is_hot" v-model="formValidate.is_hot">
-                                        <Radio :label="1" class="radio">开启</Radio>
-                                        <Radio :label="0">关闭</Radio>
-                                    </RadioGroup>
-                                </FormItem>
-                            </Col>
+<!--                            <Col v-bind="grid2">-->
+<!--                                <FormItem label="热门推荐：" props="is_hot" label-for="is_hot">-->
+<!--                                    <RadioGroup element-id="is_hot" v-model="formValidate.is_hot">-->
+<!--                                        <Radio :label="1" class="radio">开启</Radio>-->
+<!--                                        <Radio :label="0">关闭</Radio>-->
+<!--                                    </RadioGroup>-->
+<!--                                </FormItem>-->
+<!--                            </Col>-->
                             <Col v-bind="grid2">
                                 <FormItem label="活动状态：" props="status" label-for="status">
                                     <RadioGroup element-id="status"  v-model="formValidate.status">
@@ -197,7 +197,7 @@
                                 <Button class="submission mr15" @click="step" v-show="current!==0"
                                         :disabled="$route.params.id&&current===1">上一步
                                 </Button>
-                                <Button type="primary" class="submission" @click="next('formValidate')"
+                                <Button :disabled="submitOpen && current === 2" type="primary" class="submission" @click="next('formValidate')"
                                         v-text="current===2?'提交':'下一步'"></Button>
                             </FormItem>
                         </Col>
@@ -231,6 +231,7 @@
         components: { UeditorWrap, goodsList, uploadPictures, VueUeditorWrap },
         data () {
             return {
+                submitOpen: false,
                 spinShow: false,
                 isChoice: '',
                 current: 0,
@@ -550,12 +551,15 @@
                                 }
                             }
                             this.formValidate.id = Number(this.$route.params.id) || 0;
+                            this.submitOpen = true;
                             seckillAddApi(this.formValidate).then(async res => {
+                                this.submitOpen = false;
                                 this.$Message.success(res.msg);
                                 setTimeout(() => {
                                     this.$router.push({ path: '/admin/marketing/store_seckill/index' });
                                 }, 500);
                             }).catch(res => {
+                                this.submitOpen = false;
                                 this.$Message.error(res.msg);
                             })
                         } else {

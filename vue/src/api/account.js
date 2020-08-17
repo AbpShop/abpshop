@@ -31,3 +31,27 @@ export function loginInfoApi () {
         method: 'get'
     });
 }
+
+/**
+ * 获取菜单数据
+ */
+export function menusApi () {
+    return request({
+        url: '/menus',
+        method: 'get'
+    });
+}
+
+/**
+ * 搜索菜单数据
+ */
+export function menusListApi () {
+    return request({
+        url: '/menusList',
+        method: 'get'
+    });
+}
+
+export function AccountRegister () {
+
+}

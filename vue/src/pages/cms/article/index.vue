@@ -24,7 +24,7 @@
                 </Row>
                 <Row type="flex">
                     <Col v-bind="grid">
-                        <router-link :to="'/admin/cms/article/add_article'"><Button type="primary" class="bnt" icon="md-add">添加文章</Button></router-link>
+                        <router-link :to="'/admin/cms/article/add_article'" v-auth="['cms-article-creat']"><Button type="primary" class="bnt" icon="md-add">添加文章</Button></router-link>
                     </Col>
                 </Row>
             </Form>
@@ -51,7 +51,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="artFrom.page" show-elevator show-total @on-change="pageChange"
                       :page-size="artFrom.limit"/>
             </div>
         </Card>
@@ -245,6 +245,7 @@
                     title
                 });
                 this.artFrom.pid = value;
+                this.artFrom.page = 1;
                 this.getList();
             },
             // 编辑
@@ -290,6 +291,7 @@
             },
             // 表格搜索
             userSearchs () {
+                this.artFrom.page = 1;
                 this.getList();
             }
         }

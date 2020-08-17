@@ -3,7 +3,7 @@
  * */
 // 请求接口地址 如果没有配置自动获取当前网址路径
 const VUE_APP_API_URL = process.env.VUE_APP_API_URL || `${location.origin}/adminapi`;
-const VUE_APP_WS_URL = process.env.VUE_APP_WS_URL || `ws:${location.hostname}:20003`;
+const VUE_APP_WS_URL = process.env.VUE_APP_WS_URL || `ws:${location.hostname}:20002`;
 
 const Setting = {
     /**
@@ -41,11 +41,11 @@ const Setting = {
     menuSideWidth: 200,
     layout: {
         // 侧边栏风格，可选值为 dark 或 light
-        siderTheme: 'light',
+        siderTheme: 'dark',
         // 顶栏风格，可选值为 light、dark 或 primary
-        headerTheme: 'primary',
+        headerTheme: 'light',
         // 顶栏是否置顶，开启后会覆盖侧边栏，需开启 headerFix
-        headerStick: true,
+        headerStick: false,
         // 是否开启多 Tabs 页签
         tabs: true,
         // 多 Tabs 页签是否显示图标，开启 tabs 时有效
@@ -53,9 +53,9 @@ const Setting = {
         // 是否固定多 Tabs 多页签
         tabsFix: true,
         // 是否固定侧边栏
-        siderFix: false,
+        siderFix: true,
         // 是否固定顶栏
-        headerFix: true,
+        headerFix: false,
         // 是否在下滑时隐藏顶栏，需开启 headerFix，如果开启了 tabsFix，Tabs 也会被隐藏
         headerHide: false,
         // 是否显示顶部菜单栏
@@ -68,11 +68,11 @@ const Setting = {
         // 侧边菜单栏是否默认折起
         menuCollapse: false,
         // 侧边菜单折起时，是否在子菜单前显示父级菜单名称
-        showCollapseMenuTitle: true,
+        showCollapseMenuTitle: false,
         // 是否显示重载按钮
         showReload: true,
         // 是否显示搜索
-        showSearch: false,
+        showSearch: true,
         // 是否显示通知
         showNotice: true,
         // 是否显示全屏
@@ -82,7 +82,7 @@ const Setting = {
         // 是否显示全局面包屑，开启 headerMenu 时不可用
         showBreadcrumb: true,
         // 全局面包屑是否显示图标，开启 showBreadcrumb 时有效
-        showBreadcrumbIcon: false,
+        showBreadcrumbIcon: true,
         // 是否显示日志入口，开启与否，不影响日志记录，如不希望用户看到可关闭
         showLog: true,
         // 是否显示多语言
@@ -97,7 +97,7 @@ const Setting = {
      * */
     page: {
         // 默认打开的页签
-        opened: ['home/index']
+        opened: ['admin/home']
     },
     /**
      * 功能配置

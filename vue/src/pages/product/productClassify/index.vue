@@ -33,7 +33,7 @@
                 </Row>
                 <Row type="flex">
                     <Col v-bind="grid">
-                        <Button v-auth="['product-save']" type="primary" class="bnt" icon="md-add" @click="addClass">添加分类</Button>
+                        <Button v-auth="['product-save-cate']" type="primary" class="bnt" icon="md-add" @click="addClass">添加分类</Button>
                     </Col>
                 </Row>
             </Form>
@@ -72,10 +72,10 @@
                     </template>
                 </vxe-table-column>
             </vxe-table>
-            <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
-                      :page-size="artFrom.limit"/>
-            </div>
+<!--            <div class="acea-row row-right page" v-if="total">-->
+<!--                <Page :total="total" :current="artFrom.page" show-elevator show-total @on-change="pageChange"-->
+<!--                      :page-size="artFrom.limit"/>-->
+<!--            </div>-->
         </Card>
         <!-- 添加 编辑表单-->
         <edit-from ref="edits" :FromData="FromData" @submitFail="userSearchs"></edit-from>
@@ -235,4 +235,15 @@
         img
             width 100%
             height 100%
+    >>>.ivu-select,.ivu-select-item,.vxe-table
+        font-size 12px !important
+    /deep/.ivu-input
+        font-size 14px !important
+</style>
+
+<style>
+/*.ivu-input{*/
+/*    font-size: 14px !important;*/
+/*}*/
+
 </style>

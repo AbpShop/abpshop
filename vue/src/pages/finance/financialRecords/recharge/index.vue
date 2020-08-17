@@ -11,7 +11,7 @@
                             <RadioGroup v-model="formValidate.data" type="button"  @on-change="selectChange(formValidate.data)" class="mr">
                                 <Radio :label=item.val v-for="(item,i) in fromList.fromTxt" :key="i">{{item.text}}</Radio>
                             </RadioGroup>
-                            <DatePicker @on-change="onchangeTime" :value="timeVal"  format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="自定义时间" style="width: 200px;"></DatePicker>
+                            <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal"  format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="自定义时间" style="width: 200px;"></DatePicker>
                         </FormItem>
                     </Col>
                     <Col span="24" class="ivu-text-left">
@@ -26,7 +26,7 @@
                     <Col span="24" class="ivu-text-left">
                         <FormItem label="搜索：">
                             <Input search enter-button @on-search="selChange" placeholder="请输入用户昵称、订单号" element-id="name" v-model="formValidate.nickname" style="width: 30%;display: inline-table;" class="mr"/>
-                            <Button class="mr" icon="ios-share-outline" @click="exports">导出</Button>
+                            <Button v-auth="['export-userRecharge']" class="mr" icon="ios-share-outline" @click="exports">导出</Button>
 <!--                            <span class="Refresh">刷新</span><Icon type="ios-refresh" />-->
                         </FormItem>
                     </Col>
@@ -46,13 +46,13 @@
                     no-filtered-data-text="暂无筛选结果"
             >
                 <template slot-scope="{ row, index }" slot="right">
-                    <a href="javascript:void(0);" v-if="row.refund_price <= 0" @click="refund(row)">退款</a>
-                    <Divider type="vertical" />
+                    <a href="javascript:void(0);" v-if="row.refund_price <= 0 && row.paid" @click="refund(row)">退款</a>
+<!--                    <Divider type="vertical"  v-if="row.paid"/>-->
                     <a href="javascript:void(0);" v-if="row.paid === 0" @click="del(row, '此条充值记录', index)">删除</a>
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="formValidate.page" show-elevator show-total @on-change="pageChange"
                       :page-size="formValidate.limit"/>
             </div>
         </Card>
@@ -228,12 +228,14 @@
             onchangeTime (e) {
                 this.timeVal = e;
                 this.formValidate.data = this.timeVal.join('-');
+                this.formValidate.page = 1;
                 this.getList();
             },
             // 选择时间
             selectChange (tab) {
                 this.formValidate.data = tab;
                 this.timeVal = [];
+                this.formValidate.page = 1;
                 this.getList();
             },
             // 选择

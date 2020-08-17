@@ -84,9 +84,9 @@ export default {
         /**
          * @description 订单状态
          */
-        getOrderTabs ({ commit }, time) {
+        getOrderTabs ({ commit }, data) {
             return new Promise((resolve, reject) => {
-                getOrdes(time).then(async res => {
+                getOrdes(data).then(async res => {
                     resolve(res);
                     commit('onChangeChart', res.data);
                 }).catch(res => {

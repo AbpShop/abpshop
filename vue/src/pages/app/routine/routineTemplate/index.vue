@@ -8,7 +8,7 @@
                 <Row type="flex" :gutter="24">
                     <Col v-bind="grid">
                         <FormItem label="是否有效：" label-for="status">
-                            <Select v-model="formValidate.status" placeholder="请选择" element-id="status" clearable @on-change="getList">
+                            <Select v-model="formValidate.status" placeholder="请选择" element-id="status" clearable @on-change="userSearchs">
                                 <Option value="1">开启</Option>
                                 <Option value="0">关闭</Option>
                             </Select>
@@ -22,7 +22,7 @@
                 </Row>
                 <Row type="flex">
                     <Col v-bind="grid">
-                        <Button type="primary"  icon="md-add" @click="add">添加模板消息</Button>
+                        <Button v-auth="['app-wechat-template-create','app-routine-create']" type="primary"  icon="md-add" @click="add">添加模板消息</Button>
                     </Col>
                 </Row>
             </Form>
@@ -61,7 +61,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="formValidate.page" show-elevator show-total @on-change="pageChange"
                       :page-size="formValidate.limit"/>
             </div>
         </Card>
@@ -211,7 +211,7 @@
             // 等级列表
             getList () {
                 this.loading = true;
-                this.formValidate.status =  this.formValidate.status || '';
+                this.formValidate.status = this.formValidate.status || '';
                 let functon;
                 if (this.$route.path === '/admin/app/routine/routine_template/index') {
                     functon = routineListApi(this.formValidate);
@@ -263,6 +263,7 @@
             },
             // 表格搜索
             userSearchs () {
+                this.formValidate.page = 1;
                 this.getList();
             }
         }

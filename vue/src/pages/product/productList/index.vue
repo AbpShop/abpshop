@@ -1,7 +1,7 @@
 <template>
     <div class="article-manager">
         <div class="i-layout-page-header">
-            <PageHeader class="product_tabs" title="商品管理">
+            <PageHeader class="product_tabs" title="商品管理"  hidden-breadcrumb>
                 <div slot="content">
                     <Tabs v-model="artFrom.type"  @on-click="onClickTab">
                         <TabPane :label="item.name +'('+item.count +')' " :name="item.type.toString()" v-for="(item,index) in headeNum" :key="index"/>
@@ -28,13 +28,14 @@
             </Form>
             <div class="Button">
                 <router-link v-auth="['product-product-save']" :to="'/admin/product/add_product'"><Button type="primary" class="bnt mr15" icon="md-add">添加商品</Button></router-link>
-                <Button v-auth="['product-crawl-save']" type="success" class="bnt mr15" @click="onCopy">复制淘宝、天猫、1688、京东</Button>
+                <Button v-auth="['product-crawl-save']" type="success" class="bnt mr15" @click="onCopy">复制淘宝、天猫、拼多多、京东、苏宁</Button>
+                <Button v-auth="['product-product-product_show']" class="bnt mr15" @click="onDismount" v-show="artFrom.type === '1'">批量下架</Button>
                 <Button v-auth="['product-product-product_show']" class="bnt mr15" @click="onShelves" v-show="artFrom.type === '2'">批量上架</Button>
                 <Button v-auth="['export-storeProduct']" class="export" icon="ios-share-outline" @click="exports">导出</Button>
             </div>
             <Table
                     ref="table"
-                    :columns="artFrom.type === '2'?columns2:columns"
+                    :columns="(artFrom.type !== '1' && artFrom.type !== '2')?columns2:columns"
                     :data="tableList"
                     class="ivu-mt"
                     :loading="loading"
@@ -68,13 +69,13 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="artFrom.page" show-elevator show-total @on-change="pageChange"
                       :page-size="artFrom.limit"/>
             </div>
             <attribute :attrTemplate="attrTemplate" v-on:changeTemplate="changeTemplate"></attribute>
         </Card>
         <!-- 生成淘宝京东表单-->
-        <Modal v-model="modals" class="Box" scrollable  footer-hide closable title="复制淘宝、天猫、1688、京东" :mask-closable="false"  width="1200" height="500">
+        <Modal v-model="modals" :z-index="100" class="Box" scrollable  footer-hide closable title="复制淘宝、天猫、拼多多、京东、苏宁" :mask-closable="false"  width="1200" height="500">
             <tao-bao ref="taobaos" v-if="modals" @on-close="onClose"></tao-bao>
         </Modal>
     </div>
@@ -86,7 +87,7 @@
     import toExcel from '../../../utils/Excel.js';
     import { mapState } from 'vuex';
     import taoBao from './taoBao';
-    import { getGoodHeade, getGoods, PostgoodsIsShow, treeListApi, productShowApi, storeProductApi } from '@/api/product';
+    import { getGoodHeade, getGoods, PostgoodsIsShow, treeListApi, productShowApi, productUnshowApi, storeProductApi } from '@/api/product';
     export default {
         name: 'product_productList',
         components: { expandRow, attribute, taoBao },
@@ -129,6 +130,11 @@
                 treeSelect: [],
                 loading: false,
                 columns: [
+                    {
+                        type: 'selection',
+                        width: 60,
+                        align: 'center'
+                    },
                     {
                         type: 'expand',
                         width: 50,
@@ -241,8 +247,25 @@
                 } else {
                     let data = {
                         ids: this.ids
-                    }
+                    };
                     productShowApi(data).then(res => {
+                        this.$Message.success(res.msg);
+                        this.goodHeade();
+                        this.getDataList();
+                    }).catch(res => {
+                        this.$Message.error(res.msg);
+                    })
+                }
+            },
+            // 批量下架
+            onDismount () {
+                if (this.ids.length === 0) {
+                    this.$Message.warning('请选择要下架的商品');
+                } else {
+                    let data = {
+                        ids: this.ids
+                    };
+                    productUnshowApi(data).then(res => {
                         this.$Message.success(res.msg);
                         this.goodHeade();
                         this.getDataList();
@@ -271,13 +294,14 @@
             onClickTab (name) {
                 this.artFrom.type = name;
                 this.columns2 = [...this.columns];
-                if (name === '2') {
-                    this.columns2.unshift({
+                if (name !== '1' && name !== '2') {
+                    this.columns2.shift({
                         type: 'selection',
                         width: 60,
                         align: 'center'
                     })
                 }
+                this.artFrom.page = 1;
                 this.getDataList();
             },
             // 下拉树
@@ -345,7 +369,6 @@
                     this.goodHeade();
                     this.getDataList();
                 }).catch(res => {
-                    this.loading = true;
                     this.$Message.error(res.msg);
                 });
             },

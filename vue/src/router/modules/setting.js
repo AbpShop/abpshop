@@ -29,7 +29,7 @@ export default {
             name: `${pre}systemAdmin`,
             meta: {
                 auth: ['setting-system-list'],
-                title: '管理员管理'
+                title: '管理员列表'
             },
             component: () => import('@/pages/setting/systemAdmin/index')
         },
@@ -75,6 +75,24 @@ export default {
             meta: {
                 ...meta,
                 title: '分销设置'
+            },
+            component: () => import('@/pages/setting/setSystem/index')
+        },
+        {
+            path: 'system_config_message/:type?/:tab_id?',
+            name: `${pre}message`,
+            meta: {
+                auth: ['setting-system-config-message'],
+                title: '短信开关'
+            },
+            component: () => import('@/pages/setting/setSystem/index')
+        },
+        {
+            path: 'system_config_logistics/:type?/:tab_id?',
+            name: `${pre}logistics`,
+            meta: {
+                auth: ['setting-system-config-logistics'],
+                title: '物流配置'
             },
             component: () => import('@/pages/setting/setSystem/index')
         },
@@ -165,6 +183,15 @@ export default {
             meta: {
                 auth: ['setting-system-group_data-new'],
                 title: '首页滚动新闻'
+            },
+            component: () => import('@/pages/system/group/list')
+        },
+        {
+            path: 'system_group_data/search/:id',
+            name: `${pre}groupDataNew`,
+            meta: {
+                auth: ['setting-system-group_data-search'],
+                title: '热门搜索'
             },
             component: () => import('@/pages/system/group/list')
         },
@@ -290,7 +317,7 @@ export default {
             name: `${pre}store`,
             meta: {
                 auth: ['setting-merchant-system-store'],
-                title: '提货点列表'
+                title: '提货点'
             },
             component: () => import('@/pages/setting/storeList/index')
         },
@@ -299,7 +326,7 @@ export default {
             name: `${pre}staff`,
             meta: {
                 auth: ['setting-merchant-system-store-staff'],
-                title: '核销员管理'
+                title: '核销员'
             },
             component: () => import('@/pages/setting/clerkList/index')
         },
@@ -311,6 +338,33 @@ export default {
                 title: '核销订单'
             },
             component: () => import('@/pages/setting/verifyOrder/index')
-        }
+        },
+        {
+            path: 'pages/devise',
+            name: `${pre}devise`,
+            meta: {
+                auth: ['admin-setting-pages-devise'],
+                title: '页面设计'
+            },
+            component: () => import('@/pages/setting/devise/list')
+        },
+        {
+            path: 'pages/diy',
+            name: `${pre}diy`,
+            meta: {
+                auth: ['admin-setting-pages-diy'],
+                title: '页面设计'
+            },
+            component: () => import('@/pages/setting/devise/index')
+        },
+        {
+            path: 'pages/links',
+            name: `${pre}links`,
+            meta: {
+                auth: ['admin-setting-pages-links'],
+                title: '页面链接'
+            },
+            component: () => import('@/pages/setting/devise/links')
+        },
     ]
 };

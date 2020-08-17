@@ -44,7 +44,7 @@
                     <Col span="24">
                         <Col v-bind="grid">
                             <FormItem label="核销时效：" label-for="valid_time">
-                                <DatePicker @on-change="onchangeDate" :value="formItem.valid_time" v-model="formItem.valid_time" format="yyyy/MM/dd" type="daterange" split-panels placeholder="请选择核销时效" ></DatePicker>
+                                <DatePicker :editable="false" @on-change="onchangeDate" :value="formItem.valid_time" v-model="formItem.valid_time" format="yyyy/MM/dd" type="daterange" split-panels placeholder="请选择核销时效" ></DatePicker>
                             </FormItem>
                         </Col>
                     </Col>

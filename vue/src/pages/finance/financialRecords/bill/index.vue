@@ -13,7 +13,7 @@
                     </Col>
                     <Col :xl="6" :lg="6" :md="12" :sm="24" :xs="24">
                         <FormItem label="时间范围：" class="tab_data">
-                            <DatePicker style="width: 80%" @on-change="onchangeTime"  format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="自定义时间"></DatePicker>
+                            <DatePicker :editable="false" style="width: 80%" @on-change="onchangeTime"  format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="自定义时间"></DatePicker>
                         </FormItem>
                     </Col>
                     <Col :xl="6" :lg="6" :md="12" :sm="24" :xs="24">
@@ -26,7 +26,7 @@
                     <Col span="24">
                         <FormItem>
                             <Button type="primary" icon="ios-search" @click="userSearchs">搜索</Button>
-                            <Button class="export" icon="ios-share-outline" @click="exports">导出</Button>
+                            <Button v-auth="['export-userFinance']" class="export" icon="ios-share-outline" @click="exports">导出</Button>
                         </FormItem>
                     </Col>
                 </Row>
@@ -44,7 +44,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total=total show-elevator :page-size="formValidate.limit" @on-change="pageChange"/>
+                <Page :total=total :current="formValidate.page" show-elevator :page-size="formValidate.limit" @on-change="pageChange"/>
             </div>
         </Card>
     </div>
@@ -71,7 +71,7 @@
                 total: 0,
                 columns: [
                     {
-                        title: '会员ID',
+                        title: '用户ID',
                         key: 'uid',
                         sortable: true,
                         width: 80

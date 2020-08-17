@@ -143,7 +143,7 @@
             onLogin () {
                 let url = this.$route.query.url;
                 if (url) {
-                    this.$router.replace({ name: 'setting_sms_template_apply' });
+                    this.$router.replace(url);
                 } else {
                     this.isShowLogn = false;
                     this.isShow = false;

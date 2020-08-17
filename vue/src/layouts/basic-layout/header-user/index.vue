@@ -4,7 +4,7 @@
             <Avatar size="small" :src="info.avatar" v-if="infor.head_pic" />
             <span class="i-layout-header-user-name" v-if="!isMobile">{{ infor.account }}</span>
             <DropdownMenu slot="list">
-                <i-link to="/system/user">
+                <i-link to="/admin/system/user">
                     <DropdownItem>
                         <Icon type="ios-contact-outline" />
                         <span>{{ $t('basicLayout.user.center') }}</span>
@@ -26,7 +26,6 @@
 </template>
 <script>
     import { mapState, mapActions } from 'vuex';
-    import { AccountLogout } from '@/api/account';
 
     export default {
         name: 'iHeaderUser',

@@ -19,12 +19,20 @@
     import hotSearch from './hot-search';
     import userPreference from './user-preference';
     import { checkAuth } from '@/api/index';
+    import { auth } from '@/api/system';
     import { Notice } from 'iview'
     import util from '@/libs/util';
 
     export default {
         name: 'index',
-        components: { baseInfo, gridMenu, visitChart, userChart, hotSearch, userPreference },
+        components: {
+            baseInfo,
+            gridMenu,
+            visitChart,
+            userChart,
+            hotSearch,
+            userPreference
+        },
         data () {
             return {
                 visitType: 'day', // day, month, year
@@ -36,13 +44,14 @@
                 checkAuth().then(res => {
                     return Notice.warning({
                         title: '授权提醒',
-                        duration: 3,
+                        duration: 0,
                         desc: res.msg,
                         render: h => {
                             return h('div', [
                                 h('a', {
                                     attrs: {
-                                        href: 'http://shop.AbpShop.net'
+                                        href: 'http://www.yznt.com/home/grant/applyauthorize.html',
+                                        target: '_blank'
                                     }
                                 }, res.msg)
                             ])
@@ -54,8 +63,19 @@
                 }).catch(res => {
                 })
             }
+            this.getAuth();
         },
-        methods: {}
+        methods: {
+            getAuth () {
+                auth().then(res => {
+                    let data = res.data || {};
+                    if (data.auth_code && data.auth) {
+                        this.authCode = data.auth_code;
+                        this.auth = true;
+                    }
+                }).catch(res => {})
+            }
+        }
     }
 </script>
 

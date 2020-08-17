@@ -11,7 +11,7 @@
                     <Col :span="24">
                         <Col :xl="7" :lg="7" :md="22" :sm="22" :xs="22" class="left mb15">
                             <img class="top" src="../../../../assets/images/mobilehead.png" />
-                            <img class="bottom" src="../../../../assets/images/mobilefoot.png" />
+                            <img class="bottom" src="@/assets/images/mobilefoot.png" />
                             <div style="background: #F4F5F9; min-height: 438px; position: absolute;
          top: 63px; width: 320px; ">
                             </div>

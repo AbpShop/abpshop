@@ -2,7 +2,7 @@
     <div>
         <div class="i-layout-page-header">
             <PageHeader class="product_tabs" hidden-breadcrumb>
-                <div slot="title" class="ivu-mt ivu-mb">
+                <div slot="title">
                     <router-link :to="{path:'/admin/marketing/store_bargain/index'}"><Button icon="ios-arrow-back" size="small"  class="mr20">返回</Button></router-link>
                     <span v-text="$route.params.id!=='0'?'编辑砍价商品':'添加砍价商品'" class="mr20"></span>
                 </div>
@@ -25,7 +25,7 @@
                                 <div class="pictrue" v-if="formValidate.image"><img
                                         v-lazy="formValidate.image"></div>
                                 <div class="upLoad acea-row row-center-wrapper" v-else>
-                                    <Icon type="ios-camera-outline" size="26" class="iconfont"/>
+                                    <Icon type="ios-camera-outline" size="26" class="iconfonts"/>
                                 </div>
                             </div>
                         </FormItem>
@@ -35,7 +35,7 @@
                                     <div class="picBox" @click="modalPicTap('dan','danFrom')">
                                         <div class="pictrue" v-if="formValidate.image"><img v-lazy="formValidate.image"></div>
                                         <div class="upLoad acea-row row-center-wrapper" v-else>
-                                            <Icon type="ios-camera-outline" size="26" class="iconfont"/>
+                                            <Icon type="ios-camera-outline" size="26" class="iconfonts"/>
                                         </div>
                                     </div>
                                 </FormItem>
@@ -53,7 +53,7 @@
                                             <Button shape="circle" icon="md-close"  @click.native="handleRemove(index)" class="btndel"></Button>
                                         </div>
                                         <div class="upLoad acea-row row-center-wrapper" @click="modalPicTap('duo')">
-                                            <Icon type="ios-camera-outline" size="26" class="iconfont"/>
+                                            <Icon type="ios-camera-outline" size="26" class="iconfonts"/>
                                         </div>
                                     </div>
                                 </FormItem>
@@ -79,7 +79,7 @@
                             <!--</Col>-->
                             <Col v-bind="grid2">
                                 <FormItem label="活动时间：" prop="section_time">
-                                    <DatePicker type="datetimerange" format="yyyy-MM-dd HH:mm" placeholder="请选择活动时间"
+                                    <DatePicker :editable="false" type="datetimerange" format="yyyy-MM-dd HH:mm" placeholder="请选择活动时间"
                                                 @on-change="onchangeTime"     style="width: 100%" :value="formValidate.section_time" v-model="formValidate.section_time"></DatePicker>
                                 </FormItem>
                             </Col>
@@ -138,11 +138,11 @@
                                     <!--<InputNumber placeholder="请输入单次允许购买数量" :precision="0" :min="1"  v-model="formValidate.num" style="width: 100%"/>-->
                                 <!--</FormItem>-->
                             <!--</Col>-->
-                            <Col v-bind="grid2">
-                                <FormItem label="赠送积分：">
-                                    <InputNumber placeholder="请输入赠送积分" element-id="give_integral" :precision="0"  v-model="formValidate.give_integral" style="width: 100%"/>
-                                </FormItem>
-                            </Col>
+<!--                            <Col v-bind="grid2">-->
+<!--                                <FormItem label="赠送积分：">-->
+<!--                                    <InputNumber placeholder="请输入赠送积分" element-id="give_integral" :precision="0"  v-model="formValidate.give_integral" style="width: 100%"/>-->
+<!--                                </FormItem>-->
+<!--                            </Col>-->
                             <Col v-bind="grid2">
                                 <FormItem label="运费模板：" prop="temp_id">
                                     <div>
@@ -188,7 +188,7 @@
                                             <div class="acea-row row-middle row-center-wrapper" @click="modalPicTap('dan','danTable',index)">
                                                 <div class="pictrue pictrueTab" v-if="specsData[index].pic"><img v-lazy="specsData[index].pic"></div>
                                                 <div class="upLoad pictrueTab acea-row row-center-wrapper"   v-else>
-                                                    <Icon type="ios-camera-outline" size="21" class="iconfont"/>
+                                                    <Icon type="ios-camera-outline" size="21" class="iconfonts"/>
                                                 </div>
                                             </div>
                                         </template>
@@ -215,7 +215,7 @@
                         </div>
                         <FormItem>
                             <Button class="submission mr15" @click="step" v-show="current!==0" :disabled="$route.params.id&&$route.params.id!=='0'&&current===1">上一步</Button>
-                            <Button type="primary" class="submission" @click="next('formValidate')" v-text="current===2?'提交':'下一步'"></Button>
+                            <Button type="primary" :disabled="submitOpen && current === 2" class="submission" @click="next('formValidate')" v-text="current===2?'提交':'下一步'"></Button>
                         </FormItem>
                         <Spin size="large" fix v-if="spinShow"></Spin>
                     </Form>
@@ -246,6 +246,7 @@
         components: { goodsList, uploadPictures, VueUeditorWrap },
         data () {
             return {
+                submitOpen: false,
                 spinShow: false,
                 myConfig: {
                     autoHeightEnabled: false, // 编辑器不自动被内容撑高
@@ -588,12 +589,15 @@
                                 }
                             }
                             this.formValidate.id = (this.$route.params.id) || 0;
+                            this.submitOpen = true;
                             bargainCreatApi(this.formValidate).then(async res => {
+                                this.submitOpen = false;
                                 this.$Message.success(res.msg);
                                 setTimeout(() => {
                                     this.$router.push({ path: '/admin/marketing/store_bargain/index' });
                                 }, 500);
                             }).catch(res => {
+                                this.submitOpen = false;
                                 this.$Message.error(res.msg);
                             })
                         } else {

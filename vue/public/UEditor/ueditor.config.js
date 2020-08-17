@@ -37,8 +37,7 @@
             'bold', 'italic', 'underline', 'strikethrough', '|', 'superscript', 'subscript', '|', 'forecolor', 'backcolor', '|',
             'removeformat', '|', 'insertorderedlist', 'insertunorderedlist', '|', 'selectall', 'cleardoc', 'paragraph', '|',
             'fontfamily', 'fontsize', '|', 'justifyleft', 'justifycenter', 'justifyright', 'justifyjustify', '|',
-            'link', 'unlink', '|', 'emotion', '|',
-            '|', 'horizontal', 'print', 'preview', 'fullscreen', 'drafts', 'formula'
+            'horizontal', 'print', 'preview', 'drafts', 'formula'
         ]],
         // 当鼠标放在工具栏上时显示的tooltip提示,留空支持自动多语言配置，否则以配置值为准
         //, labelMap:{

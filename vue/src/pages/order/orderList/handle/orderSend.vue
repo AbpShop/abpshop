@@ -60,7 +60,7 @@
                         { required: true, message: '请输入送货人姓名', trigger: 'blur' }
                     ],
                     delivery_id: [
-                        { required: true, message: '请输入快递单独', trigger: 'blur' }
+                        { required: true, message: '请输入快递单号', trigger: 'blur' }
                     ]
                 }
             }

@@ -78,6 +78,10 @@
             titleFrom: {
                 type: String,
                 default: ''
+            },
+            addId: {
+                type: String,
+                default: ''
             }
         },
         data () {
@@ -114,6 +118,13 @@
                     config_name: '',
                     info: '',
                     typelist: []
+                }
+            }
+        },
+        watch: {
+            'addId' (n) {
+                if (n === 'addId') {
+                    this.formValidate.typelist = []
                 }
             }
         },

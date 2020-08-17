@@ -52,11 +52,11 @@
         },
         data () {
             return {
-                iSselect:false,
+                iSselect: false,
                 addressModal: false,
-                cityList:[],
+                cityList: [],
                 activeCity: -1,
-                loading:false
+                loading: false
             }
         },
         computed: {
@@ -79,7 +79,7 @@
             },
             getCityList () {
                 this.loading = true;
-                templatesCityListApi().then(res=>{
+                templatesCityListApi().then(res => {
                     this.loading = false;
                     this.cityList = res.data;
                 })
@@ -89,26 +89,26 @@
              * @param checked
              */
             allCheckbox: function () {
-                let that = this,checked = this.iSselect;
-                that.cityList.forEach(function (item,key) {
+                let that = this, checked = this.iSselect;
+                that.cityList.forEach(function (item, key) {
                     that.$set(that.cityList[key], 'checked', checked);
                     if (checked) {
                         that.$set(that.cityList[key], 'count', that.cityList[key].children.length);
                     } else {
                         that.$set(that.cityList[key], 'count', 0);
                     }
-                    that.cityList[key].children.forEach(function (val,k) {
+                    that.cityList[key].children.forEach(function (val, k) {
                         that.$set(that.cityList[key].children[k], 'checked', checked);
                     })
                 });
                 // this.render();
             },
-            //清空；
+            // 清空；
             empty () {
                 let that = this;
-                that.cityList.forEach(function (item,key) {
+                that.cityList.forEach(function (item, key) {
                     that.$set(that.cityList[key], 'checked', false);
-                    that.cityList[key].children.forEach(function (val,k) {
+                    that.cityList[key].children.forEach(function (val, k) {
                         that.$set(that.cityList[key].children[k], 'checked', false);
                     });
                     that.$set(that.cityList[key], 'count', 0);
@@ -123,13 +123,13 @@
                 let that = this;
                 if (that.cityList[index].checked) {
                     that.$set(that.cityList[index], 'count', that.cityList[index].children.length);
-                    that.cityList[index].children.forEach(function (item,key) {
+                    that.cityList[index].children.forEach(function (item, key) {
                         that.$set(that.cityList[index].children[key], 'checked', true);
                     });
                 } else {
                     that.$set(that.cityList[index], 'count', 0);
                     that.$set(that.cityList[index], 'checked', false);
-                    that.cityList[index].children.forEach(function (item,key) {
+                    that.cityList[index].children.forEach(function (item, key) {
                         that.$set(that.cityList[index].children[key], 'checked', false);
                     });
                     that.iSselect = false;
@@ -143,7 +143,7 @@
              */
             primary: function (index, ind) {
                 let checked = false, count = 0;
-                this.cityList[index].children.forEach(function (item,key) {
+                this.cityList[index].children.forEach(function (item, key) {
                     if (item.checked) {
                         checked = true;
                         count++;
@@ -153,36 +153,36 @@
                 this.$set(this.cityList[index], 'checked', checked);
                 // this.render();
             },
-            //确定;
+            // 确定;
             confirm () {
                 let that = this;
-                //被选中的省市；
+                // 被选中的省市；
                 let selectList = [];
-                that.cityList.forEach(function (item,key) {
+                that.cityList.forEach(function (item, key) {
                     let data = {};
-                    if(item.checked){
+                    if (item.checked) {
                         data = {
                             name: item.name,
                             city_id: item.city_id,
                             children: []
                         };
                     }
-                    that.cityList[key].children.forEach(function (i,k) {
-                        if(i.checked){
+                    that.cityList[key].children.forEach(function (i, k) {
+                        if (i.checked) {
                             data.children.push({
                                 city_id: i.city_id
                             })
                         }
                     });
-                    if(data.city_id !== undefined){
+                    if (data.city_id !== undefined) {
                         selectList.push(data);
                     }
                 });
                 console.log(selectList);
-                if(selectList.length === 0){
+                if (selectList.length === 0) {
                     return that.$Message.error('至少选择一个省份或者城市');
-                }else {
-                    this.$emit('selectCity',selectList,this.type);
+                } else {
+                    this.$emit('selectCity', selectList, this.type);
                     that.addressModal = false;
                     this.cityList = []
                 }
@@ -194,7 +194,7 @@
             close () {
                 this.addressModal = false;
                 this.cityList = []
-            },
+            }
         },
         mounted () {
             // this.getCityList();

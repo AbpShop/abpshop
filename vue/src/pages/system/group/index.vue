@@ -37,12 +37,12 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="formValidate.page" show-elevator show-total @on-change="pageChange"
                       :page-size="formValidate.limit"/>
             </div>
         </Card>
         <!-- 新增 编辑-->
-        <group-from ref="groupfroms" :titleFrom="titleFrom" :groupId="groupId" @getList="getList"></group-from>
+        <group-from ref="groupfroms" :titleFrom="titleFrom" :groupId="groupId" :addId = "addId" @getList="getList"></group-from>
     </div>
 </template>
 
@@ -100,7 +100,8 @@
                 ],
                 FromData: null,
                 titleFrom: '',
-                groupId: 0
+                groupId: 0,
+                addId: ''
             }
         },
         computed: {
@@ -141,12 +142,14 @@
             },
             // 表格搜索
             userSearchs () {
+                this.formValidate.page = 1;
                 this.getList();
             },
             // 点击添加
             groupAdd (title) {
                 this.$refs.groupfroms.modals = true;
                 this.titleFrom = title;
+                this.addId = 'addId';
             },
             // 删除
             del (row, tit, num) {
@@ -170,6 +173,7 @@
                 this.groupId = row.id;
                 this.$refs.groupfroms.fromData(row.id);
                 this.$refs.groupfroms.modals = true;
+                this.addId = ''
             }
         }
     }

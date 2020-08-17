@@ -36,21 +36,21 @@
         },
         methods: {
             getPicD (pc) {
-                if(this.$route.query.fodder === 'dialog'){
+                if (this.$route.query.fodder === 'dialog') {
                     let str = '';
-                    for (let i = 0; i < pc.length; i++){
-                        str += '<img src="'+pc[i].att_dir+'">'
+                    for (let i = 0; i < pc.length; i++) {
+                        str += '<img src="' + pc[i].att_dir + '">'
                     }
                     nowEditor.dialog.close(true);
-                    nowEditor.editor.setContent(str,true);
-                }else {
+                    nowEditor.editor.setContent(str, true);
+                } else {
                     form_create_helper.set(this.$route.query.fodder, pc);
                     form_create_helper.close(this.$route.query.fodder);
                 }
             },
             getPic (pc) {
-                 form_create_helper.set(this.$route.query.fodder, pc.satt_dir);
-                 form_create_helper.close(this.$route.query.fodder);
+                form_create_helper.set(this.$route.query.fodder, pc.satt_dir);
+                form_create_helper.close(this.$route.query.fodder);
             }
             // getPic (pc) {
             //     if (this.$route.query.fodder === 'dialog') {

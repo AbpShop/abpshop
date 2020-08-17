@@ -8,7 +8,7 @@ export function authLapse (data) {
                 return h('div', [
                     h('a', {
                         attrs: {
-                            href: 'http://shop.AbpShop.net'
+                            href: 'http://www.yznt.com'
                         }
                     }, data.info)
                 ])

@@ -1,7 +1,7 @@
 <template>
     <div>
         <cards-data :cardLists="cardLists" v-if="cardLists.length>=0"></cards-data>
-        <Card :bordered="false" dis-hover class="ivu-mt">
+        <Card :bordered="false" dis-hover>
             <table-form @getList="getData"/>
             <table-list ref="table" @on-changeCards="getCards" @changeGetTabs = 'changeGetTabs'/>
         </Card>

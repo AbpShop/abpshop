@@ -8,19 +8,19 @@
                 <Row type="flex" :gutter="24">
                     <Col v-bind="grid" class="mr">
                         <FormItem label="提货点名称："  label-for="store_name">
-                            <Select v-model="artFrom.id">
+                            <Select v-model="artFrom.store_id" element-id="store_id" clearable @on-change="userSearchs">
                                 <Option v-for="item in storeSelectList" :value="item.id" :key="item.id">{{ item.name }}</Option>
                             </Select>
                         </FormItem>
                     </Col>
-                    <Col v-bind="grid" class="mr">
-                        <Button type="primary" class="mr15" @click="userSearchs">搜索</Button>
-                    </Col>
+                    <!--<Col v-bind="grid" class="mr">-->
+                        <!--<Button type="primary" class="mr15" @click="userSearchs">搜索</Button>-->
+                    <!--</Col>-->
                 </Row>
             </Form>
             <Row type="flex">
                 <Col v-bind="grid">
-                    <Button type="primary"  icon="md-add" @click="add">添加核销员</Button>
+                    <Button v-auth="['merchant-store_staff-create']" type="primary"  icon="md-add" @click="add">添加核销员</Button>
                 </Col>
             </Row>
             <Table :columns="columns" :data="storeLists" ref="table" class="mt25"
@@ -47,7 +47,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="artFrom.page" show-elevator show-total @on-change="pageChange"
                       :page-size="artFrom.limit"/>
             </div>
         </Card>
@@ -162,6 +162,7 @@
             },
             // 搜索；
             userSearchs () {
+                this.artFrom.page = 1;
                 this.getList();
             },
             pageChange (index) {

@@ -29,7 +29,7 @@ export default {
             name: `${pre}systemUpgradeclient`,
             meta: {
                 auth: ['system-system-upgradeclient'],
-                title: '在线更新'
+                title: '在线升级'
             },
             component: () => import('@/pages/system/systemUpgradeclient/index')
         },
@@ -113,15 +113,6 @@ export default {
                 title: '组合数据列表'
             },
             component: () => import('@/pages/system/group/list')
-        },
-        {
-            path: 'maintain/auth',
-            name: `${pre}auth`,
-            meta: {
-                auth: ['system-maintain-auth'],
-                title: '商业授权'
-            },
-            component: () => import('@/pages/system/auth/index')
         }
     ]
 };

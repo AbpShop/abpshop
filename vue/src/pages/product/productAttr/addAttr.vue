@@ -25,7 +25,7 @@
                 </Col>
                 <Col span="24" v-if="isBtn" class="mt10">
                     <Col span="8" class="mr15">
-                        <FormItem label="规格：">
+                        <FormItem label="规格名称：">
                             <Input  placeholder="请输入规格" v-model="attrsName"  />
                         </FormItem>
                     </Col>

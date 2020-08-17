@@ -1,6 +1,6 @@
 <template>
     <div style="width: 100%">
-        <Modal v-model="modals" scrollable footer-hide closable title="会员详情" :mask-closable="false"
+        <Modal v-model="modals" scrollable footer-hide closable title="用户详情" :mask-closable="false"
                width="900">
             <Spin size="large" fix v-if="spinShow"></Spin>
             <div class="acea-row">

@@ -2,7 +2,7 @@
     <div>
         <div class="i-layout-page-header">
             <PageHeader class="product_tabs" hidden-breadcrumb>
-                <div slot="title" class="ivu-mt ivu-mb">
+                <div slot="title">
                     <router-link :to="{path:'/admin/marketing/store_combination/index'}"><Button icon="ios-arrow-back" size="small"  class="mr20">返回</Button></router-link>
                     <span v-text="$route.params.id?'编辑拼团商品':'添加拼团商品'" class="mr20"></span>
                 </div>
@@ -74,7 +74,7 @@
                             </Col>
                             <Col v-bind="grid2">
                                 <FormItem label="拼团时间：" prop="section_time">
-                                    <DatePicker type="datetimerange" format="yyyy-MM-dd HH:mm" placeholder="请选择活动时间"
+                                    <DatePicker :editable="false" type="datetimerange" format="yyyy-MM-dd HH:mm" placeholder="请选择活动时间"
                                                 @on-change="onchangeTime"   v-width="'100%'" :value="formValidate.section_time" v-model="formValidate.section_time"></DatePicker>
                                 </FormItem>
                             </Col>
@@ -175,7 +175,7 @@
                         </Row>
                         <FormItem>
                             <Button class="submission mr15" @click="step" v-show="current!==0" :disabled="$route.params.id&&current===1">上一步</Button>
-                            <Button type="primary" class="submission" @click="next('formValidate')" v-text="current===2?'提交':'下一步'"></Button>
+                            <Button type="primary" :disabled="submitOpen && current === 2" class="submission" @click="next('formValidate')" v-text="current===2?'提交':'下一步'"></Button>
                         </FormItem>
                     </Form>
                     <Spin size="large" fix v-if="spinShow"></Spin>
@@ -206,6 +206,7 @@
         components: { UeditorWrap, goodsList, uploadPictures, VueUeditorWrap },
         data () {
             return {
+                submitOpen: false,
                 spinShow: false,
                 isChoice: '',
                 current: 0,
@@ -508,12 +509,15 @@
                                 }
                             }
                             this.formValidate.id = Number(this.$route.params.id) || 0;
+                            this.submitOpen = true;
                             combinationCreatApi(this.formValidate).then(async res => {
+                                this.submitOpen = false;
                                 this.$Message.success(res.msg);
                                 setTimeout(() => {
                                     this.$router.push({ path: '/admin/marketing/store_combination/index' });
                                 }, 500);
                             }).catch(res => {
+                                this.submitOpen = false;
                                 this.$Message.error(res.msg);
                             })
                         } else {

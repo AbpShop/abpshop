@@ -11,7 +11,7 @@
                             <RadioGroup v-model="formValidate.data" type="button"  @on-change="selectChange(formValidate.data)" class="mr">
                                 <Radio :label=item.val v-for="(item,i) in fromList.fromTxt" :key="i">{{item.text}}</Radio>
                             </RadioGroup>
-                            <DatePicker @on-change="onchangeTime" :value="timeVal"  format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="自定义时间" style="width: 200px;"></DatePicker>
+                            <DatePicker :editable="false" @on-change="onchangeTime" :value="timeVal"  format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="自定义时间" style="width: 200px;"></DatePicker>
                         </FormItem>
                     </Col>
                     <Col span="24">
@@ -71,6 +71,13 @@
                         <div class="item">支付宝号:{{row.alipay_code}}</div>
                     </div>
                 </template>
+                <template slot-scope="{ row, index }" slot="qrcode_url">
+                    <viewer v-if="row.extract_type === 'weixin' || row.extract_type === 'alipay'">
+                        <div class="tabBox_img">
+                            <img v-lazy="row.qrcode_url">
+                        </div>
+                    </viewer>
+                </template>
                 <template slot-scope="{ row, index }" slot="status">
                     <div class="status" v-if="row.status === 0">
                         <div class="statusVal">未提现</div>
@@ -87,7 +94,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="formValidate.page" show-elevator show-total @on-change="pageChange"
                       :page-size="formValidate.limit"/>
             </div>
         </Card>
@@ -150,6 +157,11 @@
                     {
                         title: '提现方式',
                         slot: 'extract_type',
+                        minWidth: 150
+                    },
+                    {
+                        title: '收款码',
+                        slot: 'qrcode_url',
                         minWidth: 150
                     },
                     {
@@ -293,10 +305,12 @@
             onchangeTime (e) {
                 this.timeVal = e;
                 this.formValidate.data = this.timeVal.join('-');
+                this.formValidate.page = 1;
                 this.getList();
             },
             // 选择时间
             selectChange (tab) {
+                this.formValidate.page = 1;
                 this.formValidate.data = tab;
                 this.timeVal = [];
                 this.getList();
@@ -315,10 +329,10 @@
                     this.total = data.list.count;
                     this.extractStatistics = data.extract_statistics.data;
                     this.cardLists = [
-                        { 'col': 6, 'count': this.extractStatistics.price, 'name': '待提现金额' },
-                        { 'col': 6, 'count': this.extractStatistics.brokerage_count, 'name': '佣金总金额' },
-                        { 'col': 6, 'count': this.extractStatistics.priced, 'name': '已提现金额' },
-                        { 'col': 6, 'count': this.extractStatistics.brokerage_not, 'name': '未提现金额' }
+                        { 'col': 6, 'count': this.extractStatistics.price, 'name': '待提现金额', className: 'md-basket' },
+                        { 'col': 6, 'count': this.extractStatistics.brokerage_count, 'name': '佣金总金额', className: 'md-pricetags' },
+                        { 'col': 6, 'count': this.extractStatistics.priced, 'name': '已提现金额', className: 'md-cash' },
+                        { 'col': 6, 'count': this.extractStatistics.brokerage_not, 'name': '未提现金额', className: 'ios-cash' }
                     ];
                     this.loading = false;
                 }).catch(res => {
@@ -369,4 +383,12 @@
     .type
        padding 3px 0
        box-sizing border-box
+    .tabBox_img
+        width 36px
+        height 36px
+        border-radius:4px
+        cursor pointer
+        img
+            width 100%
+            height 100%
 </style>

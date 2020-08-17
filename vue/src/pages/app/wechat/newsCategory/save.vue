@@ -2,7 +2,7 @@
     <div class="newsBox">
         <div class="i-layout-page-header">
             <PageHeader class="product_tabs" hidden-breadcrumb>
-                <div slot="title" class="ivu-mt ivu-mb">
+                <div slot="title">
                     <router-link :to="{path:'/admin/app/wechat/news_category/index'}"><Button icon="ios-arrow-back" size="small"  class="mr20" v-show="$route.params.id">返回</Button></router-link>
                     <span v-text="$route.meta.title" class="mr20"></span>
                 </div>
@@ -69,7 +69,7 @@
                                     <Button type="primary" class="submission" @click="subFrom('saveForm')">提交</Button>
                                 </FormItem>
                             </Col>
-                            <Modal v-model="modalPic" width="60%" scrollable  footer-hide closable title='上传商品图' :mask-closable="false" :z-index="1">
+                            <Modal v-model="modalPic" width="60%" scrollable  footer-hide closable title='上传文章图' :mask-closable="false" :z-index="1">
                                 <uploadPictures :isChoice="isChoice" @getPic="getPic" :gridBtn="gridBtn" :gridPic="gridPic" v-if="modalPic"></uploadPictures>
                             </Modal>
                         </Row>
@@ -120,8 +120,8 @@
                     autoHeightEnabled: false, // 编辑器不自动被内容撑高
                     initialFrameHeight: 500, // 初始容器高度
                     initialFrameWidth: '100%', // 初始容器宽度
-                    UEDITOR_HOME_URL: '/UEditor/',
-                    serverUrl: 'http://35.201.165.105:8000/controller.php'
+                    UEDITOR_HOME_URL: '/admin/UEditor/',
+                    serverUrl: ''
                 },
                 ruleValidate: {
                     title: [

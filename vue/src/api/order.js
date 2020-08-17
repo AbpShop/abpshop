@@ -184,3 +184,13 @@ export function storeOrderApi (data) {
         params: data
     });
 }
+
+/**
+ * @description 订单核销
+ */
+export function writeUpdate (id) {
+    return request({
+        url: `/order/write_update/${id}`,
+        method: 'put',
+    });
+}

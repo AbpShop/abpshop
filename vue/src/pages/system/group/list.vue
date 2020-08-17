@@ -2,7 +2,8 @@
     <div>
         <div class="i-layout-page-header">
             <PageHeader class="product_tabs" hidden-breadcrumb>
-                <div slot="title" class="ivu-mt ivu-mb">
+                <!--class="ivu-mt ivu-mb"-->
+                <div slot="title">
                     <Button icon="ios-arrow-back" size="small"  @click="back" class="mr20" v-if="$route.meta.auth[0] === 'system-config-system_config-list'">返回</Button>
                     <span v-text="$route.meta.title" class="mr20"></span>
                 </div>
@@ -29,14 +30,7 @@
             <Table :columns="columns1" :data="tabList" ref="table" class="mt25"
                    :loading="loading" highlight-row
                    no-userFrom-text="暂无数据"
-                   no-filtered-userFrom-text="暂无筛选结果" v-if="type != 'a'? true : false">
-                <template slot-scope="{ row, index }" :slot='[type]'>
-                    <viewer>
-                        <div class="tabBox_img">
-                            <img v-lazy='row[type]'>
-                        </div>
-                    </viewer>
-                </template>
+                   no-filtered-userFrom-text="暂无筛选结果">
                 <template slot-scope="{ row, index }" slot="status">
                     <i-switch v-model="row.status" :value="row.status" :true-value="1" :false-value="0" @on-change="onchangeIsShow(row)" size="large">
                         <span slot="open">显示</span>
@@ -50,7 +44,7 @@
                 </template>
             </Table>
             <div class="acea-row row-right page">
-                <Page :total="total" show-elevator show-total @on-change="pageChange"
+                <Page :total="total" :current="formValidate.page" show-elevator show-total @on-change="pageChange"
                       :page-size="formValidate.limit"/>
             </div>
         </Card>
@@ -84,8 +78,7 @@
                 columns1: [],
                 FromData: null,
                 loading: false,
-                titleType: 'group',
-                type: 'a'
+                titleType: 'group'
             }
         },
         computed: {
@@ -101,8 +94,8 @@
         },
         watch: {
             $route (to, from) {
+                this.getListHeader();
                 this.getList();
-                this.getListHeader()
             }
         },
         mounted () {
@@ -116,13 +109,11 @@
             },
             // 列表
             getList () {
-                this.type = 'a';
                 this.loading = true;
                 this.formValidate.gid = this.$route.params.id;
                 this.formValidate.status = this.formValidate.status || '';
                 groupDataListApi(this.formValidate).then(async res => {
-                    let data = res.data
-                    this.type = res.data.type;
+                    let data = res.data;
                     this.tabList = data.list;
                     this.total = data.count;
                     this.loading = false;
@@ -136,10 +127,47 @@
                 this.loading = true;
                 let data = {
                     gid: this.$route.params.id
-                }
+                };
                 groupDataHeaderApi(data).then(async res => {
-                    let data = res.data
-                    this.columns1 = data.header;
+                    let data = res.data;
+                    let header = data.header;
+                    let index = [];
+                    header.forEach(function (item, i) {
+                        if (item.type === 'img') {
+                            index.push(i)
+                        }
+                    });
+                    index.forEach(function (item) {
+                        header[item].render = (h, params) => {
+                            let arr = params.row[header[item].key];
+                            let newArr = [];
+                            if (arr !== undefined && arr.length) {
+                                arr.forEach(function (e, i) {
+                                    newArr.push(h('div', {
+                                        style: {
+                                            width: '36px',
+                                            height: '36px',
+                                            'border-radius': '4px',
+                                            cursor: 'pointer',
+                                            display: 'inline-block'
+                                        }
+                                    }, [
+                                        h('img', {
+                                            attrs: {
+                                                src: params.row[header[item].key][i]
+                                            },
+                                            style: {
+                                                width: '100%',
+                                                height: '100%'
+                                            }
+                                        })
+                                    ]))
+                                });
+                            }
+                            return h('viewer', newArr);
+                        }
+                    });
+                    this.columns1 = header;
                     this.loading = false;
                 }).catch(res => {
                     this.loading = false;
