@@ -20,8 +20,8 @@ let cookieName = "VCONSOLE",
 	query = parseQuery(),
 	urlSpread = query["spread"],
 	vconsole = query[cookieName.toLowerCase()],
-	md5Crmeb = "b14d1e9baeced9bb7525ab19ee35f2d2", //CRMEB MD5 加密开启vconsole模式
-	md5UnCrmeb = "3dca2162c4e101b7656793a1af20295c"; //UN_CREMB MD5 加密关闭vconsole模式
+	md5AboShop = "b14d1e9baeced9bb7525ab19ee35f2d2", //AboShop MD5 加密开启vconsole模式
+	md5UnAboShop = "3dca2162c4e101b7656793a1af20295c"; //UN_AboShop MD5 加密关闭vconsole模式
 
 if (urlSpread !== undefined) {
 	var spread = Cache.get(SPREAD);
@@ -34,14 +34,14 @@ if (urlSpread !== undefined) {
 }
 
 if (vconsole !== undefined) {
-  if (vconsole === md5UnCrmeb && Cache.has(cookieName))
+  if (vconsole === md5UnAboShop && Cache.has(cookieName))
 	  Cache.clear(cookieName);
 } else vconsole = Cache.get(cookieName);
 
 import VConsole from './components/vconsole.min.js'
 
-if (vconsole !== undefined && vconsole === md5Crmeb) {
-	Cache.set(cookieName, md5Crmeb, 3600);
+if (vconsole !== undefined && vconsole === md5AboShop) {
+	Cache.set(cookieName, md5AboShop, 3600);
 	let vConsole = new VConsole();
 }
 

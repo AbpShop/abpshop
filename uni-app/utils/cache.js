@@ -8,7 +8,7 @@ class Cache {
 		this.cacheSetHandler = uni.setStorageSync;
 		this.cacheGetHandler = uni.getStorageSync;
 		this.cacheClearHandler = uni.removeStorageSync;
-		this.cacheExpire = 'UNI-APP-CRMEB:TAG';
+		this.cacheExpire = 'UNI-APP-ABPSHOP:TAG';
 		this.clearOverdue();
 	}
 

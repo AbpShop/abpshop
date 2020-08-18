@@ -83,7 +83,7 @@
 		{
 			"path": "pages/auth/index",
 			"style": {
-				"navigationBarTitleText": "CRMEB"
+				"navigationBarTitleText": "ABPSHOP"
 			}
 		},
 		//#endif
@@ -494,7 +494,7 @@
 	  ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "crmeb",
+		"navigationBarTitleText": "abpshop",
 		"navigationBarBackgroundColor": "#fff",
 		"backgroundColor": "#F8F8F8",
 		"titleNView": false

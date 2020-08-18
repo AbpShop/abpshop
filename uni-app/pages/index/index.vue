@@ -93,7 +93,7 @@
 			// #ifdef H5
 			...mConfig,
 			// #endif
-			// #ifdef MP
+			// #ifdef MP || APP-PLUS
 			authorize,
 			activeParty,
 			headerSerch,
