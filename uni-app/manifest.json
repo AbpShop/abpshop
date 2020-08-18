@@ -55,10 +55,10 @@
             },
             "icons" : {
                 "android" : {
-                    "hdpi" : "",
-                    "xhdpi" : "",
-                    "xxhdpi" : "",
-                    "xxxhdpi" : ""
+                    "hdpi" : "static/img/icon.png",
+                    "xhdpi" : "static/img/icon.png",
+                    "xxhdpi" : "static/img/icon.png",
+                    "xxxhdpi" : "static/img/icon.png"
                 }
             }
         }
