@@ -18,10 +18,22 @@
     "AbpShop.HttpApi.Host": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:44304",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "applicationUrl": "https://localhost:44304"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "environmentVariables": {
+        "ASPNETCORE_URLS": "https://+:443;http://+:80",
+        "ASPNETCORE_HTTPS_PORT": "44305"
+      },
+      "httpPort": 44305,
+      "useSSL": true,
+      "sslPort": 44305
     }
   }
 }
