@@ -113,7 +113,6 @@ namespace AbpShop.Third.WeChat
                 api = api.Replace(WeChat.APPID, AppId);
                 api = $"https://api.weixin.qq.com/{api}";
                 ExpandoObject json = null;
-                json.m
                 if (api.Contains("/get"))
                     json = await api.GetJsonAsync();
                 else
