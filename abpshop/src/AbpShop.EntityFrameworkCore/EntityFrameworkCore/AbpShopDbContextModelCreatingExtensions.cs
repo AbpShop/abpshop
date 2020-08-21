@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Volo.Abp;
-using AbpShop.Merchant;
 using Volo.Abp.EntityFrameworkCore.Modeling;
 
 namespace AbpShop.EntityFrameworkCore

@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AbpShop.Dto;
+using AutoMapper;
 
 namespace AbpShop
 {
@@ -6,9 +7,8 @@ namespace AbpShop
     {
         public AbpShopApplicationAutoMapperProfile()
         {
-            /* You can configure your AutoMapper mapping configuration here.
-             * Alternatively, you can split your mapping configurations
-             * into multiple profile classes for a better organization. */
+            CreateMap<Community, CommunityDto>();
+            CreateMap<CreateUpdateCommunityDto, Community>();
         }
     }
 }

@@ -4,5 +4,10 @@
     "Menu:Home": "Home",
     "Welcome": "Welcome",
     "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information, visit abp.io."
-  }
+  },
+  "Group:Community": "生活圈",
+  "Permission:Community_Create": "创建",
+  "Permission:Community_Update": "更新",
+  "Permission:Community_Delete": "查询",
+  "Permission:Community_List": "删除"
 }

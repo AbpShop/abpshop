@@ -5,7 +5,6 @@ using Volo.Abp.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore.Modeling;
 using Volo.Abp.Identity;
 using Volo.Abp.Users.EntityFrameworkCore;
-using AbpShop.Merchant;
 
 namespace AbpShop.EntityFrameworkCore
 {

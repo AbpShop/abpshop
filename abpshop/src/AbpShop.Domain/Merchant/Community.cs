@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Volo.Abp.Domain.Entities.Auditing;
 
-namespace AbpShop.Merchant
+namespace AbpShop
 {
     /// <summary>
     /// 生活圈
